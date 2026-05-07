@@ -191,6 +191,8 @@ body{background:var(--bg);font-family:-apple-system,'SF Pro Text','DM Sans',sans
 
 <!-- Supabase Client -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<!-- jsPDF — gerador de PDF client-side -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 // ══════════════════════════════════════════
 // ACE PLAYER PASSPORT — SUPABASE AUTH
@@ -266,6 +268,7 @@ async function showApp() {
   await loadCoaches();
   await loadTurmas();
   await loadAlunos();
+  await preloadCalProgress();
   rAL(); rCo(); rEvalList(); rAc();
 }
 function showLogin() {
@@ -833,11 +836,90 @@ function openCalPed() {
   opnM('m-calped');
 }
 
-// ── ABRIR TURMAS DO COACH ──
-function openCalPedCoach(coachName) {
+// ══════════════════════════════════════════════════════════════════
+// FRENTE 2 — CALENDÁRIO PEDAGÓGICO COM SUPABASE
+// ══════════════════════════════════════════════════════════════════
+
+const _calCache   = {};
+const _notesCache = {};
+
+async function getCalProg(turmaId) {
+  if (_calCache[turmaId]) return _calCache[turmaId];
+  try {
+    const { data, error } = await getDb().from('cal_progress').select('ciclo_index, aulas_json').eq('turma_id', turmaId).single();
+    if (!error && data) { _calCache[turmaId] = { ciclo: data.ciclo_index, aulas: data.aulas_json || {} }; return _calCache[turmaId]; }
+  } catch(e) {}
+  const raw = localStorage.getItem('calped_prog_' + turmaId);
+  const prog = raw ? JSON.parse(raw) : { ciclo: 0, aulas: {} };
+  _calCache[turmaId] = prog;
+  return prog;
+}
+
+async function saveCalProg(turmaId, prog) {
+  _calCache[turmaId] = prog;
+  if (!currentUser || !currentAcademia) return;
+  try {
+    const { error } = await getDb().from('cal_progress').upsert({ turma_id: turmaId, academia_id: currentAcademia.id, coach_id: currentUser.id, ciclo_index: prog.ciclo, aulas_json: prog.aulas, updated_at: new Date().toISOString() }, { onConflict: 'turma_id' });
+    if (!error) localStorage.removeItem('calped_prog_' + turmaId);
+    else localStorage.setItem('calped_prog_' + turmaId, JSON.stringify(prog));
+  } catch(e) { localStorage.setItem('calped_prog_' + turmaId, JSON.stringify(prog)); }
+}
+
+async function getCalNotes(turmaId, aulaId) {
+  const k = turmaId + '_' + aulaId;
+  if (_notesCache[k]) return _notesCache[k];
+  try {
+    const { data, error } = await getDb().from('cal_notes').select('nota,aq1,tf1,ts1,aq2,st2,jd2').eq('turma_id', turmaId).eq('aula_id', aulaId).single();
+    if (!error && data) { _notesCache[k] = data; return data; }
+  } catch(e) {}
+  return { nota: localStorage.getItem('calped_notes_'+turmaId+'_'+aulaId)||'', aq1: localStorage.getItem('aq1_'+turmaId+'_'+aulaId)||'', tf1: localStorage.getItem('tf1_'+turmaId+'_'+aulaId)||'', ts1: localStorage.getItem('ts1_'+turmaId+'_'+aulaId)||'', aq2: localStorage.getItem('aq2_'+turmaId+'_'+aulaId)||'', st2: localStorage.getItem('st2_'+turmaId+'_'+aulaId)||'', jd2: localStorage.getItem('jd2_'+turmaId+'_'+aulaId)||'' };
+}
+
+async function saveCalNotes(turmaId, aulaId, fields) {
+  const k = turmaId + '_' + aulaId;
+  _notesCache[k] = { ...(_notesCache[k]||{}), ...fields };
+  if (!currentUser || !currentAcademia) return;
+  try {
+    await getDb().from('cal_notes').upsert({ turma_id: turmaId, aula_id: aulaId, academia_id: currentAcademia.id, coach_id: currentUser.id, updated_at: new Date().toISOString(), ...fields }, { onConflict: 'turma_id,aula_id' });
+  } catch(e) {}
+}
+
+async function preloadCalProgress() {
+  if (!tms.length) return;
+  try {
+    const { data } = await getDb().from('cal_progress').select('turma_id,ciclo_index,aulas_json').in('turma_id', tms.map(t => t.id));
+    if (data) data.forEach(r => { _calCache[r.turma_id] = { ciclo: r.ciclo_index, aulas: r.aulas_json || {} }; });
+  } catch(e) {}
+}
+
+async function migrateLocalStorageToSupabase() {
+  if (!currentUser || !currentAcademia) return;
+  let migrated = 0;
+  for (const t of tms) {
+    const raw = localStorage.getItem('calped_prog_' + t.id);
+    if (raw) { try { await saveCalProg(t.id, JSON.parse(raw)); migrated++; } catch(e) {} }
+  }
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key) continue;
+    if (key.startsWith('calped_notes_')) {
+      const rest = key.replace('calped_notes_','').split('_');
+      await saveCalNotes(rest[0], rest.slice(1).join('_'), { nota: localStorage.getItem(key)||'' });
+    }
+    for (const p of ['aq1','tf1','ts1','aq2','st2','jd2']) {
+      if (key.startsWith(p+'_')) { const rest=key.slice(p.length+1).split('_'); await saveCalNotes(rest[0],rest.slice(1).join('_'),{[p]:localStorage.getItem(key)||''}); }
+    }
+  }
+  toast(`✅ ${migrated} turma(s) migradas para nuvem`);
+}
+
+// ── ABRIR TURMAS DO COACH (async) ──
+async function openCalPedCoach(coachName) {
   const el = document.getElementById('calped-body');
   if (!el) return;
   const coachTurmas = tms.filter(t => (t.coach || 'Sem coach') === coachName);
+  el.innerHTML = `<div style="text-align:center;padding:40px"><div class="spin"></div></div>`;
+  await Promise.all(coachTurmas.map(t => getCalProg(t.id)));
 
   el.innerHTML = `
     <button onclick="openCalPed()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--g);font-size:13px;font-weight:700;cursor:pointer;margin-bottom:16px;padding:0">
@@ -846,16 +928,14 @@ function openCalPedCoach(coachName) {
     </button>
     <div style="font-size:16px;font-weight:800;color:var(--t);margin-bottom:4px">${coachName}</div>
     <div style="font-size:13px;color:var(--t2);margin-bottom:16px">${coachTurmas.length} turma${coachTurmas.length !== 1 ? 's' : ''}</div>
-
-    ${coachTurmas.map(t => {
+    ${(await Promise.all(coachTurmas.map(async t => {
       const calKey = PULS_CAL_MAP[t.pulseira] || t.pulseira;
       const cal = CAL_PED[calKey];
-      const prog = JSON.parse(localStorage.getItem('calped_prog_' + t.id) || '{"ciclo":0,"aulas":{}}');
+      const prog = await getCalProg(t.id);
       const cicloAtual = cal ? cal.ciclos[prog.ciclo] : null;
       const totalAulas = cicloAtual ? cicloAtual.aulas.length : 0;
       const concluidas = cicloAtual ? cicloAtual.aulas.filter(a => prog.aulas[a.id] === 'done').length : 0;
       const pct = totalAulas > 0 ? Math.round((concluidas/totalAulas)*100) : 0;
-
       return `<div onclick="openCalPedTurma('${t.id}')" style="background:var(--card);border:1px solid var(--bo);border-radius:16px;padding:16px;margin-bottom:12px;cursor:pointer" ontouchstart="this.style.opacity='.7'" ontouchend="this.style.opacity='1'">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
           <div style="width:42px;height:42px;border-radius:12px;background:${t.cor};display:flex;align-items:center;justify-content:center;font-size:20px">${cal ? cal.ball : '🎾'}</div>
@@ -866,54 +946,35 @@ function openCalPedCoach(coachName) {
           </div>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3)"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
-        ${cicloAtual ? `
-        <div style="font-size:12px;font-weight:600;color:var(--t2);margin-bottom:6px">${cicloAtual.nome}</div>
-        <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">
-          <div style="width:${pct}%;height:100%;background:${t.cor};border-radius:3px;transition:width .4s"></div>
-        </div>
-        <div style="font-size:11px;color:var(--t2);margin-top:4px">${concluidas} de ${totalAulas} aulas concluídas · ${pct}%</div>
-        ` : '<div style="font-size:12px;color:var(--t3)">Nível sem conteúdo cadastrado</div>'}
+        ${cicloAtual ? `<div style="font-size:12px;font-weight:600;color:var(--t2);margin-bottom:6px">${cicloAtual.nome}</div><div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${t.cor};border-radius:3px;transition:width .4s"></div></div><div style="font-size:11px;color:var(--t2);margin-top:4px">${concluidas} de ${totalAulas} aulas concluídas · ${pct}%</div>` : '<div style="font-size:12px;color:var(--t3)">Nível sem conteúdo cadastrado</div>'}
       </div>`;
-    }).join('')}
+    }))).join('')}
   `;
 }
 
-// ── ABRIR CICLOS DA TURMA ──
-function openCalPedTurma(turmaId) {
+// ── ABRIR CICLOS DA TURMA (async) ──
+async function openCalPedTurma(turmaId) {
   calPedTurmaId = turmaId;
   const t = tms.find(x => String(x.id) === String(turmaId));
   if (!t) return;
-
   const calKey = PULS_CAL_MAP[t.pulseira] || t.pulseira;
   const cal = CAL_PED[calKey];
-  if (!cal) {
-    toast('Conteúdo pedagógico não encontrado para esta pulseira');
-    return;
-  }
-
-  const progKey = 'calped_prog_' + t.id;
-  const prog = JSON.parse(localStorage.getItem(progKey) || '{"ciclo":0,"aulas":{}}');
+  if (!cal) { toast('Conteúdo pedagógico não encontrado para esta pulseira'); return; }
   const el = document.getElementById('calped-body');
-
+  el.innerHTML = `<div style="text-align:center;padding:40px"><div class="spin"></div></div>`;
+  const prog = await getCalProg(turmaId);
   const focoColor = { Olho:'#2563eb', Mão:'#d97706', Pé:'#059669' };
-
   el.innerHTML = `
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
       <div style="width:38px;height:38px;border-radius:10px;background:${t.cor};display:flex;align-items:center;justify-content:center;font-size:18px">${cal.ball}</div>
-      <div>
-        <div style="font-size:16px;font-weight:800;color:var(--t)">${t.label}</div>
-        <div style="font-size:12px;color:var(--t2)">${cal.label} · ${cal.quadra}</div>
-      </div>
+      <div><div style="font-size:16px;font-weight:800;color:var(--t)">${t.label}</div><div style="font-size:12px;color:var(--t2)">${cal.label} · ${cal.quadra}</div></div>
     </div>
-
     ${cal.ciclos.map((c, ci) => {
       const isCurrent = ci === prog.ciclo;
       const isDone = ci < prog.ciclo;
       const concluidas = c.aulas.filter(a => prog.aulas[a.id] === 'done').length;
       const pct = Math.round((concluidas/c.aulas.length)*100);
-
-      return `
-      <div style="background:var(--card);border:${isCurrent ? '2px solid '+t.cor : '1px solid var(--bo)'};border-radius:16px;padding:16px;margin-bottom:12px">
+      return `<div style="background:var(--card);border:${isCurrent ? '2px solid '+t.cor : '1px solid var(--bo)'};border-radius:16px;padding:16px;margin-bottom:12px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
           <div style="flex:1">
             <span style="font-size:11px;font-weight:700;color:${isCurrent ? t.cor : isDone ? 'var(--g)' : 'var(--t3)'};text-transform:uppercase">${isDone ? '✅ Concluído' : isCurrent ? '▶ Em andamento' : '⬜ Próximo'}</span>
@@ -925,27 +986,17 @@ function openCalPedTurma(turmaId) {
             ${ci < cal.ciclos.length - 1 && isCurrent ? `<button onclick="avancarCiclo('${t.id}',${ci+1})" style="padding:6px 12px;border-radius:20px;background:var(--gl);border:1px solid var(--gb);color:var(--g);font-size:11px;font-weight:700;cursor:pointer">Avançar →</button>` : ''}
           </div>
         </div>
-
-        <div style="height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:12px">
-          <div style="width:${pct}%;height:100%;background:${t.cor};border-radius:3px;transition:width .4s"></div>
-        </div>
+        <div style="height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:12px"><div style="width:${pct}%;height:100%;background:${t.cor};border-radius:3px;transition:width .4s"></div></div>
         <div style="font-size:11px;color:var(--t2);margin-bottom:12px">${concluidas} de ${c.aulas.length} aulas concluídas · ${pct}%</div>
-
         ${c.aulas.map(a => {
           const status = prog.aulas[a.id] || 'pending';
           const bg = status === 'done' ? 'var(--gl)' : status === 'progress' ? '#FEF9EE' : 'var(--bg3)';
           const icon = status === 'done' ? '✅' : status === 'progress' ? '🔵' : '⬜';
           const fc = focoColor[a.foco] || 'var(--t3)';
-          return `
-          <div onclick="openPlanoAula('${t.id}','${c.id}','${a.id}')" style="background:${bg};border:1px solid var(--bo);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:10px">
+          return `<div onclick="openPlanoAula('${t.id}','${c.id}','${a.id}')" style="background:${bg};border:1px solid var(--bo);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:10px">
             <span style="font-size:18px">${icon}</span>
-            <div style="flex:1;min-width:0">
-              <div style="font-size:12px;font-weight:700;color:var(--t)">${a.nums} · <span style="color:var(--t2);font-weight:500">${a.tema}</span></div>
-              <div style="font-size:12px;color:var(--t2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.sub}</div>
-            </div>
-            <div style="text-align:right;flex-shrink:0">
-              <div style="font-size:10px;font-weight:700;color:${fc};background:${fc}15;padding:2px 7px;border-radius:10px">${a.foco}</div>
-            </div>
+            <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--t)">${a.nums} · <span style="color:var(--t2);font-weight:500">${a.tema}</span></div><div style="font-size:12px;color:var(--t2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.sub}</div></div>
+            <div style="font-size:10px;font-weight:700;color:${fc};background:${fc}15;padding:2px 7px;border-radius:10px">${a.foco}</div>
           </div>`;
         }).join('')}
       </div>`;
@@ -953,23 +1004,19 @@ function openCalPedTurma(turmaId) {
   `;
 }
 
-// ── AVANÇAR DE CICLO ──
-function avancarCiclo(turmaId, novoCiclo) {
-  const progKey = 'calped_prog_' + turmaId;
-  const prog = JSON.parse(localStorage.getItem(progKey) || '{"ciclo":0,"aulas":{}}');
+// ── AVANÇAR DE CICLO (async) ──
+async function avancarCiclo(turmaId, novoCiclo) {
+  const prog = await getCalProg(turmaId);
   const voltando = novoCiclo < prog.ciclo;
-  const msg = voltando
-    ? 'Voltar para o ciclo anterior?'
-    : 'Avançar para o próximo ciclo?';
-  if (!confirm(msg)) return;
+  if (!confirm(voltando ? 'Voltar para o ciclo anterior?' : 'Avançar para o próximo ciclo?')) return;
   prog.ciclo = novoCiclo;
-  localStorage.setItem(progKey, JSON.stringify(prog));
+  await saveCalProg(turmaId, prog);
   toast(voltando ? 'Voltou para ciclo anterior ✓' : 'Ciclo avançado ✓');
   openCalPedTurma(turmaId);
 }
 
-// ── ABRIR PLANO DE AULA ──
-function openPlanoAula(turmaId, cicloId, aulaId) {
+// ── ABRIR PLANO DE AULA (async) ──
+async function openPlanoAula(turmaId, cicloId, aulaId) {
   const t = tms.find(x => String(x.id) === String(turmaId));
   if (!t) return;
   const calKey = PULS_CAL_MAP[t.pulseira] || t.pulseira;
@@ -980,120 +1027,101 @@ function openPlanoAula(turmaId, cicloId, aulaId) {
   const aula = ciclo.aulas.find(a => a.id === aulaId);
   if (!aula) return;
 
-  const progKey = 'calped_prog_' + turmaId;
-  const prog = JSON.parse(localStorage.getItem(progKey) || '{"ciclo":0,"aulas":{}}');
-  const status = prog.aulas[aulaId] || 'pending';
+  document.getElementById('plano-title').textContent = aula.nums + ' · ' + aula.tema;
+  document.getElementById('plano-body').innerHTML = `<div style="text-align:center;padding:40px"><div class="spin"></div></div>`;
+  opnM('m-plano');
 
-  // Set status to progress if pending
-  if (status === 'pending') {
-    prog.aulas[aulaId] = 'progress';
-    localStorage.setItem(progKey, JSON.stringify(prog));
-  }
+  const [prog, notes] = await Promise.all([getCalProg(turmaId), getCalNotes(turmaId, aulaId)]);
+  const status = prog.aulas[aulaId] || 'pending';
+  if (status === 'pending') { prog.aulas[aulaId] = 'progress'; await saveCalProg(turmaId, prog); }
 
   const focoColor = { Olho:'#2563eb', Mão:'#d97706', Pé:'#059669' };
   const fc = focoColor[aula.foco] || 'var(--t3)';
 
-  // Load saved notes
-  const notesKey = 'calped_notes_' + turmaId + '_' + aulaId;
-  const savedNotes = localStorage.getItem(notesKey) || '';
-
-  document.getElementById('plano-title').textContent = aula.nums + ' · ' + aula.tema;
-
   document.getElementById('plano-body').innerHTML = `
-    <!-- CABEÇALHO -->
     <div style="background:linear-gradient(135deg,${t.cor}18,${t.cor}08);border:1px solid ${t.cor}30;border-radius:16px;padding:16px;margin-bottom:16px">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
         <div style="font-size:24px">${cal.ball}</div>
-        <div>
-          <div style="font-size:14px;font-weight:800;color:var(--t)">${t.label} · ${aula.nums}</div>
-          <div style="font-size:12px;color:var(--t2)">${cal.quadra}</div>
-        </div>
+        <div><div style="font-size:14px;font-weight:800;color:var(--t)">${t.label} · ${aula.nums}</div><div style="font-size:12px;color:var(--t2)">${cal.quadra}</div></div>
         <div style="margin-left:auto;background:${fc}15;border:1px solid ${fc}30;border-radius:10px;padding:4px 10px;font-size:11px;font-weight:700;color:${fc}">Foco: ${aula.foco}</div>
       </div>
       <div style="font-size:15px;font-weight:700;color:var(--t)">${aula.tema}</div>
       <div style="font-size:13px;color:var(--t2);margin-top:2px">${aula.sub}</div>
     </div>
 
-    <!-- AULA 1 — TÉCNICA -->
     <div style="background:var(--card);border:1px solid var(--bo);border-radius:14px;padding:16px;margin-bottom:12px">
       <div style="font-size:12px;font-weight:700;color:#2563eb;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">🎾 Aula 1 — Técnica e Construção</div>
-
       <div style="margin-bottom:12px">
         <div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:4px">AQUECIMENTO · 10 min</div>
-        <div style="font-size:13px;color:var(--t)">Ativação motora livre com foco no tema da semana. Exercício de percepção com bolas: identificar posição, quique e direção.</div>
-        <div id="aq1-edit-${aulaId}" style="display:none"><textarea id="aq1-txt-${aulaId}" style="width:100%;margin-top:6px;padding:8px;border-radius:8px;border:1px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-family:inherit;resize:vertical" rows="2">${localStorage.getItem('aq1_'+turmaId+'_'+aulaId)||''}</textarea></div>
+        <div style="font-size:13px;color:var(--t)">Ativação motora livre com foco no tema da semana.</div>
+        <div id="aq1-edit-${aulaId}" style="display:none"><textarea id="aq1-txt-${aulaId}" style="width:100%;margin-top:6px;padding:8px;border-radius:8px;border:1px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-family:inherit;resize:vertical" rows="2">${notes.aq1||''}</textarea></div>
         <button onclick="toggleEdit('aq1-edit-${aulaId}','aq1-txt-${aulaId}','aq1_${turmaId}_${aulaId}')" style="margin-top:6px;font-size:11px;color:var(--g);background:none;border:none;cursor:pointer;font-weight:600">✏️ Editar</button>
       </div>
-
       <div style="margin-bottom:12px">
         <div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:4px">TÉCNICA FECHADA · 15 min</div>
-        <div style="font-size:13px;color:var(--t)">Exercício controlado com foco direto no tema <strong>${aula.sub}</strong>. Coach alimenta. Repetição com qualidade.</div>
+        <div style="font-size:13px;color:var(--t)">Exercício com foco direto no tema <strong>${aula.sub}</strong>.</div>
         <div style="background:var(--gl);border-radius:8px;padding:8px 10px;margin-top:6px;font-size:12px;color:var(--g);font-weight:600">Cue: "${aula.sub.split('+')[0].trim()}"</div>
-        <div id="tf1-edit-${aulaId}" style="display:none"><textarea id="tf1-txt-${aulaId}" style="width:100%;margin-top:6px;padding:8px;border-radius:8px;border:1px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-family:inherit;resize:vertical" rows="2">${localStorage.getItem('tf1_'+turmaId+'_'+aulaId)||''}</textarea></div>
+        <div id="tf1-edit-${aulaId}" style="display:none"><textarea id="tf1-txt-${aulaId}" style="width:100%;margin-top:6px;padding:8px;border-radius:8px;border:1px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-family:inherit;resize:vertical" rows="2">${notes.tf1||''}</textarea></div>
         <button onclick="toggleEdit('tf1-edit-${aulaId}','tf1-txt-${aulaId}','tf1_${turmaId}_${aulaId}')" style="margin-top:6px;font-size:11px;color:var(--g);background:none;border:none;cursor:pointer;font-weight:600">✏️ Editar</button>
       </div>
-
       <div>
         <div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:4px">TÉCNICA SEMI-ABERTA · 15 min</div>
-        <div style="font-size:13px;color:var(--t)">Aluno inicia o ponto. Coach introduz variáveis (direção, profundidade). Manter o tema como referência principal.</div>
-        <div id="ts1-edit-${aulaId}" style="display:none"><textarea id="ts1-txt-${aulaId}" style="width:100%;margin-top:6px;padding:8px;border-radius:8px;border:1px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-family:inherit;resize:vertical" rows="2">${localStorage.getItem('ts1_'+turmaId+'_'+aulaId)||''}</textarea></div>
+        <div style="font-size:13px;color:var(--t)">Aluno inicia o ponto com variáveis de direção e profundidade.</div>
+        <div id="ts1-edit-${aulaId}" style="display:none"><textarea id="ts1-txt-${aulaId}" style="width:100%;margin-top:6px;padding:8px;border-radius:8px;border:1px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-family:inherit;resize:vertical" rows="2">${notes.ts1||''}</textarea></div>
         <button onclick="toggleEdit('ts1-edit-${aulaId}','ts1-txt-${aulaId}','ts1_${turmaId}_${aulaId}')" style="margin-top:6px;font-size:11px;color:var(--g);background:none;border:none;cursor:pointer;font-weight:600">✏️ Editar</button>
       </div>
     </div>
 
-    <!-- AULA 2 — TÁTICA -->
     <div style="background:var(--card);border:1px solid var(--bo);border-radius:14px;padding:16px;margin-bottom:12px">
       <div style="font-size:12px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">🧠 Aula 2 — Aplicação e Jogo</div>
-
       <div style="margin-bottom:12px">
         <div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:4px">AQUECIMENTO · 10 min</div>
-        <div style="font-size:13px;color:var(--t)">Retomar o tema da aula 1. Exercício de ativação com percepção da situação tática (favorável / desfavorável / neutra).</div>
-        <div id="aq2-edit-${aulaId}" style="display:none"><textarea id="aq2-txt-${aulaId}" style="width:100%;margin-top:6px;padding:8px;border-radius:8px;border:1px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-family:inherit;resize:vertical" rows="2">${localStorage.getItem('aq2_'+turmaId+'_'+aulaId)||''}</textarea></div>
+        <div style="font-size:13px;color:var(--t)">Retomar o tema com percepção da situação tática.</div>
+        <div id="aq2-edit-${aulaId}" style="display:none"><textarea id="aq2-txt-${aulaId}" style="width:100%;margin-top:6px;padding:8px;border-radius:8px;border:1px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-family:inherit;resize:vertical" rows="2">${notes.aq2||''}</textarea></div>
         <button onclick="toggleEdit('aq2-edit-${aulaId}','aq2-txt-${aulaId}','aq2_${turmaId}_${aulaId}')" style="margin-top:6px;font-size:11px;color:var(--g);background:none;border:none;cursor:pointer;font-weight:600">✏️ Editar</button>
       </div>
-
       <div style="margin-bottom:12px">
         <div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:4px">SEMI-ABERTO COM TÁTICA · 15 min</div>
-        <div style="font-size:13px;color:var(--t)">Mesmo tema + decisão tática. Aluno escolhe direção e aplica o conteúdo em situação com adversário real ou coach.</div>
+        <div style="font-size:13px;color:var(--t)">Tema + decisão tática com adversário real.</div>
         <div style="background:#FEF9EE;border-radius:8px;padding:8px 10px;margin-top:6px;font-size:12px;color:#d97706;font-weight:600">Cue tático: "Quando usar ${aula.tema.toLowerCase()}?"</div>
-        <div id="st2-edit-${aulaId}" style="display:none"><textarea id="st2-txt-${aulaId}" style="width:100%;margin-top:6px;padding:8px;border-radius:8px;border:1px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-family:inherit;resize:vertical" rows="2">${localStorage.getItem('st2_'+turmaId+'_'+aulaId)||''}</textarea></div>
+        <div id="st2-edit-${aulaId}" style="display:none"><textarea id="st2-txt-${aulaId}" style="width:100%;margin-top:6px;padding:8px;border-radius:8px;border:1px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-family:inherit;resize:vertical" rows="2">${notes.st2||''}</textarea></div>
         <button onclick="toggleEdit('st2-edit-${aulaId}','st2-txt-${aulaId}','st2_${turmaId}_${aulaId}')" style="margin-top:6px;font-size:11px;color:var(--g);background:none;border:none;cursor:pointer;font-weight:600">✏️ Editar</button>
       </div>
-
       <div>
         <div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:4px">JOGO DIRIGIDO · 15 min</div>
-        <div style="font-size:13px;color:var(--t)">Partida com regra adaptada ao tema. Coach intervém somente se o tema for completamente ignorado. Fechar com feedback rápido.</div>
-        <div id="jd2-edit-${aulaId}" style="display:none"><textarea id="jd2-txt-${aulaId}" style="width:100%;margin-top:6px;padding:8px;border-radius:8px;border:1px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-family:inherit;resize:vertical" rows="2">${localStorage.getItem('jd2_'+turmaId+'_'+aulaId)||''}</textarea></div>
+        <div style="font-size:13px;color:var(--t)">Partida com regra adaptada ao tema. Fechar com feedback rápido.</div>
+        <div id="jd2-edit-${aulaId}" style="display:none"><textarea id="jd2-txt-${aulaId}" style="width:100%;margin-top:6px;padding:8px;border-radius:8px;border:1px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-family:inherit;resize:vertical" rows="2">${notes.jd2||''}</textarea></div>
         <button onclick="toggleEdit('jd2-edit-${aulaId}','jd2-txt-${aulaId}','jd2_${turmaId}_${aulaId}')" style="margin-top:6px;font-size:11px;color:var(--g);background:none;border:none;cursor:pointer;font-weight:600">✏️ Editar</button>
       </div>
     </div>
 
-    <!-- FEEDBACK PÓS-AULA -->
     <div style="background:var(--card);border:1px solid var(--bo);border-radius:14px;padding:16px;margin-bottom:16px">
-      <div style="font-size:12px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">📝 Feedback pós-aula (opcional)</div>
-      <textarea id="feedback-${aulaId}" placeholder="Observações sobre a aula, desempenho da turma, ajustes para próxima vez..." style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-family:inherit;resize:vertical" rows="3">${savedNotes}</textarea>
+      <div style="font-size:12px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">📝 Feedback pós-aula</div>
+      <textarea id="feedback-${aulaId}" placeholder="Observações sobre a aula..." style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-family:inherit;resize:vertical" rows="3">${notes.nota||''}</textarea>
       <button onclick="saveFeedback('${turmaId}','${aulaId}')" style="width:100%;margin-top:8px;padding:10px;border-radius:10px;background:var(--bg3);border:1px solid var(--bo);color:var(--t);font-size:13px;font-weight:600;cursor:pointer">💾 Salvar observações</button>
     </div>
 
-    <!-- BOTÕES DE STATUS -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <button onclick="setAulaStatus('${turmaId}','${aulaId}','progress')" style="padding:14px;border-radius:14px;background:${status==='progress'?'#EEF4FF':'var(--bg3)'};border:${status==='progress'?'2px solid #2563eb':'1px solid var(--bo)'};color:${status==='progress'?'#2563eb':'var(--t2)'};font-size:13px;font-weight:700;cursor:pointer">🔵 Em andamento</button>
       <button onclick="setAulaStatus('${turmaId}','${aulaId}','done')" style="padding:14px;border-radius:14px;background:${status==='done'?'var(--gl)':'var(--bg3)'};border:${status==='done'?'2px solid var(--g)':'1px solid var(--bo)'};color:${status==='done'?'var(--g)':'var(--t2)'};font-size:13px;font-weight:700;cursor:pointer">✅ Concluída</button>
     </div>
   `;
-
-  opnM('m-plano');
 }
 
-// ── TOGGLE EDIÇÃO ──
-function toggleEdit(divId, txtId, storageKey) {
+// ── TOGGLE EDIÇÃO (async) ──
+async function toggleEdit(divId, txtId, storageKey) {
   const div = document.getElementById(divId);
   const txt = document.getElementById(txtId);
   if (!div) return;
   const isOpen = div.style.display !== 'none';
   if (isOpen) {
-    // Save
-    if (txt) localStorage.setItem(storageKey, txt.value);
+    if (txt) {
+      const parts = storageKey.split('_');
+      const field = parts[0];
+      const turmaId = parts[1];
+      const aulaId = parts.slice(2).join('_');
+      await saveCalNotes(turmaId, aulaId, { [field]: txt.value });
+    }
     div.style.display = 'none';
     toast('Salvo ✓');
   } else {
@@ -1101,23 +1129,21 @@ function toggleEdit(divId, txtId, storageKey) {
   }
 }
 
-// ── SALVAR FEEDBACK ──
-function saveFeedback(turmaId, aulaId) {
+// ── SALVAR FEEDBACK (async) ──
+async function saveFeedback(turmaId, aulaId) {
   const txt = document.getElementById('feedback-' + aulaId);
   if (!txt) return;
-  localStorage.setItem('calped_notes_' + turmaId + '_' + aulaId, txt.value);
+  await saveCalNotes(turmaId, aulaId, { nota: txt.value });
   toast('Observações salvas ✓');
 }
 
-// ── MARCAR STATUS DA AULA ──
-function setAulaStatus(turmaId, aulaId, status) {
-  const progKey = 'calped_prog_' + turmaId;
-  const prog = JSON.parse(localStorage.getItem(progKey) || '{"ciclo":0,"aulas":{}}');
+// ── MARCAR STATUS DA AULA (async) ──
+async function setAulaStatus(turmaId, aulaId, status) {
+  const prog = await getCalProg(turmaId);
   prog.aulas[aulaId] = status;
-  localStorage.setItem(progKey, JSON.stringify(prog));
+  await saveCalProg(turmaId, prog);
   toast(status === 'done' ? 'Aula concluída ✅' : 'Em andamento 🔵');
-  // Rerender just the status buttons
-  openPlanoAula(turmaId, Object.keys(CAL_PED[PULS_CAL_MAP[tms.find(t=>String(t.id)===String(turmaId))?.pulseira]||'']?.ciclos?.find(c=>c.aulas.find(a=>a.id===aulaId))?.aulas?.find(a=>a.id===aulaId) || {})[0] || '', aulaId);
+  openCalPedTurma(turmaId);
 }
 
 
@@ -1796,6 +1822,132 @@ async function saveAvaliacaoRapida(studentId, tipo, fundScores) {
 
 // ── INICIAR ──
 window.addEventListener('load', initApp);
+
+// ══════════════════════════════════════════════════════════════════
+// FRENTE 3 — GERADOR DE PDF DO PASSPORT
+// ══════════════════════════════════════════════════════════════════
+
+const PULS_PDF_INFO = {
+  roxa:          { label:'Roxa',             color:[107,33,168] },
+  verm_branca:   { label:'Vermelha-Branca',  color:[220,38,38]  },
+  verm_verm:     { label:'Vermelha',         color:[220,38,38]  },
+  verm_laranja:  { label:'Vermelha-Laranja', color:[220,38,38]  },
+  laranja:       { label:'Laranja',          color:[234,88,12]  },
+  laranja_verde: { label:'Laranja-Verde',    color:[234,88,12]  },
+  verde_verde:   { label:'Verde',            color:[22,163,74]  },
+  verde_amarela: { label:'Verde-Amarelo',    color:[22,163,74]  },
+  amarela:       { label:'Amarela',          color:[202,138,4]  },
+};
+
+function _pdfSectionTitle(doc, text, x, y, w) {
+  doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(75,99,88);
+  doc.text(text, x, y);
+  doc.setDrawColor(226,237,232); doc.setLineWidth(0.5); doc.line(x, y+2, x+w, y+2);
+}
+
+function _pdfLoadScript(src) {
+  return new Promise((res,rej) => {
+    if (document.querySelector(`script[src="${src}"]`)) { res(); return; }
+    const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+
+async function gerarPassportPDF(alunoId) {
+  const s = gSt(alunoId);
+  if (!s) { toast('Aluno não encontrado'); return; }
+  if (typeof window.jspdf === 'undefined') {
+    toast('Carregando PDF engine...');
+    await _pdfLoadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+  const PW=210, PH=297, ML=20, MR=20, CW=PW-ML-MR;
+  const pInfo = PULS_PDF_INFO[s.pulseira] || PULS_PDF_INFO['laranja'];
+  const today = new Date().toLocaleDateString('pt-BR');
+  let y = 0;
+
+  // CABEÇALHO
+  doc.setFillColor(0,135,90); doc.rect(0,0,PW,38,'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(22); doc.text('RAW TENNIS',ML,16);
+  doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.text('ACE PLAYER PASSPORT',ML,23);
+  doc.setFillColor(...pInfo.color); doc.roundedRect(PW-ML-44,7,44,22,4,4,'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(9);
+  doc.text(pInfo.label.toUpperCase(),PW-ML-42,16); doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.text('Pulseira atual',PW-ML-42,23);
+  y=50;
+
+  // DADOS DO ALUNO
+  doc.setFillColor(248,250,249); doc.roundedRect(ML,y-6,CW,44,4,4,'F');
+  doc.setDrawColor(226,237,232); doc.roundedRect(ML,y-6,CW,44,4,4,'S');
+  doc.setFillColor(0,135,90); doc.circle(ML+15,y+13,12,'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(14);
+  doc.text(s.nome.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase(),ML+15,y+17,{align:'center'});
+  doc.setTextColor(15,31,23); doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.text(s.nome,ML+32,y+6);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(75,99,88);
+  const turmaObj = gT(s.turma);
+  [
+    [`Turma: ${turmaObj?turmaObj.label:s.turma||'—'}`, `Coach: ${s.coach||'—'}`],
+    [`Horário: ${s.horario||'—'}`, `Quadra: ${s.quadra||'—'}`],
+    [`Data: ${today}`, `Academia: ${currentAcademia?.nome||'Raw Tennis'}`],
+  ].forEach((row,ri) => { doc.text(row[0],ML+32,y+14+ri*7); doc.text(row[1],ML+32+CW/2-12,y+14+ri*7); });
+  y+=52;
+
+  // PROGRESSO
+  _pdfSectionTitle(doc,'PROGRESSO GERAL',ML,y,CW); y+=10;
+  const revPct = s.reveal||0;
+  doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(15,31,23);
+  doc.text('Passport revelado',ML,y+4); doc.text(`${Math.round(revPct)}%`,ML+CW,y+4,{align:'right'});
+  doc.setFillColor(226,237,232); doc.roundedRect(ML,y+7,CW,6,3,3,'F');
+  if (revPct>0) { doc.setFillColor(0,135,90); doc.roundedRect(ML,y+7,CW*revPct/100,6,3,3,'F'); }
+  y+=20;
+  const bw=CW/3-4;
+  [{label:'XP Total',value:(s.xp||0).toLocaleString('pt-BR')},{label:'Nível',value:pInfo.label},{label:'Status',value:s.apto?'Apto ✓':'Em desenvolvimento'}]
+    .forEach((st,i) => {
+      const bx=ML+i*(bw+6);
+      doc.setFillColor(248,250,249); doc.setDrawColor(226,237,232); doc.roundedRect(bx,y,bw,20,3,3,'FD');
+      doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(15,31,23); doc.text(String(st.value),bx+bw/2,y+10,{align:'center'});
+      doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(75,99,88); doc.text(st.label,bx+bw/2,y+16,{align:'center'});
+    });
+  y+=28;
+
+  // FUNDAMENTOS
+  _pdfSectionTitle(doc,'FUNDAMENTOS TÉCNICOS',ML,y,CW); y+=10;
+  const fund = s.fundamentos||{tecnico:0,tatico:0,fisico:0,mental:0};
+  [{label:'Técnico',value:fund.tecnico||0,color:[37,99,235]},{label:'Tático',value:fund.tatico||0,color:[217,119,6]},{label:'Físico',value:fund.fisico||0,color:[22,163,74]},{label:'Mental',value:fund.mental||0,color:[124,58,237]}]
+    .forEach(f => {
+      const pct=Math.min(100,Math.max(0,f.value));
+      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(75,99,88);
+      doc.text(f.label,ML,y+3); doc.text(`${Math.round(pct)}%`,ML+CW,y+3,{align:'right'});
+      doc.setFillColor(226,237,232); doc.roundedRect(ML+28,y-1,CW-36,5,2.5,2.5,'F');
+      if (pct>0) { doc.setFillColor(...f.color); doc.roundedRect(ML+28,y-1,(CW-36)*pct/100,5,2.5,2.5,'F'); }
+      y+=12;
+    });
+  y+=4;
+
+  // PRÓXIMOS OBJETIVOS
+  if (y>PH-60) { doc.addPage(); y=20; }
+  _pdfSectionTitle(doc,'PRÓXIMOS OBJETIVOS',ML,y,CW); y+=10;
+  const calKey=PULS_CAL_MAP[s.pulseira]||s.pulseira;
+  const cal=CAL_PED[calKey];
+  if (cal) cal.ciclos.slice(0,3).forEach((c,i) => {
+    doc.setFillColor(220,252,231); doc.roundedRect(ML,y,CW,10,2,2,'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(0,135,90); doc.text(`C${i+1}`,ML+3,y+6.5);
+    doc.setFont('helvetica','normal'); doc.setTextColor(15,31,23); doc.text(c.obj,ML+14,y+6.5);
+    y+=13;
+  });
+
+  // RODAPÉ
+  for (let i=1;i<=doc.getNumberOfPages();i++) {
+    doc.setPage(i); doc.setFillColor(0,135,90); doc.rect(0,PH-14,PW,14,'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
+    doc.text(`RAW TENNIS ACADEMY · ${currentAcademia?.nome||''} · Emitido em ${today}`,PW/2,PH-5,{align:'center'});
+    doc.text(`Pág. ${i}/${doc.getNumberOfPages()}`,PW-ML,PH-5,{align:'right'});
+  }
+
+  const filename = `passport_${s.nome.replace(/\s+/g,'_').toLowerCase()}_${today.replace(/\//g,'-')}.pdf`;
+  doc.save(filename);
+  toast(`📄 PDF gerado: ${s.nome.split(' ')[0]}`);
+}
 </script>
 </head>
 <body>
