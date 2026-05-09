@@ -1785,8 +1785,9 @@ async function saveAvaliacaoRapida(studentId, tipo, fundScores) {
   if (!s) return;
 
   // Aumentar score de avaliação +2% por sessão de treino (60% peso no boneco)
-  s.score_av = Math.min(100, Math.round(((s.score_av || 0) + 2) * 10) / 10);
-  s.reveal   = calcReveal(s);
+  s.score_av     = Math.min(100, Math.round(((s.score_av || 0) + 2) * 10) / 10);
+  s.reveal       = calcReveal(s);
+  s.comportamento = qsBehav;
   s.xp = (s.xp || 0) + 10;
 
   // Salvar no Supabase
@@ -2151,6 +2152,7 @@ async function gerarPassportPDF(alunoId) {
 <div class="ms" id="m-eval"><div class="mh"><button class="mb" onclick="pauseEval()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg></button><span style="font-size:16px;font-weight:700;color:var(--t);flex:1;text-align:center" id="etit">Avaliação</span><div style="width:34px"></div></div><div class="mb2" id="eb"></div></div>
 <div class="ms" id="m-quiz"><div class="mh"><button class="mb" onclick="clsM(&#39;m-quiz&#39;)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg></button><span style="font-size:16px;font-weight:700;color:var(--t);flex:1;text-align:center">Quiz de Tênis</span><div id="qxp" style="font-size:13px;font-weight:700;color:var(--g)">+0 XP</div></div><div class="mb2" id="qb"></div></div>
 <div class="ms" id="m-fisico"><div class="mh"><button class="mb" onclick="clsM(&#39;m-fisico&#39;)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg></button><span style="font-size:16px;font-weight:700;color:var(--t);flex:1;text-align:center">Testes Físicos</span><div style="width:34px"></div></div><div class="mb2" id="fib"></div></div>
+<div class="ms" id="m-comp"><div class="mh"><button class="mb" onclick="clsM('m-comp')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg></button><span style="font-size:16px;font-weight:700;color:var(--t);flex:1;text-align:center">🏆 Registrar Competição</span></div><div class="mb2" id="comp-body"></div></div>
 <div class="ms" id="m-turmas"><div class="mh"><button class="mb" onclick="clsM(&#39;m-turmas&#39;)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg></button><span style="font-size:16px;font-weight:700;color:var(--t);flex:1;text-align:center" id="tmt">Verde Q7 Douglas</span><div style="width:34px"></div></div><div class="mb2" id="tmb"><button class="bg" style="margin-bottom:16px;font-size:14px" onclick="rTL(&#39;list&#39;)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg> Todas as turmas</button><div style="background:#065F4612;border:1.5px solid #065F4630;border-radius:20px;padding:18px;margin-bottom:18px"><div style="font-size:20px;font-weight:800;color:var(--t);margin-bottom:14px">Verde Q7 Douglas</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div style="background:rgba(255,255,255,.8);border-radius:10px;padding:11px;box-shadow:var(--shadow)"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);margin-bottom:4px">Coach</div><div style="font-size:13px;font-weight:700;color:var(--t)">👤 Douglas</div></div><div style="background:rgba(255,255,255,.8);border-radius:10px;padding:11px;box-shadow:var(--shadow)"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);margin-bottom:4px">Horário</div><div style="font-size:13px;font-weight:700;color:var(--t)">🕐 07:00 – 19:00</div></div><div style="background:rgba(255,255,255,.8);border-radius:10px;padding:11px;box-shadow:var(--shadow)"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);margin-bottom:4px">Dias</div><div style="font-size:13px;font-weight:700;color:var(--t)">📅 Seg · Ter · Qua · Qui · Sex</div></div><div style="background:rgba(255,255,255,.8);border-radius:10px;padding:11px;box-shadow:var(--shadow)"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);margin-bottom:4px">Bolas</div><div style="font-size:13px;font-weight:700;color:var(--t)">🎾 </div></div><div style="background:rgba(255,255,255,.8);border-radius:10px;padding:11px;box-shadow:var(--shadow)"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);margin-bottom:4px">Quadra</div><div style="font-size:13px;font-weight:700;color:var(--t)">🎾 Quadra 7</div></div></div></div><div class="lbl">Alunos (0)</div><div style="background:var(--card);border:1px solid var(--bo);border-radius:var(--rs);padding:0 16px;box-shadow:var(--shadow)"><div style="padding:22px 0;text-align:center;color:var(--t3);font-size:14px">Nenhum aluno nesta turma</div></div><button onclick="rTL(&#39;new&#39;)" class="bp" style="margin-top:16px">+ Nova turma</button>
 <button onclick="openEditTurma(&#39;ec5c625e-8043-4378-bd55-cd37bad8f157&#39;)" style="width:100%;padding:12px;border-radius:var(--rs);border:1px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-weight:600;cursor:pointer;margin-top:8px">✏️ Editar turma</button>
 <button onclick="deleteTurma(&#39;ec5c625e-8043-4378-bd55-cd37bad8f157&#39;)" style="width:100%;padding:12px;border-radius:var(--rs);border:1px solid var(--r);background:var(--rl);color:var(--r);font-size:13px;font-weight:600;cursor:pointer;margin-top:8px">🗑️ Remover turma</button></div></div>
@@ -2269,7 +2271,7 @@ function cls(id){document.getElementById(id).classList.remove('open')}
 function opnM(id){document.getElementById(id).classList.add('open')}
 function clsM(id){document.getElementById(id).classList.remove('open')}
 
-function sRow(s){const p=gP(s.pulseira);const td=gT(s.turma);return `<div class="row" onclick="openAS('${s.id}')"><div class="rav" style="background:${s.cor}">${ini(s.nome)}<div class="rb2">${p.ball}</div></div><div class="ri"><div class="rn">${s.nome}</div><div class="rm">${p.label}${td?' · '+td.horario:''}</div></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg></div>`;}
+function sRow(s){const p=gP(s.pulseira);const td=gT(s.turma);const cb=CB[s.comportamento??1];return `<div class="row" onclick="openAS('${s.id}')"><div class="rav" style="background:${s.cor}">${ini(s.nome)}<div class="rb2">${p.ball}</div></div><div class="ri"><div class="rn">${s.nome} <span style="font-size:12px">${cb.icon}</span></div><div class="rm">${p.label}${td?' · '+td.horario:''}</div></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg></div>`;}
 
 function rAL(){
   const list=filt();
@@ -2381,6 +2383,43 @@ function opPro(){const s=gSt(sid);if(!s)return;const p=gP(s.pulseira);const td=g
       </div>`).join('')}
   </div>
 </div>
+<div class="card" style="margin-bottom:14px">
+  <div class="lbl">Comportamento</div>
+  ${(()=>{
+    const cb=s.comportamento??1;const b=CB[cb];
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:${b.bg};border:1.5px solid ${b.border};border-radius:var(--rs);margin-bottom:10px">
+      <span style="font-size:22px">${b.icon}</span>
+      <div><div style="font-size:13px;font-weight:700;color:${b.color}">${b.short}</div>
+      <div style="font-size:11px;color:var(--t3);line-height:1.4;margin-top:2px">${b.full}</div></div>
+    </div>
+    <div style="display:flex;gap:8px">${CB.map((x,i)=>`<button onclick="setComportamento('${s.id}',${i})" style="flex:1;padding:10px 6px;border-radius:var(--rs);border:2px solid ${cb===i?x.border:'var(--bo)'};background:${cb===i?x.bg:'var(--bg3)'};cursor:pointer;font-size:18px">${x.icon}<div style="font-size:9px;font-weight:700;color:${cb===i?x.color:'var(--t3)'};margin-top:2px">${x.short.split(' ')[0]}</div></button>`).join('')}</div>`;
+  })()}
+</div>
+<div class="card" style="margin-bottom:14px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <span class="lbl" style="margin:0">🏆 Competições</span>
+    <button onclick="openAddComp()" style="padding:6px 14px;border-radius:20px;background:var(--g);border:none;color:#fff;font-size:12px;font-weight:700;cursor:pointer">+ Registrar</button>
+  </div>
+  ${(()=>{
+    const comps=s.competicoes||[];
+    if(!comps.length) return '<div style="text-align:center;padding:16px;color:var(--t3);font-size:13px">Nenhuma competição registrada ainda</div>';
+    return comps.map((c,i)=>{
+      const b=CB[c.comportamento??1];
+      const resMap={participou:'Participou',semifinal:'Semifinal',final:'Final',campeao:'🏆 Campeão'};
+      const dataStr=c.data?new Date(c.data+'T12:00').toLocaleDateString('pt-BR'):'';
+      return `<div style="padding:11px 12px;background:var(--bg3);border-radius:var(--rs);margin-bottom:8px;border:1px solid var(--bo)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div style="flex:1">
+            <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:${c.tipo==='externo'?'#dbeafe':'#dcfce7'};color:${c.tipo==='externo'?'#1d4ed8':'#16a34a'}">${c.tipo==='externo'?'Externo':'Interno'}</span>
+            <div style="font-size:13px;font-weight:700;color:var(--t);margin-top:5px">${c.nome}</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:3px">${[dataStr,resMap[c.resultado]||c.resultado,b.icon+' '+b.short].filter(Boolean).join(' · ')}</div>
+          </div>
+          <button onclick="removeComp('${s.id}',${i})" style="border:none;background:none;font-size:18px;color:var(--t3);cursor:pointer;padding:2px 0 0 8px;line-height:1">×</button>
+        </div>
+      </div>`;
+    }).join('');
+  })()}
+</div>
 ${s.apto ? `
 <button onclick="confirmarAvancoBola('${s.id}')" style="width:100%;padding:15px;border-radius:var(--rs);background:linear-gradient(135deg,#059669,#00875a);border:none;color:#fff;font-size:15px;font-weight:800;cursor:pointer;margin-bottom:10px;box-shadow:0 4px 16px rgba(0,135,90,.4)">
   🏆 Confirmar avanço de bola
@@ -2436,9 +2475,11 @@ function confirmarAvancoBola(studentId) {
   // Avançar pulseira e zerar boneco + componentes
   s.pulseira   = proxPuls;
   s.reveal     = 0;
-  s.score_av   = 0;
-  s.score_req  = 0;
-  s.score_quiz = 0;
+  s.score_av    = 0;
+  s.score_req   = 0;
+  s.score_quiz  = 0;
+  s.score_comp  = 0;
+  s.competicoes = [];
   s.apto       = false;
   s.xp         = (s.xp || 0) + 200;
   s.fundamentos = {tecnico:0, tatico:0, fisico:0, mental:0};
@@ -2709,8 +2750,9 @@ function updateGrandTotal(provaId) {
 
 
 function sEM(m){document.getElementById('mau').classList.toggle('on',m==='audio');document.getElementById('mbt').classList.toggle('on',m==='buttons');rEM(m);}
-function rEM(m){const el=document.getElementById('emc');if(m==='audio'){el.innerHTML=`<div style="text-align:center;padding:24px 0"><div class="micb" id="mcb" onclick="togM()"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div><div style="font-size:14px;color:var(--t2);margin-top:14px;font-weight:500" id="mlbl">Toque para gravar</div></div><div id="ta" style="display:none"><div class="lbl">Transcrição</div><div style="background:var(--bg3);border:1.5px solid var(--bo);border-radius:var(--rs);padding:14px;font-size:14px;line-height:1.6;margin-bottom:12px;color:var(--t)" id="tt"></div><div style="background:var(--gl);border:1.5px solid var(--gb);border-radius:var(--rs);padding:14px;margin-bottom:16px"><div style="font-size:11px;color:var(--g);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:9px">✦ IA identificou</div><div><span style="background:#fff;border-radius:20px;padding:4px 11px;font-size:12px;font-weight:600;color:var(--g);margin:3px;display:inline-block;box-shadow:var(--shadow)">Forehand ↑↑</span><span style="background:#fff;border-radius:20px;padding:4px 11px;font-size:12px;font-weight:600;color:var(--g);margin:3px;display:inline-block;box-shadow:var(--shadow)">Tática ↑</span><span style="background:#fff;border-radius:20px;padding:4px 11px;font-size:12px;font-weight:600;color:var(--t2);margin:3px;display:inline-block;box-shadow:var(--shadow)">Footwork →</span><span style="background:#fff;border-radius:20px;padding:4px 11px;font-size:12px;font-weight:600;color:var(--r);margin:3px;display:inline-block;box-shadow:var(--shadow)">Saque ↓</span></div></div><button class="bp" onclick="saveAvaliacaoRapida(sid,'rapida_audio',{});clsM('m-eval')">Confirmar e salvar</button></div>`;}else{const fs=['Forehand','Backhand','Saque','Voleio','Footwork','Tática'];el.innerHTML=`<div class="lbl">Por fundamento</div>`+fs.map(f=>`<div style="margin-bottom:14px"><div style="font-size:14px;font-weight:600;color:var(--t);margin-bottom:8px">${f}</div><div class="fbg">${['Evoluiu muito','Evoluiu','Estável','Melhorar'].map((l,i)=>`<button class="fbo" onclick="sFb(this,${i})">${l}</button>`).join('')}</div></div>`).join('')+`<button class="bp" style="margin-top:10px" onclick="saveAvaliacaoRapida(sid,'rapida_botoes',{});clsM('m-eval')">Salvar avaliação</button>`;}}
+function rEM(m){const el=document.getElementById('emc');if(m==='audio'){el.innerHTML=`<div style="text-align:center;padding:24px 0"><div class="micb" id="mcb" onclick="togM()"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div><div style="font-size:14px;color:var(--t2);margin-top:14px;font-weight:500" id="mlbl">Toque para gravar</div></div><div id="ta" style="display:none"><div class="lbl">Transcrição</div><div style="background:var(--bg3);border:1.5px solid var(--bo);border-radius:var(--rs);padding:14px;font-size:14px;line-height:1.6;margin-bottom:12px;color:var(--t)" id="tt"></div><div style="background:var(--gl);border:1.5px solid var(--gb);border-radius:var(--rs);padding:14px;margin-bottom:16px"><div style="font-size:11px;color:var(--g);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:9px">✦ IA identificou</div><div><span style="background:#fff;border-radius:20px;padding:4px 11px;font-size:12px;font-weight:600;color:var(--g);margin:3px;display:inline-block;box-shadow:var(--shadow)">Forehand ↑↑</span><span style="background:#fff;border-radius:20px;padding:4px 11px;font-size:12px;font-weight:600;color:var(--g);margin:3px;display:inline-block;box-shadow:var(--shadow)">Tática ↑</span><span style="background:#fff;border-radius:20px;padding:4px 11px;font-size:12px;font-weight:600;color:var(--t2);margin:3px;display:inline-block;box-shadow:var(--shadow)">Footwork →</span><span style="background:#fff;border-radius:20px;padding:4px 11px;font-size:12px;font-weight:600;color:var(--r);margin:3px;display:inline-block;box-shadow:var(--shadow)">Saque ↓</span></div></div><button class="bp" onclick="saveAvaliacaoRapida(sid,'rapida_audio',{});clsM('m-eval')">Confirmar e salvar</button></div>`;}else{const fs=['Forehand','Backhand','Saque','Voleio','Footwork','Tática'];el.innerHTML=`<div class="lbl">Por fundamento</div>`+fs.map(f=>`<div style="margin-bottom:14px"><div style="font-size:14px;font-weight:600;color:var(--t);margin-bottom:8px">${f}</div><div class="fbg">${['Evoluiu muito','Evoluiu','Estável','Melhorar'].map((l,i)=>`<button class="fbo" onclick="sFb(this,${i})">${l}</button>`).join('')}</div></div>`).join('')+`<div class="lbl" style="margin-top:16px">Comportamento na aula</div><div style="display:flex;gap:8px;margin-bottom:14px" id="sess-behav">${CB.map((b,i)=>`<button onclick="qsBehav=${i};document.getElementById('sess-behav').querySelectorAll('button').forEach((x,j)=>{x.style.borderColor=j===${i}?'${b.border}':'var(--bo)';x.style.background=j===${i}?'${b.bg}':'var(--bg3)';x.style.color=j===${i}?'${b.color}':'var(--t2)'})" style="flex:1;padding:11px 6px;border-radius:var(--rs);border:2px solid ${i===1?'#fde68a':'var(--bo)'};background:${i===1?'#fffbeb':'var(--bg3)'};cursor:pointer;font-size:18px;color:${i===1?'#b45309':'var(--t2)'}">${b.icon}</button>`).join('')}</div><button class="bp" style="margin-top:4px" onclick="saveAvaliacaoRapida(sid,'rapida_botoes',{});clsM('m-eval')">Salvar avaliação</button>`;}}
 
+let qsBehav = 1; // comportamento padrão da sessão (0=ruim,1=bom,2=exemplar)
 let mR=false,mT;function togM(){const b=document.getElementById('mcb');const l=document.getElementById('mlbl');if(!mR){mR=true;b.classList.add('rec');l.textContent='Gravando... toque para parar';mT=setTimeout(stpM,3000);}else{clearTimeout(mT);stpM();}}
 function stpM(){mR=false;const b=document.getElementById('mcb');const l=document.getElementById('mlbl');b.classList.remove('rec');l.textContent='Processando...';setTimeout(()=>{l.textContent='Análise concluída ✓';document.getElementById('ta').style.display='block';document.getElementById('tt').textContent='"Lucas teve aula excelente. Forehand evoluiu muito, tática impressionante. Footwork estável. Saque precisa atenção."';},1200);}
 function sFb(btn,idx){const cs=['s0','s1','s2','s3'];btn.closest('.fbg').querySelectorAll('.fbo').forEach((b,i)=>{b.className='fbo'+(b===btn?' '+cs[i]:'');});}
@@ -3004,12 +3046,117 @@ function aFT_dias() {
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 
 // ════ CÁLCULO PONDERADO DO BONECO ════
-// Avaliação 60% · Requisitos 30% · Quiz 10%
+// Avaliação 50% · Requisitos 25% · Quiz 10% · Competições 15%
 function calcReveal(s) {
-  const av  = s.score_av   || 0;
-  const req = s.score_req  || 0;
-  const qz  = s.score_quiz || 0;
-  return Math.min(100, Math.round((av * 0.6) + (req * 0.3) + (qz * 0.1)));
+  const av   = s.score_av   || 0;
+  const req  = s.score_req  || 0;
+  const qz   = s.score_quiz || 0;
+  const comp = s.score_comp || 0;
+  return Math.min(100, Math.round((av * 0.50) + (req * 0.25) + (qz * 0.10) + (comp * 0.15)));
+}
+
+// ════ COMPORTAMENTO ════
+const CB = [
+  {icon:'🔴', short:'Precisa melhorar',   full:'Falta de foco, atrapalha a aula, desrespeita regras, treinadores e amigos', color:'#dc2626', bg:'#fef2f2', border:'#fecaca'},
+  {icon:'🟡', short:'Bom comportamento',  full:'Bom comportamento, está se desenvolvendo bem',                              color:'#b45309', bg:'#fffbeb', border:'#fde68a'},
+  {icon:'🟢', short:'Exemplar',           full:'Comportamento exemplar em todas as situações',                              color:'#16a34a', bg:'#f0fdf4', border:'#bbf7d0'}
+];
+
+function setComportamento(studentId, val) {
+  const s = gSt(studentId);
+  if (!s) return;
+  s.comportamento = val;
+  updateAlunoSupabase(s).catch(e => console.error(e));
+  opPro();
+  rAL();
+  toast('Comportamento atualizado ✓');
+}
+
+// ════ COMPETIÇÕES ════
+let compForm = {};
+
+function calcScoreComp(s) {
+  const comps = s.competicoes || [];
+  if (!comps.length) return 0;
+  const pts = comps.reduce((acc, c) => {
+    let p = c.tipo === 'externo' ? 25 : 15;
+    const res = {semifinal:3, final:6, campeao:10}[c.resultado] || 0;
+    const beh = (c.comportamento === 2) ? 5 : 0;
+    return acc + p + res + beh;
+  }, 0);
+  return Math.min(100, pts);
+}
+
+function openAddComp() {
+  compForm = {tipo:'interno', resultado:'participou', comportamento:1, nome:'', data:''};
+  rCompForm();
+  opnM('m-comp');
+}
+
+function rCompForm() {
+  const f = compForm;
+  const el = document.getElementById('comp-body');
+  if (!el) return;
+  el.innerHTML = `
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      ${['interno','externo'].map(t=>`<button onclick="compForm.tipo='${t}';rCompForm()" style="flex:1;padding:11px;border-radius:var(--rs);border:2px solid ${f.tipo===t?'var(--g)':'var(--bo)'};background:${f.tipo===t?'var(--gl)':'var(--bg3)'};font-size:13px;font-weight:700;color:${f.tipo===t?'var(--g)':'var(--t2)'};cursor:pointer">${t==='interno'?'🏫 Interno':'🏆 Externo'}</button>`).join('')}
+    </div>
+    <div class="fi"><label>Nome do torneio *</label>
+      <input id="comp-nome" type="text" placeholder="Ex: Copa Raw Tennis" value="${f.nome||''}"
+        oninput="compForm.nome=this.value"
+        style="width:100%;padding:10px 12px;border-radius:var(--rs);border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:14px;outline:none;box-sizing:border-box">
+    </div>
+    <div class="fi"><label>Data</label>
+      <input id="comp-data" type="date" value="${f.data||''}"
+        oninput="compForm.data=this.value"
+        style="width:100%;padding:10px 12px;border-radius:var(--rs);border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:14px;outline:none;box-sizing:border-box">
+    </div>
+    <div class="fi"><label>Resultado</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        ${[['participou','Participou'],['semifinal','Semifinal'],['final','Final'],['campeao','🏆 Campeão']].map(([v,l])=>`<button onclick="compForm.resultado='${v}';rCompForm()" style="padding:10px;border-radius:var(--rs);border:2px solid ${f.resultado===v?'var(--g)':'var(--bo)'};background:${f.resultado===v?'var(--gl)':'var(--bg3)'};font-size:13px;font-weight:600;color:${f.resultado===v?'var(--g)':'var(--t2)'};cursor:pointer">${l}</button>`).join('')}
+      </div>
+    </div>
+    <div class="fi"><label>Comportamento</label>
+      <div style="display:flex;gap:8px">
+        ${CB.map((b,i)=>`<button onclick="compForm.comportamento=${i};rCompForm()" style="flex:1;padding:11px 6px;border-radius:var(--rs);border:2px solid ${f.comportamento===i?b.border:'var(--bo)'};background:${f.comportamento===i?b.bg:'var(--bg3)'};cursor:pointer;font-size:18px;color:${f.comportamento===i?b.color:'var(--t2)'}">${b.icon}</button>`).join('')}
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-top:6px">
+      <button class="bs" onclick="clsM('m-comp')">Cancelar</button>
+      <button class="bp" onclick="saveCompetition('${sid}')">Salvar ✓</button>
+    </div>`;
+}
+
+function saveCompetition(studentId) {
+  if (!compForm.nome?.trim()) { toast('Preencha o nome do torneio ⚠️'); return; }
+  const s = gSt(studentId);
+  if (!s) return;
+  if (!s.competicoes) s.competicoes = [];
+  s.competicoes.unshift({
+    tipo:          compForm.tipo,
+    nome:          compForm.nome.trim(),
+    data:          compForm.data || '',
+    resultado:     compForm.resultado,
+    comportamento: compForm.comportamento ?? 1
+  });
+  s.score_comp = calcScoreComp(s);
+  s.reveal     = calcReveal(s);
+  updateAlunoSupabase(s).catch(e => console.error(e));
+  clsM('m-comp');
+  opPro();
+  rAL();
+  toast('Competição registrada ✓');
+}
+
+function removeComp(studentId, idx) {
+  const s = gSt(studentId);
+  if (!s || !s.competicoes) return;
+  s.competicoes.splice(idx, 1);
+  s.score_comp = calcScoreComp(s);
+  s.reveal     = calcReveal(s);
+  updateAlunoSupabase(s).catch(e => console.error(e));
+  opPro();
+  rAL();
 }
 
 // ════ COACHES ════
