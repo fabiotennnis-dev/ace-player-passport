@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planejador de Sessão — ACE Player Passport</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+/* ── RESET & VARS ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #080E1A;
+  --bg2:       #0C1525;
+  --bg3:       #101C30;
+  --card:      #0E1929;
+  --border:    #1A2D48;
+  --border2:   #243D5E;
+  --gold:      #D4A843;
+  --gold2:     #F0C060;
+  --gold-glow: rgba(212,168,67,.18);
+  --t1:        #EEF3FA;
+  --t2:        #7A95BB;
+  --t3:        #3A5272;
+  --rx:   #7B68EE; --vmvm:#E84545; --vmtg:#F07030;
+  --vmbr:#A0AEC0; --lrlr:#F5A623; --lrlm:#C8E000;
+  --vdam:#5CB85C; --vdvd:#2E7D32;
+  --s1:#2E86C1; --s2:#D35400; --s3:#1E8449; --s4:#7D3C98;
+  --drill-c:#1A4A6E; --drill-l:#E8F4FD;
+  --jogo-c:#1A5E35; --jogo-l:#E8F8EE;
+  --game-c:#5C1A7A; --game-l:#F4E8FD;
+  --fisico-c:#7A3B0A; --fisico-l:#FDF0E0;
+}
+
+body { font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(--t1); min-height:100vh; overflow-x:hidden; }
+
+/* ── HEADER ── */
+.hdr { height:58px; background:linear-gradient(90deg,var(--bg2),var(--bg3)); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; padding:0 22px; position:sticky; top:0; z-index:300; }
+.hdr-l { display:flex; align-items:center; gap:14px; }
+.ace { font-family:'Bebas Neue',sans-serif; font-size:24px; letter-spacing:4px; color:var(--gold); }
+.hdr-pipe { width:1px; height:24px; background:var(--border2); }
+.hdr-mod { font-size:11px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--t2); }
+.hdr-badge { background:var(--gold-glow); border:1px solid rgba(212,168,67,.3); border-radius:4px; padding:4px 10px; font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); }
+
+/* ── LAYOUT ── */
+.layout { display:flex; min-height:calc(100vh - 58px); }
+
+/* ── SIDEBAR ── */
+.sb { width:210px; flex-shrink:0; background:var(--bg2); border-right:1px solid var(--border); padding:18px 0 18px; position:sticky; top:58px; height:calc(100vh - 58px); overflow-y:auto; display:flex; flex-direction:column; gap:0; }
+.sb-sec { font-size:9px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--t3); padding:12px 16px 6px; margin-top:4px; }
+.sb-item { display:flex; align-items:center; gap:9px; padding:8px 16px; cursor:pointer; font-size:12px; font-weight:400; color:var(--t2); border-left:2px solid transparent; transition:all .15s; }
+.sb-item:hover { background:rgba(255,255,255,.03); color:var(--t1); }
+.sb-item.on { background:rgba(255,255,255,.04); border-left-color:var(--gold); color:var(--t1); font-weight:600; }
+.sb-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.sb-divider { height:1px; background:var(--border); margin:10px 16px; }
+
+/* ── MAIN ── */
+.main { flex:1; padding:26px 30px; min-width:0; }
+.pg-title { font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:3px; color:var(--t1); margin-bottom:2px; }
+.pg-sub { font-size:12px; color:var(--t3); margin-bottom:22px; }
+
+/* ── TABS ── */
+.tabs { display:flex; border-bottom:1px solid var(--border); margin-bottom:22px; gap:0; }
+.tab-btn { font-family:'Space Grotesk',sans-serif; font-size:12px; font-weight:600; letter-spacing:.04em; padding:10px 18px; color:var(--t3); border:none; background:none; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:all .15s; }
+.tab-btn:hover { color:var(--t2); }
+.tab-btn.on { color:var(--gold); border-bottom-color:var(--gold); }
+
+/* ── SETUP CARD ── */
+.setup-card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:20px 22px; margin-bottom:20px; }
+.setup-title { font-family:'Bebas Neue',sans-serif; font-size:14px; letter-spacing:2px; color:var(--gold); margin-bottom:14px; }
+.setup-row { display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; }
+.fld { display:flex; flex-direction:column; gap:5px; }
+.fld-lbl { font-size:9px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--t3); }
+.fld-inp { background:var(--bg3); border:1px solid var(--border); border-radius:6px; padding:8px 11px; font-family:'Space Grotesk',sans-serif; font-size:12px; color:var(--t1); outline:none; transition:border-color .15s; min-width:130px; }
+.fld-inp:focus { border-color:rgba(212,168,67,.5); }
+.fld-inp option { background:var(--bg2); }
+.gen-btn { background:var(--gold); color:var(--bg); font-family:'Bebas Neue',sans-serif; font-size:15px; letter-spacing:2px; border:none; border-radius:7px; padding:9px 22px; cursor:pointer; transition:all .15s; white-space:nowrap; }
+.gen-btn:hover { background:var(--gold2); transform:translateY(-1px); }
+
+/* ── STATS ROW ── */
+.stats { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:20px; }
+.stat { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:11px 14px; }
+.stat-l { font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--t3); margin-bottom:4px; }
+.stat-v { font-family:'Bebas Neue',sans-serif; font-size:24px; color:var(--gold); line-height:1; }
+
+/* ── LEGEND ── */
+.legend { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:18px; align-items:center; }
+.leg { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--t2); }
+.leg-dot { width:10px; height:10px; border-radius:2px; }
+
+/* ── CALENDÁRIO ── */
+.cal-month { margin-bottom:26px; }
+.cal-m-title { font-family:'Bebas Neue',sans-serif; font-size:17px; letter-spacing:3px; color:var(--t2); margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+.cal-dow { font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--t3); text-align:center; padding:4px 0; }
+.cal-day { min-height:90px; background:var(--card); border:1px solid var(--border); border-radius:7px; padding:6px 7px; position:relative; transition:all .2s; }
+.cal-day.empty { opacity:.2; }
+.cal-day.has-ev { border-color:rgba(212,168,67,.25); cursor:pointer; }
+.cal-day.has-ev:hover { border-color:var(--gold); transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,.35),0 0 0 1px rgba(212,168,67,.2); }
+.cal-day.today { border-color:rgba(212,168,67,.5); }
+.cal-day-n { font-size:11px; font-weight:600; color:var(--t3); margin-bottom:4px; }
+.cal-day.today .cal-day-n { color:var(--gold); }
+.cal-ev { border-radius:3px; padding:2px 5px; font-size:9px; font-weight:600; margin-bottom:2px; line-height:1.4; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; letter-spacing:.02em; }
+.ev-s1 { background:rgba(46,134,193,.25); color:#5DADE2; border-left:2px solid var(--s1); }
+.ev-s2 { background:rgba(211,84,0,.2); color:#EC935B; border-left:2px solid var(--s2); }
+.ev-s3 { background:rgba(30,132,73,.2); color:#58D68D; border-left:2px solid var(--s3); }
+.ev-s4 { background:rgba(125,60,152,.2); color:#BB8FCE; border-left:2px solid var(--s4); }
+.ev-av { background:rgba(212,168,67,.15); color:var(--gold); border-left:2px solid var(--gold); font-size:9px; }
+.ev-dot { width:5px; height:5px; border-radius:50%; display:inline-block; margin-right:3px; vertical-align:middle; }
+
+/* ── BUSCADOR DE TREINOS ── */
+#view-busca { display:none; }
+.busca-title { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:3px; color:var(--gold); margin-bottom:16px; }
+.filtros-wrap { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:18px 20px; margin-bottom:20px; }
+.filtros-title { font-size:9px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--t3); margin-bottom:14px; }
+.filtros-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; }
+.filtro-group { display:flex; flex-direction:column; gap:6px; }
+.filtro-lbl { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--t2); }
+.tag-wrap { display:flex; flex-wrap:wrap; gap:5px; }
+.tag { padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; cursor:pointer; border:1px solid var(--border); background:var(--bg3); color:var(--t2); transition:all .15s; letter-spacing:.02em; user-select:none; }
+.tag:hover { border-color:var(--border2); color:var(--t1); }
+.tag.on { color:var(--bg); font-weight:700; }
+.tag-habilidade.on { background:#1A4A6E; border-color:#2E7DB5; color:#7EC8E3; }
+.tag-tipo.on { background:#1A5E35; border-color:#27AE60; color:#58D68D; }
+.tag-formato.on { background:#4A1A6E; border-color:#7D3C98; color:#BB8FCE; }
+.tag-foco.on { background:#6E3A00; border-color:#D35400; color:#F0A060; }
+.tag-puls.on { color:#fff; }
+.tag-ciclo.on { background:rgba(212,168,67,.2); border-color:var(--gold); color:var(--gold); }
+.search-treino { width:100%; background:var(--bg3); border:1px solid var(--border); border-radius:7px; padding:10px 14px 10px 36px; font-family:'Space Grotesk',sans-serif; font-size:13px; color:var(--t1); outline:none; transition:border-color .15s; margin-bottom:14px; }
+.search-treino::placeholder { color:var(--t3); }
+.search-treino:focus { border-color:rgba(212,168,67,.5); }
+.s-wrap-big { position:relative; }
+.s-ico { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--t3); pointer-events:none; font-size:14px; }
+.treinos-count { font-size:11px; color:var(--t3); margin-bottom:14px; }
+
+/* ── TREINO CARD ── */
+.treino-card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:16px 18px; margin-bottom:10px; cursor:pointer; transition:all .2s; position:relative; overflow:hidden; }
+.treino-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; }
+.treino-card.drill::before { background:var(--s1); }
+.treino-card.jogo::before { background:var(--s3); }
+.treino-card.game::before { background:var(--s4); }
+.treino-card.fisico::before { background:var(--s2); }
+.treino-card:hover { border-color:var(--border2); transform:translateY(-1px); box-shadow:0 6px 20px rgba(0,0,0,.3); }
+.tc-header { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; margin-bottom:8px; }
+.tc-title { font-size:14px; font-weight:700; color:var(--t1); line-height:1.3; }
+.tc-chips { display:flex; gap:5px; flex-wrap:wrap; }
+.chip { display:inline-block; padding:2px 7px; border-radius:4px; font-size:10px; font-weight:700; letter-spacing:.04em; font-family:'JetBrains Mono',monospace; }
+.chip-drill { background:rgba(46,134,193,.15); color:#5DADE2; border:1px solid rgba(46,134,193,.25); }
+.chip-jogo { background:rgba(30,132,73,.15); color:#58D68D; border:1px solid rgba(30,132,73,.25); }
+.chip-game { background:rgba(125,60,152,.15); color:#BB8FCE; border:1px solid rgba(125,60,152,.25); }
+.chip-fisico { background:rgba(211,84,0,.15); color:#EC935B; border:1px solid rgba(211,84,0,.25); }
+.chip-hab { background:rgba(212,168,67,.1); color:var(--gold); border:1px solid rgba(212,168,67,.2); }
+.chip-foco { background:rgba(255,255,255,.05); color:var(--t2); border:1px solid var(--border); }
+.chip-formato { background:rgba(200,224,0,.08); color:#BADC58; border:1px solid rgba(200,224,0,.2); }
+.tc-desc { font-size:12px; color:var(--t2); line-height:1.55; margin-bottom:8px; }
+.tc-cue { font-size:11px; color:var(--gold); font-style:italic; background:var(--gold-glow); padding:4px 8px; border-radius:4px; border-left:2px solid var(--gold); }
+.tc-footer { display:flex; align-items:center; justify-content:space-between; margin-top:10px; }
+.tc-dur { font-size:10px; color:var(--t3); font-family:'JetBrains Mono',monospace; }
+.tc-add-btn { background:var(--gold-glow); border:1px solid rgba(212,168,67,.3); border-radius:5px; padding:4px 10px; font-size:11px; font-weight:700; color:var(--gold); cursor:pointer; transition:all .15s; letter-spacing:.04em; }
+.tc-add-btn:hover { background:rgba(212,168,67,.25); }
+
+/* ── MODAL ── */
+.modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:500; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity .2s; padding:20px; }
+.modal-bg.open { opacity:1; pointer-events:all; }
+.modal { background:var(--bg2); border:1px solid var(--border2); border-radius:14px; width:700px; max-width:100%; max-height:90vh; overflow-y:auto; flex-direction:column; display:flex; }
+.modal-hdr { padding:18px 22px 14px; border-bottom:1px solid var(--border); display:flex; align-items:flex-start; justify-content:space-between; gap:12px; position:sticky; top:0; background:var(--bg2); z-index:10; }
+.modal-title { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:2px; color:var(--gold); line-height:1.1; }
+.modal-sub { font-size:11px; color:var(--t2); margin-top:3px; }
+.modal-close { background:none; border:none; color:var(--t3); font-size:20px; cursor:pointer; padding:2px 6px; border-radius:4px; transition:all .15s; line-height:1; flex-shrink:0; }
+.modal-close:hover { color:var(--t1); background:var(--bg3); }
+.modal-body { padding:18px 22px 24px; }
+
+/* MODAL SECTIONS */
+.m-sec { margin-bottom:18px; }
+.m-sec-lbl { font-size:9px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--t3); margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+.m-obj-box { background:var(--bg3); border:1px solid var(--border); border-left:3px solid var(--gold); border-radius:6px; padding:10px 14px; font-size:13px; color:var(--t1); line-height:1.55; }
+.m-chips-row { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:14px; }
+
+/* FASE BLOCO */
+.fase-block { background:var(--card); border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:8px; }
+.fase-hdr { padding:10px 14px; display:flex; align-items:center; gap:10px; }
+.fase-hdr-title { font-size:12px; font-weight:700; color:var(--t1); }
+.fase-body { padding:12px 14px; background:rgba(0,0,0,.15); }
+.fase-desc { font-size:12px; color:var(--t2); line-height:1.6; margin-bottom:10px; }
+
+/* DRILL ITEM */
+.drill-item { background:var(--bg3); border:1px solid var(--border); border-radius:6px; padding:10px 12px; margin-bottom:6px; }
+.drill-title { font-size:12px; font-weight:700; color:var(--t1); margin-bottom:4px; display:flex; align-items:center; gap:6px; }
+.drill-body { font-size:12px; color:var(--t2); line-height:1.55; }
+.drill-cue { margin-top:6px; font-size:11px; color:var(--gold); font-style:italic; background:var(--gold-glow); padding:4px 8px; border-radius:4px; border-left:2px solid var(--gold); }
+.drill-chips { display:flex; gap:5px; flex-wrap:wrap; margin-top:6px; }
+
+/* VAR BLOCO */
+.var-block { background:rgba(125,60,152,.07); border:1px solid rgba(125,60,152,.2); border-radius:6px; padding:10px 12px; margin-top:8px; }
+.var-title { font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:#BB8FCE; margin-bottom:4px; }
+.var-body { font-size:11px; color:var(--t2); line-height:1.5; }
+
+/* PLANO SESSÃO SALVO */
+.sessao-container { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:18px; margin-bottom:18px; }
+.sessao-title { font-family:'Bebas Neue',sans-serif; font-size:14px; letter-spacing:2px; color:var(--gold); margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; }
+.sessao-item { background:var(--bg3); border:1px solid var(--border); border-radius:6px; padding:8px 12px; margin-bottom:5px; display:flex; align-items:center; gap:10px; }
+.sessao-ordem { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--t3); width:20px; text-align:center; }
+.sessao-info { flex:1; }
+.sessao-nome { font-size:12px; font-weight:600; color:var(--t1); }
+.sessao-det { font-size:11px; color:var(--t3); }
+.sessao-rm { background:none; border:none; color:var(--t3); cursor:pointer; font-size:14px; transition:color .15s; }
+.sessao-rm:hover { color:#E84545; }
+
+/* EMPTY */
+.empty { text-align:center; padding:48px; color:var(--t3); font-size:12px; }
+
+/* SCROLL */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+
+/* PRINT CUE */
+.print-btn { background:var(--bg3); border:1px solid var(--border); border-radius:6px; padding:6px 12px; font-family:'Space Grotesk',sans-serif; font-size:11px; font-weight:600; color:var(--t2); cursor:pointer; transition:all .15s; letter-spacing:.04em; }
+.print-btn:hover { border-color:var(--border2); color:var(--t1); }
+
+@media(max-width:860px){.sb{display:none}.stats{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-l">
+    <a href="index.html" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--t2);font-size:11px;font-weight:600;letter-spacing:.08em;padding:5px 10px;border:1px solid var(--border);border-radius:6px;transition:all .15s" onmouseover="this.style.color='var(--t1)';this.style.borderColor='var(--border2)'" onmouseout="this.style.color='var(--t2)';this.style.borderColor='var(--border)'">← ACE</a>
+    <div class="hdr-pipe"></div>
+    <div class="ace">ACE</div>
+    <div class="hdr-pipe"></div>
+    <div class="hdr-mod">Player Passport</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <span id="hdr-academia" style="font-size:11px;color:var(--t3);font-weight:500"></span>
+    <div class="hdr-badge">Planejador de Sessão</div>
+  </div>
+</header>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<nav class="sb">
+  <div class="sb-sec">Pulseiras</div>
+  <div class="sb-item on" data-p="" onclick="setSbPuls(this,'')">
+    <span class="sb-dot" style="background:var(--gold)"></span>Todas
+  </div>
+  <div class="sb-item" data-p="Roxa" onclick="setSbPuls(this,'Roxa')">
+    <span class="sb-dot" style="background:var(--rx)"></span>RX — Roxa
+  </div>
+  <div class="sb-item" data-p="Vermelho-Vermelho" onclick="setSbPuls(this,'Vermelho-Vermelho')">
+    <span class="sb-dot" style="background:var(--vmvm)"></span>VM-VM
+  </div>
+  <div class="sb-item" data-p="Vermelho-Tangerina" onclick="setSbPuls(this,'Vermelho-Tangerina')">
+    <span class="sb-dot" style="background:var(--vmtg)"></span>VM-TG
+  </div>
+  <div class="sb-item" data-p="Vermelho-Branco" onclick="setSbPuls(this,'Vermelho-Branco')">
+    <span class="sb-dot" style="background:var(--vmbr)"></span>VM-BR
+  </div>
+  <div class="sb-item" data-p="Laranja-Laranja" onclick="setSbPuls(this,'Laranja-Laranja')">
+    <span class="sb-dot" style="background:var(--lrlr)"></span>LR-LR
+  </div>
+  <div class="sb-item" data-p="Laranja-Limão" onclick="setSbPuls(this,'Laranja-Limão')">
+    <span class="sb-dot" style="background:var(--lrlm)"></span>LR-LM
+  </div>
+  <div class="sb-item" data-p="Verde-Amarelo" onclick="setSbPuls(this,'Verde-Amarelo')">
+    <span class="sb-dot" style="background:var(--vdam)"></span>VD-AM
+  </div>
+  <div class="sb-item" data-p="Verde-Verde" onclick="setSbPuls(this,'Verde-Verde')">
+    <span class="sb-dot" style="background:var(--vdvd)"></span>VD-VD
+  </div>
+  <div class="sb-divider"></div>
+  <div class="sb-sec">Minhas Turmas</div>
+  <div id="sb-turmas" style="padding:0 8px 4px">
+    <div style="font-size:11px;color:var(--t3);padding:6px 8px">Carregando...</div>
+  </div>
+  <div class="sb-divider"></div>
+  <div class="sb-sec">Módulos</div>
+  <div class="sb-item on" id="sv-cal" onclick="setView('cal')">📅 Calendário</div>
+  <div class="sb-item" id="sv-busca" onclick="setView('busca')">🔎 Buscar Treinos</div>
+  <div class="sb-item" id="sv-sessao" onclick="setView('sessao')">📋 Minha Sessão <span id="sessao-count-sb" style="margin-left:auto;background:var(--gold);color:var(--bg);border-radius:10px;padding:1px 6px;font-size:9px;font-weight:700;display:none">0</span></div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="pg-title">Planejador de Sessão</div>
+  <div class="pg-sub">Clique em qualquer aula no calendário para ver o plano completo · Use "Buscar Treinos" para montar sua sessão personalizada</div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn on" onclick="setTab(this,'plano')">Plano de Aulas</button>
+    <button class="tab-btn" onclick="setTab(this,'objetivos')">Objetivos</button>
+  </div>
+
+  <!-- SETUP -->
+  <div class="setup-card">
+    <div class="setup-title">⚙️ Configurar Período</div>
+    <div class="setup-row">
+      <div class="fld">
+        <div class="fld-lbl">Início do Ciclo 1</div>
+        <input class="fld-inp" id="ci-data" type="date">
+      </div>
+      <div class="fld">
+        <div class="fld-lbl">Pulseira</div>
+        <select class="fld-inp" id="ci-puls">
+          <option value="Roxa">RX — Roxa</option>
+          <option value="Vermelho-Vermelho">VM-VM</option>
+          <option value="Vermelho-Tangerina">VM-TG</option>
+          <option value="Vermelho-Branco">VM-BR</option>
+          <option value="Laranja-Laranja">LR-LR</option>
+          <option value="Laranja-Limão">LR-LM</option>
+          <option value="Verde-Amarelo">VD-AM</option>
+          <option value="Verde-Verde">VD-VD</option>
+        </select>
+      </div>
+      <div class="fld">
+        <div class="fld-lbl">Dias de Treino</div>
+        <select class="fld-inp" id="ci-dias">
+          <option value="135">Seg / Qua / Sex</option>
+          <option value="24">Ter / Qui</option>
+          <option value="13">Seg / Qua</option>
+          <option value="1234">Seg a Qui</option>
+        </select>
+      </div>
+      <div class="fld">
+        <div class="fld-lbl">Duração da Aula</div>
+        <select class="fld-inp" id="ci-dur">
+          <option value="60">60 min</option>
+          <option value="75">75 min</option>
+          <option value="90">90 min</option>
+          <option value="45">45 min</option>
+        </select>
+      </div>
+      <button class="gen-btn" onclick="buildCal()">GERAR CALENDÁRIO</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat"><div class="stat-l">Pulseira</div><div class="stat-v" id="st-puls">—</div></div>
+    <div class="stat"><div class="stat-l">Ciclos</div><div class="stat-v">3</div></div>
+    <div class="stat"><div class="stat-l">Total Aulas</div><div class="stat-v" id="st-aulas">—</div></div>
+    <div class="stat"><div class="stat-l">Semanas</div><div class="stat-v">12</div></div>
+    <div class="stat"><div class="stat-l">Na Sessão</div><div class="stat-v" id="st-sessao">0</div></div>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <span style="font-size:10px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.08em">Semanas:</span>
+    <div class="leg"><div class="leg-dot" style="background:var(--s1)"></div>S1 Introdução</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--s2)"></div>S2 Construção</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--s3)"></div>S3 Aplicação</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--s4)"></div>S4 Avaliação</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--gold)"></div>Avaliação Semestral</div>
+  </div>
+
+  <!-- ========= CALENDÁRIO ========= -->
+  <div id="view-cal">
+    <div id="cal-output"><div class="empty">Configure o período acima e clique em GERAR CALENDÁRIO.</div></div>
+  </div>
+
+  <!-- ========= BUSCA DE TREINOS ========= -->
+  <div id="view-busca" style="display:none">
+    <div class="busca-title">🔎 Buscar Treinos</div>
+
+    <div class="filtros-wrap">
+      <div class="filtros-title">Filtros</div>
+      <div class="filtros-grid">
+
+        <div class="filtro-group">
+          <div class="filtro-lbl">Habilidade Técnica</div>
+          <div class="tag-wrap" id="tags-hab">
+            <span class="tag tag-habilidade" data-v="top spin" onclick="toggleTag(this,'hab')">Top Spin</span>
+            <span class="tag tag-habilidade" data-v="slice" onclick="toggleTag(this,'hab')">Slice</span>
+            <span class="tag tag-habilidade" data-v="voleio" onclick="toggleTag(this,'hab')">Voleio</span>
+            <span class="tag tag-habilidade" data-v="saque" onclick="toggleTag(this,'hab')">Saque</span>
+            <span class="tag tag-habilidade" data-v="smash" onclick="toggleTag(this,'hab')">Smash</span>
+            <span class="tag tag-habilidade" data-v="forehand" onclick="toggleTag(this,'hab')">Forehand</span>
+            <span class="tag tag-habilidade" data-v="backhand" onclick="toggleTag(this,'hab')">Backhand</span>
+            <span class="tag tag-habilidade" data-v="devolução" onclick="toggleTag(this,'hab')">Devolução</span>
+            <span class="tag tag-habilidade" data-v="approach" onclick="toggleTag(this,'hab')">Approach</span>
+            <span class="tag tag-habilidade" data-v="movimentação" onclick="toggleTag(this,'hab')">Movimentação</span>
+            <span class="tag tag-habilidade" data-v="empunhadura" onclick="toggleTag(this,'hab')">Empunhadura</span>
+            <span class="tag tag-habilidade" data-v="split step" onclick="toggleTag(this,'hab')">Split Step</span>
+          </div>
+        </div>
+
+        <div class="filtro-group">
+          <div class="filtro-lbl">Tipo de Exercício</div>
+          <div class="tag-wrap" id="tags-tipo">
+            <span class="tag tag-tipo" data-v="drill" onclick="toggleTag(this,'tipo')">Drill</span>
+            <span class="tag tag-tipo" data-v="jogo dirigido" onclick="toggleTag(this,'tipo')">Jogo Dirigido</span>
+            <span class="tag tag-tipo" data-v="jogo livre" onclick="toggleTag(this,'tipo')">Jogo Livre</span>
+            <span class="tag tag-tipo" data-v="físico" onclick="toggleTag(this,'tipo')">Físico / TMC</span>
+            <span class="tag tag-tipo" data-v="psicomotor" onclick="toggleTag(this,'tipo')">Psicomotor</span>
+            <span class="tag tag-tipo" data-v="competição" onclick="toggleTag(this,'tipo')">Competição</span>
+            <span class="tag tag-tipo" data-v="aquecimento" onclick="toggleTag(this,'tipo')">Aquecimento</span>
+          </div>
+        </div>
+
+        <div class="filtro-group">
+          <div class="filtro-lbl">Formato de Exercício</div>
+          <div class="tag-wrap" id="tags-formato">
+            <span class="tag tag-formato" data-v="fechado" onclick="toggleTag(this,'formato')">Fechado</span>
+            <span class="tag tag-formato" data-v="semi-aberto" onclick="toggleTag(this,'formato')">Semi-aberto</span>
+            <span class="tag tag-formato" data-v="aberto" onclick="toggleTag(this,'formato')">Aberto</span>
+          </div>
+        </div>
+
+        <div class="filtro-group">
+          <div class="filtro-lbl">Foco</div>
+          <div class="tag-wrap" id="tags-foco">
+            <span class="tag tag-foco" data-v="olho" onclick="toggleTag(this,'foco')">Olho</span>
+            <span class="tag tag-foco" data-v="pé" onclick="toggleTag(this,'foco')">Pé</span>
+            <span class="tag tag-foco" data-v="mão" onclick="toggleTag(this,'foco')">Mão</span>
+          </div>
+        </div>
+
+        <div class="filtro-group">
+          <div class="filtro-lbl">Pulseira</div>
+          <div class="tag-wrap" id="tags-puls">
+            <span class="tag tag-puls" data-v="Roxa" data-cor="#7B68EE" onclick="toggleTag(this,'puls')">RX</span>
+            <span class="tag tag-puls" data-v="Vermelho-Vermelho" data-cor="#E84545" onclick="toggleTag(this,'puls')">VM-VM</span>
+            <span class="tag tag-puls" data-v="Vermelho-Tangerina" data-cor="#F07030" onclick="toggleTag(this,'puls')">VM-TG</span>
+            <span class="tag tag-puls" data-v="Vermelho-Branco" data-cor="#A0AEC0" onclick="toggleTag(this,'puls')">VM-BR</span>
+            <span class="tag tag-puls" data-v="Laranja-Laranja" data-cor="#F5A623" onclick="toggleTag(this,'puls')">LR-LR</span>
+            <span class="tag tag-puls" data-v="Laranja-Limão" data-cor="#C8E000" onclick="toggleTag(this,'puls')">LR-LM</span>
+            <span class="tag tag-puls" data-v="Verde-Amarelo" data-cor="#5CB85C" onclick="toggleTag(this,'puls')">VD-AM</span>
+            <span class="tag tag-puls" data-v="Verde-Verde" data-cor="#2E7D32" onclick="toggleTag(this,'puls')">VD-VD</span>
+          </div>
+        </div>
+
+        <div class="filtro-group">
+          <div class="filtro-lbl">Ciclo</div>
+          <div class="tag-wrap" id="tags-ciclo">
+            <span class="tag tag-ciclo" data-v="C1" onclick="toggleTag(this,'ciclo')">Ciclo 1</span>
+            <span class="tag tag-ciclo" data-v="C2" onclick="toggleTag(this,'ciclo')">Ciclo 2</span>
+            <span class="tag tag-ciclo" data-v="C3" onclick="toggleTag(this,'ciclo')">Ciclo 3</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="s-wrap-big">
+      <span class="s-ico">🔍</span>
+      <input class="search-treino" id="search-treino" type="text" placeholder="Ex: top spin cruzado, voleio de construção, split step..." oninput="renderBusca()">
+    </div>
+    <div class="treinos-count" id="treinos-count">—</div>
+    <div id="treinos-output"></div>
+  </div>
+
+  <!-- ========= MINHA SESSÃO ========= -->
+  <div id="view-sessao" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div class="busca-title" style="margin:0">📋 Minha Sessão</div>
+      <div style="display:flex;gap:8px">
+        <button class="print-btn" onclick="printSessao()">🖨 Imprimir</button>
+        <button class="print-btn" onclick="clearSessao()" style="color:#E84545">🗑 Limpar</button>
+      </div>
+    </div>
+    <div id="sessao-output"><div class="empty">Sua sessão está vazia.<br>Adicione treinos pelo Buscador ou clicando em exercícios dentro de um plano de aula.</div></div>
+  </div>
+
+</main>
+</div>
+
+<!-- ========= MODAL PLANO DE AULA ========= -->
+<div class="modal-bg" id="modal-bg" onclick="closeModal(event)">
+  <div class="modal" id="modal-box">
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title" id="m-title">—</div>
+        <div class="modal-sub" id="m-sub">—</div>
+      </div>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-body" id="m-body"></div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════
+   CORES / SIGLAS
+════════════════════════════════════════════════════════ */
+const CORES = {
+  Roxa:'#7B68EE','Vermelho-Vermelho':'#E84545','Vermelho-Tangerina':'#F07030',
+  'Vermelho-Branco':'#A0AEC0','Laranja-Laranja':'#F5A623','Laranja-Limão':'#C8E000',
+  'Verde-Amarelo':'#5CB85C','Verde-Verde':'#2E7D32',
+};
+const SIGLAS = {
+  Roxa:'RX','Vermelho-Vermelho':'VM-VM','Vermelho-Tangerina':'VM-TG',
+  'Vermelho-Branco':'VM-BR','Laranja-Laranja':'LR-LR','Laranja-Limão':'LR-LM',
+  'Verde-Amarelo':'VD-AM','Verde-Verde':'VD-VD',
+};
+const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const DIAS_SEMANA = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+/* ════════════════════════════════════════════════════════
+   AULAS (plano completo)
+════════════════════════════════════════════════════════ */
+const AULAS = [
+  {p:'Roxa',c:'C1',a:'C1.1',s:'S1',cat:'Tático',tema:'Tática e arbitragem',obj:'Reconhecer "Fora" e "Dentro" + anunciar para colega',foco:'Olho'},
+  {p:'Roxa',c:'C1',a:'C1.2',s:'S1',cat:'Tático',tema:'Tática e arbitragem',obj:'Posição de arranque antes do sinal sonoro + anunciar',foco:'Olho'},
+  {p:'Roxa',c:'C1',a:'C1.3',s:'S1',cat:'FDQ',tema:'Fundo de Quadra',obj:'Posição no início do jogo — quadra sem rede',foco:'Pé'},
+  {p:'Roxa',c:'C1',a:'C1.4',s:'S2',cat:'FDQ',tema:'Fundo de Quadra',obj:'Posição início + agilidade (circuito estrela)',foco:'Pé'},
+  {p:'Roxa',c:'C1',a:'C1.5',s:'S2',cat:'FDQ',tema:'Fundo de Quadra',obj:'Base neutra no arremesso FH + Posição 0 joelhos flexionados',foco:'Pé'},
+  {p:'Roxa',c:'C1',a:'C1.6',s:'S2',cat:'FDQ',tema:'Fundo de Quadra',obj:'Arranque (estrela) + SAQUE: base semi-aberta de FH',foco:'Pé'},
+  {p:'Roxa',c:'C1',a:'C1.7',s:'S3',cat:'FDQ',tema:'Fundo de Quadra',obj:'Pegada na raquete (almofadinha) + mão livre no coração',foco:'Mão'},
+  {p:'Roxa',c:'C1',a:'C1.8',s:'S3',cat:'FDQ',tema:'Fundo de Quadra',obj:'Pegada correta + mão livre — devoluções',foco:'Mão'},
+  {p:'Roxa',c:'C1',a:'C1.9',s:'S3',cat:'FDQ',tema:'Fundo de Quadra',obj:'Percepção de alvos e zonas + Posição 0 (expectativa)',foco:'Olho'},
+  {p:'Roxa',c:'C1',a:'C1.10',s:'S4',cat:'Jogo',tema:'Pré-evento',obj:'Posição arranque + identificar "Fora/Dentro" em jogo',foco:'Olho'},
+  {p:'Roxa',c:'C1',a:'C1.11',s:'S4',cat:'Jogo',tema:'Pré-evento',obj:'Jogo gol a gol: 1 arremesso + 3 devoluções rolando',foco:'Olho'},
+  {p:'Roxa',c:'C1',a:'C1.12',s:'S4',cat:'Jogo',tema:'Avaliação Formativa C1',obj:'Avaliação: circuito psicomotor + gol a gol + arbitragem',foco:'Olho'},
+  {p:'Roxa',c:'C2',a:'C2.1',s:'S1',cat:'FDQ',tema:'FDQ c/ adversidade',obj:'Apoio neutro (arremesso) / Pés dinâmicos (devolução)',foco:'Pé'},
+  {p:'Roxa',c:'C2',a:'C2.2',s:'S1',cat:'FDQ',tema:'FDQ c/ adversidade',obj:'Apoio neutro equilibrado + pés ativos na espera',foco:'Pé'},
+  {p:'Roxa',c:'C2',a:'C2.3',s:'S1',cat:'FDQ',tema:'FDQ c/ adversidade',obj:'Giro dos ombros para arremessar de FH e BH',foco:'Mão'},
+  {p:'Roxa',c:'C2',a:'C2.4',s:'S2',cat:'FDQ',tema:'FDQ c/ adversidade',obj:'Giro ombros + ponto de contato identificado na frente',foco:'Mão'},
+  {p:'Roxa',c:'C2',a:'C2.5',s:'S2',cat:'FDQ',tema:'FDQ c/ adversidade',obj:'Golpes com ponto de contato na frente do corpo',foco:'Olho'},
+  {p:'Roxa',c:'C2',a:'C2.6',s:'S2',cat:'FDQ',tema:'FDQ c/ adversidade',obj:'Ponto de contato na frente + equilíbrio da base',foco:'Olho'},
+  {p:'Roxa',c:'C2',a:'C2.7',s:'S3',cat:'FDQ',tema:'FDQ c/ adversidade',obj:'Equilíbrio da base durante o golpe + precisão para alvo',foco:'Pé'},
+  {p:'Roxa',c:'C2',a:'C2.8',s:'S3',cat:'FDQ',tema:'FDQ c/ adversidade',obj:'Equilíbrio + precisão + contagem simples (1, 2, 3)',foco:'Pé'},
+  {p:'Roxa',c:'C2',a:'C2.9',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Anunciar "fora/dentro" + anunciar placar para colega',foco:'Olho'},
+  {p:'Roxa',c:'C2',a:'C2.10',s:'S4',cat:'Jogo',tema:'Avaliação Formativa C2',obj:'Jogo com adversidade + arbitragem autônoma',foco:'Olho'},
+  {p:'Roxa',c:'C3',a:'C3.1',s:'S1',cat:'Saque',tema:'Conseguir sacar',obj:'Conhecer e dominar espaço acima da cabeça — troféu',foco:'Olho'},
+  {p:'Roxa',c:'C3',a:'C3.2',s:'S1',cat:'Saque',tema:'Conseguir sacar',obj:'Dominar espaço acima da cabeça + apresentar a bola',foco:'Olho'},
+  {p:'Roxa',c:'C3',a:'C3.3',s:'S1',cat:'Saque',tema:'Conseguir sacar',obj:'Saque com base semi-aberta — equilíbrio durante o golpe',foco:'Pé'},
+  {p:'Roxa',c:'C3',a:'C3.4',s:'S2',cat:'Saque',tema:'Conseguir sacar',obj:'Base semi-aberta + subida junta dos braços',foco:'Pé'},
+  {p:'Roxa',c:'C3',a:'C3.5',s:'S2',cat:'Saque',tema:'Conseguir sacar',obj:'Saque segurando raquete no fim do cabo — eminência hipotenar',foco:'Mão'},
+  {p:'Roxa',c:'C3',a:'C3.6',s:'S2',cat:'Saque',tema:'Conseguir sacar',obj:'Empunhadura correta + toss controlado para manter equilíbrio',foco:'Mão'},
+  {p:'Roxa',c:'C3',a:'C3.7',s:'S3',cat:'Saque',tema:'Conseguir sacar',obj:'Toss + ponto de contato acima da cabeça com equilíbrio total',foco:'Mão'},
+  {p:'Roxa',c:'C3',a:'C3.8',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Sacar para o gol + partida com regra adaptada (3 gols ou 5 min)',foco:'Olho'},
+  {p:'Roxa',c:'C3',a:'C3.9',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Recuperar conteúdos + autonomia na arbitragem',foco:'Olho'},
+  {p:'Roxa',c:'C3',a:'C3.10',s:'S4',cat:'Jogo',tema:'Avaliação Semestral',obj:'Torneio interno: 3 gols · arbitragem autônoma · avaliação somativa',foco:'Olho'},
+  {p:'Vermelho-Vermelho',c:'C1',a:'C1.1',s:'S1',cat:'FDQ',tema:'Fundo de Quadra',obj:'Posição "0" dinâmica · Arr: ½ aberto · SAQ: ½ aberto',foco:'Pé'},
+  {p:'Vermelho-Vermelho',c:'C1',a:'C1.2',s:'S1',cat:'FDQ',tema:'Fundo de Quadra',obj:'Posição "0" + bases semi-abertas nas bolas laterais',foco:'Pé'},
+  {p:'Vermelho-Vermelho',c:'C1',a:'C1.3',s:'S1',cat:'FDQ',tema:'Fundo de Quadra',obj:'Empunhadura ½ fechada FH + pegada almofadinha',foco:'Mão'},
+  {p:'Vermelho-Vermelho',c:'C1',a:'C1.4',s:'S2',cat:'FDQ',tema:'Fundo de Quadra',obj:'Empunhadura ½ fechada FH/BH + posição "0" organizada',foco:'Mão'},
+  {p:'Vermelho-Vermelho',c:'C1',a:'C1.5',s:'S2',cat:'FDQ',tema:'FDQ: 1+2 FH',obj:'Percepção TIC-TAC + avaliar precisão do "Toss"',foco:'Olho'},
+  {p:'Vermelho-Vermelho',c:'C1',a:'C1.6',s:'S2',cat:'FDQ',tema:'FDQ: 1+2 FH',obj:'Percepção TIC-TAC + dominar 1º quique antes de bater',foco:'Olho'},
+  {p:'Vermelho-Vermelho',c:'C1',a:'C1.7',s:'S3',cat:'FDQ',tema:'FDQ: 1+2 FH',obj:'Giro equilibrado c/ mão livre: FH/BH + SAQ posição "0"',foco:'Mão'},
+  {p:'Vermelho-Vermelho',c:'C1',a:'C1.8',s:'S3',cat:'FDQ',tema:'FDQ: 1+2 FH',obj:'Giro equilibrado + posição "0" c/ bola no coração',foco:'Mão'},
+  {p:'Vermelho-Vermelho',c:'C1',a:'C1.9',s:'S3',cat:'FDQ',tema:'Fundo de Quadra',obj:'Percepção: dominar e distanciar do 1º quique + alvos',foco:'Olho'},
+  {p:'Vermelho-Vermelho',c:'C1',a:'C1.10',s:'S4',cat:'Tático',tema:'Pré-evento',obj:'Reconhecer situação favorável/desfavorável + jogo contagem',foco:'Olho'},
+  {p:'Vermelho-Vermelho',c:'C1',a:'C1.11',s:'S4',cat:'Jogo',tema:'Pré-evento',obj:'1+2 FH · jogo com contagem 1/2 e 2/1',foco:'Olho'},
+  {p:'Vermelho-Vermelho',c:'C1',a:'C1.12',s:'S4',cat:'Jogo',tema:'Avaliação Formativa C1',obj:'Avaliação: 1+2 FH · SAQ · circuito · arbitragem',foco:'Olho'},
+  {p:'Vermelho-Vermelho',c:'C2',a:'C2.1',s:'S1',cat:'Rede',tema:'Voleio: 1+interceptar',obj:'Arremesso + joelhos flexionados "0" + SAQ: base ½ aberta',foco:'Pé'},
+  {p:'Vermelho-Vermelho',c:'C2',a:'C2.2',s:'S1',cat:'Rede',tema:'Voleio: 1+interceptar',obj:'Posição "0" + arrancar para interceptar',foco:'Pé'},
+  {p:'Vermelho-Vermelho',c:'C2',a:'C2.3',s:'S1',cat:'Rede',tema:'Jogo na rede: 1+1',obj:'Mão livre no coração + empunhadura FH-BH no voleio',foco:'Mão'},
+  {p:'Vermelho-Vermelho',c:'C2',a:'C2.4',s:'S2',cat:'Rede',tema:'Jogo na rede: 1+1',obj:'Mão livre + empunhadura + preparação curta (escudo)',foco:'Mão'},
+  {p:'Vermelho-Vermelho',c:'C2',a:'C2.5',s:'S2',cat:'Rede',tema:'Jogo na rede: 1+1',obj:'Percepção lateral FH/BH + apontar bola no smash',foco:'Olho'},
+  {p:'Vermelho-Vermelho',c:'C2',a:'C2.6',s:'S2',cat:'Rede',tema:'Jogo na rede: 1+1',obj:'Smash: apontar bola + troféu + movimentação lateral',foco:'Olho'},
+  {p:'Vermelho-Vermelho',c:'C2',a:'C2.7',s:'S3',cat:'Rede',tema:'Voleio: 1+interceptar',obj:'Preparação curta no voleio + troféu no smash',foco:'Mão'},
+  {p:'Vermelho-Vermelho',c:'C2',a:'C2.8',s:'S3',cat:'Tático',tema:'Pré-evento',obj:'Decisão: atacar ou defender · contagem e pontuação',foco:'Olho'},
+  {p:'Vermelho-Vermelho',c:'C2',a:'C2.9',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Jogo reinado na rede · decisão tática',foco:'Olho'},
+  {p:'Vermelho-Vermelho',c:'C2',a:'C2.10',s:'S4',cat:'Jogo',tema:'Avaliação Formativa C2',obj:'Avaliação: voleio · smash · posição rede · contagem',foco:'Olho'},
+  {p:'Vermelho-Vermelho',c:'C3',a:'C3.1',s:'S1',cat:'FDQ',tema:'Construir ponto FDQ',obj:'Percepção e decisão de usar "vazios" da quadra',foco:'Olho'},
+  {p:'Vermelho-Vermelho',c:'C3',a:'C3.2',s:'S1',cat:'FDQ',tema:'Construir ponto FDQ',obj:'Usar os vazios + trajetórias variadas',foco:'Olho'},
+  {p:'Vermelho-Vermelho',c:'C3',a:'C3.3',s:'S1',cat:'FDQ',tema:'Construir ponto FDQ',obj:'Empunhadura Eastern FH + escovar bola (spin)',foco:'Mão'},
+  {p:'Vermelho-Vermelho',c:'C3',a:'C3.4',s:'S2',cat:'FDQ',tema:'Construir ponto FDQ',obj:'Eastern FH + escovar para controle · Eastern BH iniciando',foco:'Mão'},
+  {p:'Vermelho-Vermelho',c:'C3',a:'C3.5',s:'S2',cat:'FDQ',tema:'Construir ponto FDQ',obj:'Eastern BH + escovar para controle da bola',foco:'Mão'},
+  {p:'Vermelho-Vermelho',c:'C3',a:'C3.6',s:'S2',cat:'Saque',tema:'Saque e FDQ',obj:'Ponto de contato na frente FH/BH + saque acima da cabeça',foco:'Olho'},
+  {p:'Vermelho-Vermelho',c:'C3',a:'C3.7',s:'S3',cat:'Saque',tema:'Saque',obj:'Toss + ponto de contato acima da cabeça equilibrado',foco:'Olho'},
+  {p:'Vermelho-Vermelho',c:'C3',a:'C3.8',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Trajetórias diferentes + contagem tie-break',foco:'Olho'},
+  {p:'Vermelho-Vermelho',c:'C3',a:'C3.9',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Tie-break: contagem, sacador, autonomia + regras dupla',foco:'Olho'},
+  {p:'Vermelho-Vermelho',c:'C3',a:'C3.10',s:'S4',cat:'Jogo',tema:'Avaliação Semestral',obj:'Torneio tie-break · arbitragem autônoma · avaliação somativa',foco:'Olho'},
+  {p:'Laranja-Laranja',c:'C1',a:'C1.1',s:'S1',cat:'FDQ',tema:'OBS + FDQ',obj:'Percepção lateral rápida + posição sacador simples/dupla',foco:'Olho'},
+  {p:'Laranja-Laranja',c:'C1',a:'C1.2',s:'S1',cat:'FDQ',tema:'OBS + FDQ',obj:'Leitura rápida + empunhadura FH/BH na expectativa',foco:'Olho'},
+  {p:'Laranja-Laranja',c:'C1',a:'C1.3',s:'S1',cat:'FDQ',tema:'Fundo de Quadra',obj:'Empunhadura FH/BH + mão livre no coração',foco:'Mão'},
+  {p:'Laranja-Laranja',c:'C1',a:'C1.4',s:'S2',cat:'FDQ',tema:'Fundo de Quadra',obj:'Empunhadura Continental + mão livre + giro ombros',foco:'Mão'},
+  {p:'Laranja-Laranja',c:'C1',a:'C1.5',s:'S2',cat:'FDQ',tema:'FDQ: trocar no 18m',obj:'Passos laterais + SAQ: equilíbrio pé esquerdo',foco:'Pé'},
+  {p:'Laranja-Laranja',c:'C1',a:'C1.6',s:'S2',cat:'FDQ',tema:'FDQ: trocar no 18m',obj:'Passos laterais + X em função da profundidade',foco:'Pé'},
+  {p:'Laranja-Laranja',c:'C1',a:'C1.7',s:'S3',cat:'FDQ',tema:'FDQ: trocar no 18m',obj:'Giro + "troféu" FH/BH + SAQ: subida junta dos braços',foco:'Mão'},
+  {p:'Laranja-Laranja',c:'C1',a:'C1.8',s:'S3',cat:'FDQ',tema:'FDQ: trocar no 18m',obj:'Giro + troféu + amplitude da preparação',foco:'Mão'},
+  {p:'Laranja-Laranja',c:'C1',a:'C1.9',s:'S3',cat:'FDQ',tema:'FDQ: trocar no 18m',obj:'3 T (tempos) após quique + SAQ: 2 toss diferenciados',foco:'Olho'},
+  {p:'Laranja-Laranja',c:'C1',a:'C1.10',s:'S4',cat:'Tático',tema:'Pré-evento',obj:'Reconhecer situação favorável e desfavorável',foco:'Olho'},
+  {p:'Laranja-Laranja',c:'C1',a:'C1.11',s:'S4',cat:'Jogo',tema:'Pré-evento',obj:'Jogo 18m · passos laterais · giro · troféu · game',foco:'Olho'},
+  {p:'Laranja-Laranja',c:'C1',a:'C1.12',s:'S4',cat:'Jogo',tema:'Avaliação Formativa C1',obj:'Avaliação: trocar 18m · empunhaduras · SAQ',foco:'Olho'},
+  {p:'Laranja-Laranja',c:'C2',a:'C2.1',s:'S1',cat:'FDQ',tema:'FDQ: direcionar jogadas',obj:'Profundidade da bola (1=curta/2=profunda) + S1 vs S2',foco:'Olho'},
+  {p:'Laranja-Laranja',c:'C2',a:'C2.2',s:'S1',cat:'FDQ',tema:'FDQ: direcionar jogadas',obj:'Profundidade + preparação elevada (troféu) + soltar',foco:'Olho'},
+  {p:'Laranja-Laranja',c:'C2',a:'C2.3',s:'S1',cat:'FDQ',tema:'FDQ: direcionar jogadas',obj:'Troféu + soltar + direcionamento',foco:'Mão'},
+  {p:'Laranja-Laranja',c:'C2',a:'C2.4',s:'S2',cat:'FDQ',tema:'FDQ: direcionar jogadas',obj:'Troféu + base ½ aberta para cruzar e paralela',foco:'Mão'},
+  {p:'Laranja-Laranja',c:'C2',a:'C2.5',s:'S2',cat:'FDQ',tema:'FDQ: direcionar jogadas',obj:'Base ½ aberta para cruzar · neutra para paralela',foco:'Pé'},
+  {p:'Laranja-Laranja',c:'C2',a:'C2.6',s:'S2',cat:'FDQ',tema:'FDQ: direcionar jogadas',obj:'Base ½ aberta + ação mão no spin + ponto de contato frente',foco:'Pé'},
+  {p:'Laranja-Laranja',c:'C2',a:'C2.7',s:'S3',cat:'FDQ',tema:'FDQ: direcionar jogadas',obj:'Ação mão no spin + ponto contato frente + pronação SAQ',foco:'Mão'},
+  {p:'Laranja-Laranja',c:'C2',a:'C2.8',s:'S3',cat:'Devolução',tema:'Devolução 2º saque',obj:'D2: escolha (ponto fraco / acelerar paralela) + noAD',foco:'Olho'},
+  {p:'Laranja-Laranja',c:'C2',a:'C2.9',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Jogo direcionado + 2 games contagem tradicional',foco:'Olho'},
+  {p:'Laranja-Laranja',c:'C2',a:'C2.10',s:'S4',cat:'Jogo',tema:'Avaliação Formativa C2',obj:'Avaliação: direcionar · spin · D2 · sacador+1',foco:'Olho'},
+  {p:'Laranja-Laranja',c:'C3',a:'C3.1',s:'S1',cat:'FDQ',tema:'FDQ: defender quadra',obj:'Defesa extrema · split + passos cruzados',foco:'Olho'},
+  {p:'Laranja-Laranja',c:'C3',a:'C3.2',s:'S1',cat:'Rede',tema:'Jogo de rede na dupla',obj:'Identificar bola de smash vs bola de voleio',foco:'Olho'},
+  {p:'Laranja-Laranja',c:'C3',a:'C3.3',s:'S1',cat:'FDQ',tema:'FDQ: defender quadra',obj:'Split + passos cruzados para defender bolas distantes',foco:'Pé'},
+  {p:'Laranja-Laranja',c:'C3',a:'C3.4',s:'S2',cat:'Rede',tema:'Jogo de rede na dupla',obj:'Split + avançar para jogador de rede + smash',foco:'Pé'},
+  {p:'Laranja-Laranja',c:'C3',a:'C3.5',s:'S2',cat:'FDQ',tema:'FDQ: defender quadra',obj:'Slice para frear a bola: empunhadura continental',foco:'Mão'},
+  {p:'Laranja-Laranja',c:'C3',a:'C3.6',s:'S2',cat:'Rede',tema:'Jogo de rede: finalizar',obj:'Voleio: preparação curta c/ cara da raquete aberta',foco:'Mão'},
+  {p:'Laranja-Laranja',c:'C3',a:'C3.7',s:'S3',cat:'Jogo',tema:'Jogo e arbitragem',obj:'Posição sacador +1 simples e dupla + game autônomo',foco:'Olho'},
+  {p:'Laranja-Laranja',c:'C3',a:'C3.8',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Partida 2 games · approach · voleio · defense · noAD',foco:'Olho'},
+  {p:'Laranja-Laranja',c:'C3',a:'C3.9',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Jogo completo: simples e dupla · posição · contagem',foco:'Olho'},
+  {p:'Laranja-Laranja',c:'C3',a:'C3.10',s:'S4',cat:'Jogo',tema:'Avaliação Semestral',obj:'Torneio 2 games · simples/dupla · avaliação somativa',foco:'Olho'},
+  {p:'Verde-Amarelo',c:'C1',a:'C1.1',s:'S1',cat:'FDQ',tema:'FDQ: situação neutra',obj:'"HOP" a cada preparação do adversário + recepção dinâmica',foco:'Pé'},
+  {p:'Verde-Amarelo',c:'C1',a:'C1.2',s:'S1',cat:'FDQ',tema:'FDQ: situação neutra',obj:'HOP + recepção dinâmica + padrões neutro',foco:'Pé'},
+  {p:'Verde-Amarelo',c:'C1',a:'C1.3',s:'S1',cat:'Tático',tema:'FDQ: situação neutra',obj:'Padrões neutro: jogar ponto fraco · S1: potência/colocado',foco:'Olho'},
+  {p:'Verde-Amarelo',c:'C1',a:'C1.4',s:'S2',cat:'Tático',tema:'FDQ: situação neutra',obj:'Padrões neutro + ação mão-antebraço no spin FH/BH',foco:'Olho'},
+  {p:'Verde-Amarelo',c:'C1',a:'C1.5',s:'S2',cat:'FDQ',tema:'FDQ: situação neutra',obj:'Ação mão-antebraço no spin (FH/BH) · lento→rápido',foco:'Mão'},
+  {p:'Verde-Amarelo',c:'C1',a:'C1.6',s:'S2',cat:'FDQ',tema:'FDQ: situação neutra',obj:'Spin + soltar após preparação + terminação amplitude',foco:'Mão'},
+  {p:'Verde-Amarelo',c:'C1',a:'C1.7',s:'S3',cat:'FDQ',tema:'FDQ: situação neutra',obj:'Ritmo de movimentação na fase do deslocamento FH/BH',foco:'Pé'},
+  {p:'Verde-Amarelo',c:'C1',a:'C1.8',s:'S3',cat:'FDQ',tema:'FDQ: situação neutra',obj:'Ritmo deslocamento + ancorar e empurrar no golpe',foco:'Pé'},
+  {p:'Verde-Amarelo',c:'C1',a:'C1.9',s:'S3',cat:'FDQ',tema:'FDQ: construir e neutralizar',obj:'Soltar após preparação + terminação oposta c/ amplitude',foco:'Mão'},
+  {p:'Verde-Amarelo',c:'C1',a:'C1.10',s:'S4',cat:'Tático',tema:'Pré-evento',obj:'3 situações TA FdQ + 3 situações TA saque',foco:'Olho'},
+  {p:'Verde-Amarelo',c:'C1',a:'C1.11',s:'S4',cat:'Jogo',tema:'Pré-evento',obj:'Set 4 games · neutro · ponto fraco · S1 intenção',foco:'Olho'},
+  {p:'Verde-Amarelo',c:'C1',a:'C1.12',s:'S4',cat:'Jogo',tema:'Avaliação Formativa C1',obj:'Avaliação: HOP · spin · padrões neutro · set 4 games',foco:'Olho'},
+  {p:'Verde-Amarelo',c:'C2',a:'C2.1',s:'S1',cat:'FDQ',tema:'FDQ: situação neutra',obj:'Perna na batida: ancorar-transferir BH/FH + SAQ p/ cima',foco:'Pé'},
+  {p:'Verde-Amarelo',c:'C2',a:'C2.2',s:'S1',cat:'FDQ',tema:'FDQ: situação neutra',obj:'Ancorar-transferir + split avançado D2',foco:'Pé'},
+  {p:'Verde-Amarelo',c:'C2',a:'C2.3',s:'S1',cat:'Tático',tema:'FDQ: situação favorável',obj:'½ quadra BH + inside out (zonas)',foco:'Olho'},
+  {p:'Verde-Amarelo',c:'C2',a:'C2.4',s:'S2',cat:'Tático',tema:'FDQ: situação favorável',obj:'Inside out: deslocamento e recuperação + D2 split',foco:'Olho'},
+  {p:'Verde-Amarelo',c:'C2',a:'C2.5',s:'S2',cat:'FDQ',tema:'FDQ: situação favorável',obj:'Passos cruzados para inside out + D2 split avançado',foco:'Pé'},
+  {p:'Verde-Amarelo',c:'C2',a:'C2.6',s:'S2',cat:'FDQ',tema:'FDQ: situação favorável',obj:'Inside out + ponto contato frente (giro tronco "janela")',foco:'Pé'},
+  {p:'Verde-Amarelo',c:'C2',a:'C2.7',s:'S3',cat:'FDQ',tema:'FDQ: situação favorável',obj:'Ponto contato frente + aceleração mão (FH agressivo)',foco:'Olho'},
+  {p:'Verde-Amarelo',c:'C2',a:'C2.8',s:'S3',cat:'Devolução',tema:'Devolução 2º saque',obj:'D2: split avançado + golpe forte · noAD lateral',foco:'Olho'},
+  {p:'Verde-Amarelo',c:'C2',a:'C2.9',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Ponto forte · inside out · D2 · set 4 games noAD',foco:'Olho'},
+  {p:'Verde-Amarelo',c:'C2',a:'C2.10',s:'S4',cat:'Jogo',tema:'Avaliação Formativa C2',obj:'Avaliação: inside out · D2 · ponto contato · noAD',foco:'Olho'},
+  {p:'Verde-Amarelo',c:'C3',a:'C3.1',s:'S1',cat:'Rede',tema:'Jogo de rede 1º/2º voleio',obj:'1º voleio (construção) e 2º voleio (finalização)',foco:'Olho'},
+  {p:'Verde-Amarelo',c:'C3',a:'C3.2',s:'S1',cat:'Rede',tema:'Jogo de rede 1º/2º voleio',obj:'V1/V2 + split step na rede + posições recuperação',foco:'Olho'},
+  {p:'Verde-Amarelo',c:'C3',a:'C3.3',s:'S1',cat:'Rede',tema:'Jogo de rede 1º/2º voleio',obj:'Voleios c/ split step + giro tronco + pé exterior',foco:'Pé'},
+  {p:'Verde-Amarelo',c:'C3',a:'C3.4',s:'S2',cat:'Rede',tema:'Jogo de rede 1º/2º voleio',obj:'Split rede + giro tronco + SAQ equilíbrio pés',foco:'Pé'},
+  {p:'Verde-Amarelo',c:'C3',a:'C3.5',s:'S2',cat:'Rede',tema:'Jogo de rede 1º/2º voleio',obj:'Giro tronco no voleio + voleio construção baixo',foco:'Mão'},
+  {p:'Verde-Amarelo',c:'C3',a:'C3.6',s:'S2',cat:'Rede',tema:'Jogo na rede',obj:'Voleio baixo + DEV: transferir → recuperação rápida',foco:'Mão'},
+  {p:'Verde-Amarelo',c:'C3',a:'C3.7',s:'S3',cat:'Tático',tema:'Pré-evento',obj:'Quando e como subir para rede · ponto fraco · abrir/paralela',foco:'Olho'},
+  {p:'Verde-Amarelo',c:'C3',a:'C3.8',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Set 6 games · autonomia · árbitro rotativo · ética',foco:'Olho'},
+  {p:'Verde-Amarelo',c:'C3',a:'C3.9',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Set 6 games · noAD · gestão trocas lado · foco',foco:'Olho'},
+  {p:'Verde-Amarelo',c:'C3',a:'C3.10',s:'S4',cat:'Jogo',tema:'Avaliação Semestral',obj:'Torneio set 6 games · rede · inside out · avaliação somativa',foco:'Olho'},
+];
+
+/* ════════════════════════════════════════════════════════
+   BANCO DE TREINOS
+════════════════════════════════════════════════════════ */
+const TREINOS = [
+  // ── AQUECIMENTO / FÍSICO ──
+  {
+    id:'t001',puls:['Roxa','Vermelho-Vermelho','Vermelho-Tangerina','Vermelho-Branco'],ciclos:['C1','C2','C3'],
+    tipo:'drill',formato:'fechado',foco:'pé',
+    habilidades:['movimentação','split step'],
+    titulo:'Circuito Estrela — Arranque e Freada',
+    duracao:'8–10 min',
+    descricao:'5 cones dispostos em estrela (central + 4 extremos). Aluno arranca do cone central para qualquer extremo ao sinal sonoro do treinador. Foca em explosão de saída e freada controlada. Treinador varia ritmo e sequência. 4–6 séries de 30 seg com 20 seg de pausa.',
+    exercicios:[
+      {nome:'Estrela Básica',desc:'Treinador aponta para cone. Aluno arranca, toca o cone, retorna ao centro. Foco: explosão no primeiro passo.',cue:'Primeiro passo EXPLOSIVO — como um gato pulando!'},
+      {nome:'Estrela com Raquete',desc:'Mesmo circuito mas segurando raquete. Mão livre no coração durante o retorno ao centro.',cue:'Volta pro centro com a mão no coração — posição JEDI!'},
+    ],
+    variacoes:'Avançado: aluno só reage quando ouve o sinal E vê o treinador apontar ao mesmo tempo (duplo estímulo).',
+    cue:'Olha a rede antes de parar — freio de carro, não de trem!'
+  },
+  {
+    id:'t002',puls:['Roxa','Vermelho-Vermelho'],ciclos:['C1','C2'],
+    tipo:'físico',formato:'fechado',foco:'pé',
+    habilidades:['movimentação','split step'],
+    titulo:'Navette + Reação ao Sinal',
+    duracao:'8 min',
+    descricao:'Circuito navette 1 ida + volta. No retorno, treinador lança sinal sonoro em momento aleatório e aluno muda de direção imediatamente. Foco em reação e freada funcional.',
+    exercicios:[
+      {nome:'Navette Básica',desc:'Aluno percorre 6m ida e 6m volta o mais rápido possível. Treinador cronometra. 6 repetições com pausa de 15 seg.',cue:'Olha a rede antes de frear — não de lado!'},
+    ],
+    cue:'Reação = primeiro passo, não o pensamento!'
+  },
+  {
+    id:'t003',puls:['Laranja-Laranja','Laranja-Limão','Verde-Amarelo','Verde-Verde'],ciclos:['C1','C2','C3'],
+    tipo:'físico',formato:'fechado',foco:'pé',
+    habilidades:['movimentação','split step'],
+    titulo:'Zig-Zag com HOP (Split Step Dinâmico)',
+    duracao:'10 min',
+    descricao:'6 cones em zig-zag com 1,5m entre eles. Aluno percorre em passos laterais cruzados. Em cada cone ímpar: HOP (split step agachado antes do próximo deslocamento). Treinador bate palma para o HOP.',
+    exercicios:[
+      {nome:'Zig-Zag Lento',desc:'Percurso completo em velocidade controlada. Foco em posição do HOP: dois pés no chão simultaneamente, joelhos flexionados.',cue:'HOP baixo e equilibrado — não pula, pousa!'},
+      {nome:'Zig-Zag Acelerado',desc:'Aumentar velocidade mantendo qualidade do HOP. Treinador reduz intervalo entre palmas.',cue:'Mais rápido SEM perder o agachamento!'},
+    ],
+    variacoes:'Adicionar bola: aluno faz zig-zag e no final recebe bola do treinador para rebater de FH.',
+    cue:'HOP = aterrissar com controle, não com barulho!'
+  },
+
+  // ── FOREHAND ──
+  {
+    id:'t010',puls:['Roxa','Vermelho-Vermelho'],ciclos:['C1'],
+    tipo:'drill',formato:'fechado',foco:'mão',
+    habilidades:['forehand','empunhadura'],
+    titulo:'Exercício Fechado — 1+2 Forehand (Almofadinha)',
+    duracao:'15 min',
+    descricao:'Treinador alimenta bola vermelha suave. Aluno executa 1+2 FH para cone/alvo. Foco exclusivo na empunhadura eastern FH (eminência hipotenar na almofadinha da 3ª bisel) e no ponto de contato na frente do corpo.',
+    exercicios:[
+      {nome:'FH Parado — Empunhadura',desc:'Aluno parado, treinador lança bola na mão direita (FH). 20 repetições. Treinador para a cada 5 para checar empunhadura.',cue:'Sente a almofadinha — como segurar uma passarinha sem apertá-la!'},
+      {nome:'FH com Posição 0',desc:'Após cada FH, aluno retorna à posição 0 (joelhos flexionados, mão livre no coração) antes do próximo arremesso.',cue:'Bate → volta pro JEDI → bate de novo!'},
+      {nome:'1+2 FH Alvo',desc:'1 arremesso do treinador + 2 trocas de FH para cone fixo. Contar sequências sem errar. Recorde pessoal.',cue:'Mantém a empunhadura — não inventa na hora de bater!'},
+    ],
+    variacoes:'Variação difícil: treinador varia altura (joelho / quadril / ombro). Aluno ajusta ponto de contato.',
+    cue:'Ponto de contato na frente — não deixa a bola passar!'
+  },
+  {
+    id:'t011',puls:['Vermelho-Vermelho','Vermelho-Tangerina'],ciclos:['C2','C3'],
+    tipo:'drill',formato:'semi-aberto',foco:'mão',
+    habilidades:['forehand','top spin','empunhadura'],
+    titulo:'FH Top Spin — Ação Mão-Antebraço (Chicote)',
+    duracao:'15 min',
+    descricao:'Desenvolvimento do top spin no FH com foco na ação do antebraço. Partindo de posição troféu, aluno "escova" a bola de baixo para cima. Ritmo lento→rápido para sentir a aceleração.',
+    exercicios:[
+      {nome:'Escovar Parado',desc:'Aluno segura raquete na posição de bater. Sem bola, pratica o movimento de "escovar" a bola (varrer de baixo para cima). Treinador posiciona a mão do aluno.',cue:'Mão varre de baixo para cima — como varrer o chão com a palma!'},
+      {nome:'FH Spin com Alimentação',desc:'Treinador alimenta bola lenta. Aluno aplica o chicote. Objetivo: bola cruzar a rede com clara rotação de spin. Espuma ou bola vermelha.',cue:'Lento no começo, RÁPIDO na bola — aceleração no contato!'},
+      {nome:'FH Spin Semi-aberto',desc:'Treinador alterna FH e BH. Aluno escolhe empunhadura antes do quique. FH com spin, BH com controle.',cue:'Troca a empunhadura ANTES do quique — não espera!'},
+    ],
+    variacoes:'Jogo de spin: conta quem acerta mais cruzados com spin visível em 10 bolas.',
+    cue:'Antebraço gira para dentro → bola gira para frente = top spin!'
+  },
+  {
+    id:'t012',puls:['Laranja-Laranja','Laranja-Limão'],ciclos:['C2','C3'],
+    tipo:'drill',formato:'semi-aberto',foco:'mão',
+    habilidades:['forehand','top spin','movimentação'],
+    titulo:'FH Inside-Out — Passos Cruzados e Aceleração',
+    duracao:'18 min',
+    descricao:'Aluno aprende a executar o FH inside-out a partir da meia-quadra de BH. Usa passos cruzados para posicionar e aceleração da cabeça da raquete para direcionar.',
+    exercicios:[
+      {nome:'Passos Cruzados na Meia-Quadra BH',desc:'Treinador alimenta bola curta na meia-quadra de BH. Aluno desloca com passos cruzados, posiciona-se, bate FH inside-out para cruzada longa. Sem contar pontos ainda.',cue:'Passo cruzado ANTES da bola — não chega atrasado!'},
+      {nome:'Inside-Out com Recuperação',desc:'Após o inside-out, aluno deve recuperar o X central antes da próxima bola. Treinador alimenta em sequências de 3.',cue:'Bate → recupera X → bate de novo — nunca para!'},
+      {nome:'Jogo Dirigido Inside-Out',desc:'Ponto livre mas: vale bônus (+1) se aluno executar inside-out com aceleração visível e alvo acertado. 15 pontos decide.',cue:'Inside-out = bola vai para o lado ERRADO para o adversário!'},
+    ],
+    variacoes:'Avançado: treinador grita "INS" ou "PAR" para o aluno decidir inside-out ou paralela na última fração.',
+    cue:'A bola inside-out confunde o adversário — é arma, não erro!'
+  },
+
+  // ── BACKHAND ──
+  {
+    id:'t020',puls:['Vermelho-Vermelho','Vermelho-Tangerina'],ciclos:['C1','C2'],
+    tipo:'drill',formato:'fechado',foco:'mão',
+    habilidades:['backhand','empunhadura'],
+    titulo:'BH Eastern — Escovar para Controle',
+    duracao:'12 min',
+    descricao:'Introdução ao BH com empunhadura eastern de BH. Foco no gesto de "escovar" a bola (de baixo para cima) para gerar spin leve e controle. Sem velocidade no início.',
+    exercicios:[
+      {nome:'BH Empunhadura Check',desc:'Aluno testa empunhadura BH: palma da mão embaixo da raquete, polegar diagonalmente. Treinador confirma. 10 trocas lentas de BH.',cue:'Polegar diagonal como se fosse apertar uma laranja por cima!'},
+      {nome:'BH Escovar para Alvo',desc:'Treinador alimenta bola suave para BH. Aluno escova para alvo fixo (cone central cruzado). 20 repetições.',cue:'Escova de baixo para cima — a raquete segue a trajetória da bola!'},
+    ],
+    variacoes:'BH a duas mãos: segunda mão guia a raquete. Verificar separação após o contato.',
+    cue:'BH não é uma pancada — é um gesto controlado de baixo para cima!'
+  },
+  {
+    id:'t021',puls:['Verde-Verde'],ciclos:['C2','C3'],
+    tipo:'drill',formato:'semi-aberto',foco:'mão',
+    habilidades:['backhand','slice'],
+    titulo:'BH Slice — Frear a Bola em Defesa',
+    duracao:'15 min',
+    descricao:'Situação defensiva: bola rápida ou profunda. Aluno usa slice de BH para controlar e devolver com efeito cortado, freando o ritmo do adversário.',
+    exercicios:[
+      {nome:'Slice Parado — Continental',desc:'Treinador verifica empunhadura continental. Aluno pratica o gesto de cortar a bola (de cima para baixo e frente). Sem bola, depois com lançamentos suaves.',cue:'Raquete corta a bola como faca no pão — de cima para baixo!'},
+      {nome:'Slice em Defesa',desc:'Treinador alimenta bola profunda e rápida para BH. Aluno usa slice para devolver cruzado com controle. Foco em não forçar.',cue:'Slice não é fraqueza — é inteligência táctica!'},
+      {nome:'FH Spin vs BH Slice',desc:'Treinador alimenta aleatoriamente para FH ou BH. Aluno usa spin no FH e slice no BH. Identificar e executar antes do quique.',cue:'FH escova para cima, BH corta para baixo — dois mundos!'},
+    ],
+    variacoes:'Avançado: aluno decide quando usar slice (situação desfavorável) e quando usar spin (situação neutra). Treinador varia intensidade.',
+    cue:'Slice = freio de mão do jogo — usa quando está pressionado!'
+  },
+
+  // ── VOLEIO ──
+  {
+    id:'t030',puls:['Roxa','Vermelho-Vermelho','Vermelho-Branco'],ciclos:['C2'],
+    tipo:'drill',formato:'fechado',foco:'mão',
+    habilidades:['voleio','empunhadura'],
+    titulo:'Voleio Fechado — Escudo / Bloqueio',
+    duracao:'12 min',
+    descricao:'Introdução ao voleio como bloqueio. Aluno aprende a posição de expectativa (mão livre no coração, empunhadura continental) e a preparação curta "de escudo" — sem swing, apenas posicionamento e bloqueio.',
+    exercicios:[
+      {nome:'Posição 0 de Rede',desc:'Aluno na posição de jogo de rede. Treinador verifica: empunhadura continental, joelhos flexionados, mão livre no coração. Praticar arranque lateral sem bola.',cue:'Mão no coração e joelhos dobrados — pronto para qualquer direção!'},
+      {nome:'Voleio de FH — Escudo',desc:'Treinador lança bola suave direto para o FH do aluno na rede. Aluno bloqueia (sem puxar para trás) e direciona para cone.',cue:'Escudo, não espada! Bloqueia com a cara da raquete aberta!'},
+      {nome:'Voleio de BH — Escudo',desc:'Mesmo exercício para o BH. Treinador confirma que o aluno não gira o corpo completamente — apenas o ombro.',cue:'Ombro vai, corpo fica — voleio de BH é compacto!'},
+      {nome:'Alternado FH/BH',desc:'Treinador alimenta aleatoriamente FH ou BH. Aluno deve reconhecer e posicionar antes de bloquear. 20 repetições.',cue:'Vê a bola → decide → bloqueia. Sem atrasar!'},
+    ],
+    variacoes:'Variação: aluno decide para onde direcionar o voleio (dois cones). Desenvolve percepção de ângulo.',
+    cue:'Voleio = bloquear e direcionar, não bater forte!'
+  },
+  {
+    id:'t031',puls:['Laranja-Laranja','Laranja-Limão'],ciclos:['C3'],
+    tipo:'drill',formato:'semi-aberto',foco:'mão',
+    habilidades:['voleio','approach','movimentação'],
+    titulo:'Approach + Voleio (1º e 2º Voleio)',
+    duracao:'18 min',
+    descricao:'Aluno realiza approach shot de FH ou BH e continua a corrida até posição de rede. Executa split step antes do voleio. 1º voleio = construção (baixo/médio), 2º voleio = finalização (perto da rede).',
+    exercicios:[
+      {nome:'Approach Parado',desc:'Treinador alimenta bola curta. Aluno bate approach de FH com aceleração e para. Não sobe ainda. Confirmar: base ½ aberta, ponto de contato frente.',cue:'Approach = bola agressiva que ABRE o espaço para subir!'},
+      {nome:'Approach + Split',desc:'Após o approach, aluno corre para posição de rede e faz split step antes de receber o próximo lançamento. 10 repetições.',cue:'Corre, mas PARA no split — não chega atrasado na rede!'},
+      {nome:'Approach + 1º + 2º Voleio',desc:'Sequência completa: approach → split → 1º voleio de construção → passo à frente → 2º voleio de finalização. Treinador alimenta três bolas em sequência.',cue:'1º voleio coloca, 2º voleio mata!'},
+    ],
+    variacoes:'Jogo dirigido: aluno marca ponto apenas se completar approach + 2 voleios sem erro. Adversário tenta passar.',
+    cue:'Approach é o convite — voleio é a festa!'
+  },
+  {
+    id:'t032',puls:['Verde-Amarelo','Verde-Verde'],ciclos:['C3'],
+    tipo:'drill',formato:'semi-aberto',foco:'mão',
+    habilidades:['voleio','slice'],
+    titulo:'Voleio com Efeito Slice — V1 Construção e V2 Finalização',
+    duracao:'15 min',
+    descricao:'Desenvolvimento do efeito slice no voleio para dar profundidade (V1 de construção) e ângulo (V2 de finalização). Giro do tronco no voleio para gerar power sem swing.',
+    exercicios:[
+      {nome:'Giro de Tronco no Voleio',desc:'Aluno pratica o giro mínimo de tronco no voleio de FH (ombro direito vira ligeiramente para frente). Sem bola primeiro, depois com alimentação suave.',cue:'Ombro gira, braço pouco — tronco gera a energia!'},
+      {nome:'V1 Slice Profundo',desc:'Treinador alimenta bola média-alta. Aluno executa V1 slice cruzado profundo, voltando ao X de rede. Objetivo: bola quica perto da linha de fundo.',cue:'V1 empurra o adversário para fundo — cria o espaço!'},
+      {nome:'V1 + V2 Finalização Angular',desc:'Sequência V1 cruzado + V2 en angle (ângulo perpendicular). Aluno escolhe lado do V2 conforme posição do adversário.',cue:'V2 vai onde o adversário NÃO está!'},
+    ],
+    cue:'Voleio com slice = controle + profundidade + ângulo!'
+  },
+
+  // ── SAQUE ──
+  {
+    id:'t040',puls:['Roxa','Vermelho-Branco'],ciclos:['C3'],
+    tipo:'drill',formato:'fechado',foco:'mão',
+    habilidades:['saque','empunhadura'],
+    titulo:'Saque Iniciante — Base Semi-Aberta e Toss',
+    duracao:'12 min',
+    descricao:'Primeiros passos do saque. Foco na base semi-aberta equilibrada, no toss controlado (bola sobe e desce no mesmo ponto) e no ponto de contato acima da cabeça.',
+    exercicios:[
+      {nome:'Toss Controlado',desc:'Aluno pratica somente o toss: lança bola para cima com o braço esticado e deixa cair no mesmo ponto. Repetir 20x. Marcar com cone onde deve cair: 30cm à frente do pé esquerdo.',cue:'Bola sobe e desce no mesmo lugar — não lança para frente!'},
+      {nome:'Saque na Parede',desc:'Aluno pratica saque para uma parede ou rede baixa a 2m. Foco em equilíbrio e base semi-aberta. Sem pressão de direção ainda.',cue:'Equilíbrio primeiro, potência depois!'},
+      {nome:'Saque para Gol (Alvo)',desc:'Aluno saca para cone/gol a 6m. 10 tentativas. Conta quantas entram.',cue:'Saque é o único golpe que você controla 100% — usa isso!'},
+    ],
+    variacoes:'Fase troféu: aluno congela na posição de troféu (braço de raquete dobrado acima, braço livre apontando para cima) antes de bater.',
+    cue:'Toss = apresentar a bola para bater — não jogar para o lado!'
+  },
+  {
+    id:'t041',puls:['Laranja-Laranja','Laranja-Limão'],ciclos:['C1','C2'],
+    tipo:'drill',formato:'semi-aberto',foco:'mão',
+    habilidades:['saque','top spin'],
+    titulo:'Saque com Efeito — 1º e 2º Saque Diferenciados',
+    duracao:'15 min',
+    descricao:'Diferenciação entre 1º saque (potência/colocado) e 2º saque (spin/segurança). Aluno aprende a pronação no saque para gerar spin slice ou kick.',
+    exercicios:[
+      {nome:'Pronação no Saque',desc:'Treinador demonstra a pronação (giro do antebraço para dentro após o contato). Aluno pratica o gesto sem bola 10x. Depois com bola no basket.',cue:'Depois de bater, palma da mão vira para fora — pronação!'},
+      {nome:'1º Saque Colocado',desc:'Aluno saca em velocidade media tentando acertar uma zona específica (T ou corpo). 10 saques, conta acertos. Foco em direcionamento, não em força.',cue:'1º saque: escolhe o lugar ANTES de começar o movimento!'},
+      {nome:'2º Saque com Spin',desc:'Aluno saca com mais topspin/slice para maior margem de segurança. Toss ligeiramente ao lado. 10 saques, todos devem entrar.',cue:'2º saque precisa entrar — sacrifica velocidade por segurança!'},
+    ],
+    variacoes:'Match simulation: aluno joga pontos iniciando sempre com saque. Qualquer 1º saque dupla falta = ponto adversário.',
+    cue:'S1 = risco calculado, S2 = certeza absoluta!'
+  },
+  {
+    id:'t042',puls:['Verde-Verde'],ciclos:['C3'],
+    tipo:'drill',formato:'aberto',foco:'mão',
+    habilidades:['saque','top spin'],
+    titulo:'1º Saque Agressivo — Pernas, Posição Girada, Cotovelo',
+    duracao:'15 min',
+    descricao:'Maximizar a velocidade do 1º saque. Foco em três elementos: extensão das pernas (pular), posição girada de início e projeção do cotovelo dominante para cima.',
+    exercicios:[
+      {nome:'Saque com Pernas',desc:'Aluno saca e foca em dobrar bem os joelhos e subir na ponta dos pés no momento do contato. Exagerar o salto.',cue:'Sobe como se fosse tocar o sol — pernas empurram tudo!'},
+      {nome:'Posição Girada',desc:'Aluno inicia o saque com o corpo mais girado (ombro dominante mais para trás). Gira para bater. 10 saques.',cue:'Mais girado = mais potência — mola que solta!'},
+      {nome:'Projeção do Cotovelo',desc:'Visualizar o cotovelo subindo em direção à bola antes da queda do antebraço. Cue: "cotovelo lidera o saque".',cue:'Cotovelo sobe PRIMEIRO — raquete vem depois!'},
+    ],
+    variacoes:'Competição: 5 saques, conta velocidade estimada pelo som. Quem saca com mais consistência agressiva ganha.',
+    cue:'Saque agressivo = pernas + giro + cotovelo alto!'
+  },
+
+  // ── DEVOLUÇÃO ──
+  {
+    id:'t050',puls:['Laranja-Laranja','Laranja-Limão'],ciclos:['C2','C3'],
+    tipo:'drill',formato:'semi-aberto',foco:'olho',
+    habilidades:['devolução','split step'],
+    titulo:'Devolução 2º Saque — Split e Decisão (D2)',
+    duracao:'12 min',
+    descricao:'Treino de devolução do 2º saque com split step avançado (leaning forward) sincronizado com o toss do sacador. Decisão: ponto fraco do adversário ou acelerar paralela.',
+    exercicios:[
+      {nome:'Split no Toss',desc:'Treinador simula toss. Aluno faz split step exatamente quando a bola chega no pico do toss. Repetir 15x sem bola.',cue:'HOP quando a bola de toss para lá em cima — não espera bater!'},
+      {nome:'D2 para Ponto Fraco',desc:'Aluno devolve 2º saque para o BH (ponto fraco convencional). Foco em pegar a bola cedo e direcionar. 10 devoluções.',cue:'D2 vai para o BH SEMPRE, exceto se tiver chance melhor!'},
+      {nome:'D2 Acelerada Paralela',desc:'Quando 2º saque cai curto, aluno acelera a devolução paralela. Identificar bola "curta" e reagir.',cue:'Bola curta = presente! Vai paralela com tudo!'},
+    ],
+    variacoes:'Jogo de devolução: aluno só marca ponto se a devolução do 2º saque entrar. Sacador tenta variar posição e velocidade.',
+    cue:'D2 = você manda, não o sacador!'
+  },
+  {
+    id:'t051',puls:['Verde-Amarelo','Verde-Verde'],ciclos:['C2','C3'],
+    tipo:'drill',formato:'aberto',foco:'olho',
+    habilidades:['devolução','split step','forehand'],
+    titulo:'D2 com Ponto Forte — noAD e Escolha de Lado',
+    duracao:'12 min',
+    descricao:'No contexto noAD, aluno escolhe o lado de recepção conforme seu golpe forte. Se FH for mais forte, pega pelo lado FH mesmo que seja a esquerda. Decisão consciente de vantagem.',
+    exercicios:[
+      {nome:'Mapeamento do Golpe Forte',desc:'Aluno e treinador discutem: qual golpe é mais forte? FH ou BH? Isso determina a posição no noAD.',cue:'Conhece teu ponto forte — usa ele nos momentos decisivos!'},
+      {nome:'noAD Ponto Forte',desc:'Simulação de 5 pontos noAD. Aluno posiciona conforme golpe forte. 3 séries.',cue:'noAD = aposta no teu melhor golpe — não no convencional!'},
+    ],
+    cue:'Decisão noAD = confiança no teu melhor golpe!'
+  },
+
+  // ── TÁTICO / PADRÕES ──
+  {
+    id:'t060',puls:['Laranja-Laranja','Laranja-Limão','Verde-Amarelo','Verde-Verde'],ciclos:['C1','C2','C3'],
+    tipo:'jogo dirigido',formato:'semi-aberto',foco:'olho',
+    habilidades:['forehand','backhand','movimentação'],
+    titulo:'Jogo Dirigido — Padrão Neutro Cruzado',
+    duracao:'15 min',
+    descricao:'Alunos jogam cruzado apenas (FH cruzado vs FH cruzado ou BH cruzado vs BH cruzado). Regra: bola paralela = ponto para o adversário. Foco em consistência, profundidade e movimentação do X.',
+    exercicios:[
+      {nome:'Troca Cruzada FH',desc:'Dois alunos trocam apenas cruzado de FH. Contar sequências sem erro. Recorde de grupo.',cue:'Profundo e cruzado — joga para o canto, não para o meio!'},
+      {nome:'Troca Cruzada BH',desc:'Mesmo formato para BH vs BH cruzado.',cue:'BH cruzado abre o ângulo do adversário!'},
+      {nome:'Ponto Livre Cruzado',desc:'Ponto normal mas bola paralela = ponto para quem recebeu. Força o padrão cruzado enquanto procura abertura.',cue:'Padrão cruzado = segurança + pressão acumulada!'},
+    ],
+    variacoes:'Avançado: aluno pode sair do cruzado apenas uma vez por ponto (a bola que "decide"). Força economizar a mudança de direção.',
+    cue:'Cruzado é a base — paralela é a decisão!'
+  },
+  {
+    id:'t061',puls:['Verde-Amarelo','Verde-Verde'],ciclos:['C2','C3'],
+    tipo:'jogo dirigido',formato:'aberto',foco:'olho',
+    habilidades:['forehand','backhand','movimentação'],
+    titulo:'3 Bolas Neutras Antes da Decisão',
+    duracao:'15 min',
+    descricao:'Regra especial: ponto só vale se o aluno jogar no mínimo 3 bolas neutras/cruzadas ANTES de tentar o winner ou mudança. Desenvolve consistência e paciência tática.',
+    exercicios:[
+      {nome:'Ponto com Regra das 3',desc:'Qualquer winner nas primeiras 2 bolas = ponto adversário. A partir da 3ª bola pode tentar tudo. Treinador arbitra.',cue:'Paciência é arma — não joga cedo o winner!'},
+      {nome:'Pontos Curtos',desc:'Sets de 7 pontos com a mesma regra. Árbitro rotativo entre alunos.',cue:'3 neutras = adversário fica desconfortável!'},
+    ],
+    cue:'O ponto começa no 3º golpe, não no 1º!'
+  },
+
+  // ── JOGOS / COMPETITIVOS ──
+  {
+    id:'t070',puls:['Roxa','Vermelho-Vermelho','Vermelho-Tangerina','Vermelho-Branco'],ciclos:['C1','C2','C3'],
+    tipo:'jogo livre',formato:'aberto',foco:'olho',
+    habilidades:['movimentação'],
+    titulo:'Reinado na Rede',
+    duracao:'15 min',
+    descricao:'Jogo competitivo de rede. Aluno que marca ponto fica na rede. Próximo aluno entra. Quem marcar 5 pontos consecutivos na rede ganha o "reinado". Foco em voleio e smash em situação de pressão.',
+    exercicios:[
+      {nome:'Reinado Básico',desc:'2-3 alunos alternando. Quem fica na rede precisa defender com voleio/smash. Quem erra sai. Máximo de 5 pontos consecutivos para "reinado".',cue:'Rede é terreno perigoso — fica alerta!'},
+    ],
+    cue:'Reinado = pressão real de rede em situação competitiva!'
+  },
+  {
+    id:'t071',puls:['Laranja-Laranja','Laranja-Limão','Verde-Amarelo','Verde-Verde'],ciclos:['C2','C3'],
+    tipo:'competição',formato:'aberto',foco:'olho',
+    habilidades:['forehand','backhand','saque','movimentação'],
+    titulo:'Set Curto com Regra Temática',
+    duracao:'20 min',
+    descricao:'Set de 4 games (noAD) com regra especial que reforça o tema da semana. Exemplos: ponto bônus para inside-out, ponto perdido para erro não-forçado, ponto bônus para voleio vencedor.',
+    exercicios:[
+      {nome:'Set 4 Games — Regra da Semana',desc:'Treinador define a regra especial baseada no tema. Alunos jogam de forma autônoma. Arbitragem rotativa entre jogadores.',cue:'Usa o tema — não joga como se fosse uma semana atrás!'},
+    ],
+    variacoes:'Versões de regras: • Bônus +1 por inside-out • -1 por erro não-forçado • +1 por ponto na rede • contagem normal vs noAD alternado.',
+    cue:'Regra temática = aplicar o treino no jogo real!'
+  },
+  {
+    id:'t072',puls:['Roxa','Vermelho-Vermelho'],ciclos:['C1','C2','C3'],
+    tipo:'jogo livre',formato:'aberto',foco:'olho',
+    habilidades:['movimentação'],
+    titulo:'Gol a Gol — 1 Arremesso + 3 Devoluções',
+    duracao:'12 min',
+    descricao:'Jogo de iniciação. Quadra 10×6 sem rede, gol = cone derrubado. 1 arremesso para iniciar + 3 devoluções com bola rolando. Quem derruba o cone do adversário pontua.',
+    exercicios:[
+      {nome:'Gol a Gol Básico',desc:'Dois alunos frente a frente. Distância 6m. 1 arremesso + até 3 trocas. Pontuação livre. Anunciar placar.',cue:'Anuncia SEMPRE antes de arremessar — parceiro precisa saber!'},
+    ],
+    cue:'Gol a Gol = tênis na sua forma mais simples e divertida!'
+  },
+  {
+    id:'t073',puls:['Vermelho-Vermelho','Vermelho-Tangerina'],ciclos:['C3'],
+    tipo:'competição',formato:'aberto',foco:'olho',
+    habilidades:['saque','forehand','backhand'],
+    titulo:'Tie-Break Autônomo — Contagem e Sacador',
+    duracao:'15 min',
+    descricao:'Alunos jogam tie-breaks com arbitragem completamente autônoma. Foco na contagem (1, 2, 3... 7), na troca de sacador a cada 2 pontos (exceto o primeiro), e na troca de lados no 6.',
+    exercicios:[
+      {nome:'Tie-Break 1×1',desc:'Partida de tie-break completo. Alunos fazem a arbitragem. Treinador observa e anota erros de contagem para correção pós-treino.',cue:'Sacador anuncia SEMPRE: "1 a 0", "2 a 0"...'},
+      {nome:'Mini-Torneio de Tie-Breaks',desc:'3 alunos em rodízio. Quem perde sai. Placar geral anotado pelo grupo.',cue:'Tie-break = concentração máxima — cada ponto vale!'},
+    ],
+    cue:'Tie-break autônomo = treinador não precisa falar nada!'
+  },
+
+  // ── PSICOMOTOR / PERCEPÇÃO ──
+  {
+    id:'t080',puls:['Roxa','Vermelho-Vermelho','Vermelho-Tangerina'],ciclos:['C1'],
+    tipo:'psicomotor',formato:'fechado',foco:'olho',
+    habilidades:['movimentação'],
+    titulo:'TIC-TAC — Percepção Temporal da Bola',
+    duracao:'8 min',
+    descricao:'Desenvolvimento da percepção temporal. Aluno diz "TIC" quando a bola é batida pelo adversário/treinador e "TAC" quando a bola quica no chão. Treina os dois tempos de percepção.',
+    exercicios:[
+      {nome:'TIC-TAC Sem Raquete',desc:'Treinador lança bola. Aluno faz TIC na saída e TAC no quique, em voz alta. 20 bolas.',cue:'TIC é quando eu solto, TAC é quando bate no chão!'},
+      {nome:'TIC-TAC + Posição',desc:'Após o TAC, aluno já deve estar na posição de golpear. Sincronizar a chegada à bola com o TAC.',cue:'Chega na bola ANTES do TAC — não depois!'},
+    ],
+    cue:'Quem percebe antes, golpeia melhor!'
+  },
+  {
+    id:'t081',puls:['Laranja-Laranja','Laranja-Limão','Verde-Amarelo'],ciclos:['C1','C2'],
+    tipo:'drill',formato:'fechado',foco:'olho',
+    habilidades:['movimentação','split step'],
+    titulo:'3 Tempos — Percepção dos 3T após o Quique',
+    duracao:'10 min',
+    descricao:'O aluno aprende a identificar os 3 tempos de percepção: T1 = bola sai da raquete adversária, T2 = bola quica, T3 = próprio golpe. Dizer em voz alta durante o exercício.',
+    exercicios:[
+      {nome:'3T em Voz Alta',desc:'Treinador alimenta bola. Aluno diz "T1... T2... T3!" em voz alta, com T3 sincronizado com o próprio golpe. 15 repetições.',cue:'T3 é quando TU bates — não quando a bola chega!'},
+      {nome:'Split no T1',desc:'Aluno faz split step ANTES do T1 (antes da bola sair da raquete do treinador). Antecipação da percepção.',cue:'HOP antes do T1 — não reage, antecipa!'},
+    ],
+    cue:'3T = radar interno do tenista — treinar percepção é treinar o golpe!'
+  },
+
+  // ── SMASH ──
+  {
+    id:'t090',puls:['Vermelho-Vermelho','Vermelho-Tangerina','Vermelho-Branco'],ciclos:['C2','C3'],
+    tipo:'drill',formato:'semi-aberto',foco:'olho',
+    habilidades:['smash','movimentação'],
+    titulo:'Smash — Apontar a Bola e Posição de Troféu',
+    duracao:'12 min',
+    descricao:'Desenvolvimento do smash. Foco em: apontar a bola com o braço livre (dedo indicador aponta para a bola em voo), giro lateral para trás, posição de troféu, e contato acima da cabeça.',
+    exercicios:[
+      {nome:'Apontar Bola — Sem Raquete',desc:'Treinador lança lobos. Aluno (sem raquete) aponta a bola com o braço esquerdo e faz o movimento de saque. 10 lobos.',cue:'Braço esquerdo aponta para a bola — olhos no alvo!'},
+      {nome:'Smash Lateral',desc:'Aluno se move lateralmente para trás (de lado, não de costas) para posicionar para o smash. Só o movimento, sem bola.',cue:'Gira o ombro e vai de lado — nunca de costas!'},
+      {nome:'Smash Completo',desc:'Treinador lança lobo. Aluno posiciona, aponta, posição de troféu e bate. Alvo: cone na linha de fundo.',cue:'Aponta → gira → troféu → golpeia — sequência completa!'},
+    ],
+    variacoes:'Simulação de jogo: treinador decide aleatoriamente entre voleio normal e lobo alto. Aluno reage.',
+    cue:'Smash = saque com movimento — usa a mesma mecânica!'
+  },
+];
+
+/* ════════════════════════════════════════════════════════
+   PLANOS DE AULA DETALHADOS (por ciclo/semana)
+════════════════════════════════════════════════════════ */
+const PLANOS = {
+  'Roxa_C1_S1': {
+    meta: 'Trocar bolas em parceria numa quadra de 10×6 sem rede (gol a gol) — 1 arremesso + 3 devoluções com bola rolando',
+    estrutura: [
+      {
+        fase:'AQUECIMENTO PSICOMOTOR', duracao:'10 min', cor:'#2E86C1',
+        desc:'Circuito estrela + dribble de basquete. Foco em arranque, freada e equilíbrio.',
+        drills:[
+          {nome:'Circuito Estrela Básico', desc:'5 cones em estrela. Arranque do centro para extremos ao sinal sonoro. 4 séries × 30seg.', cue:'Primeiro passo EXPLOSIVO — como gato pulando!'},
+          {nome:'Dribble de Basquete no Percurso', desc:'Integrar dribble ao circuito. Mão livre relaxada durante o deslocamento.', cue:'Braço livre não trava — vai junto mas solto!'},
+        ],
+      },
+      {
+        fase:'TÉCNICA — EXERCÍCIO FECHADO', duracao:'15 min', cor:'#D35400',
+        desc:'Introdução à posição "0" e ao arremesso com base neutra.',
+        drills:[
+          {nome:'Posição "0" — Jedi', desc:'Aluno aprende a posição de expectativa: joelhos flexionados e distanciados, mão livre no coração da raquete, olhos para a rede. Praticar 10x.', cue:'Jedi fica solto — não congela, fica pronto!'},
+          {nome:'Arremesso com Base Neutra', desc:'Aluno arremessa bola vermelha para alvo (arco/cone) a 4m com pés paralelos. Corrigir: joelhos dobrados, cotovelo para frente. 20 repetições.', cue:'Pés pregados no chão — como raízes de árvore!'},
+          {nome:'Posição 0 + Arremesso', desc:'Após cada arremesso, retornar à posição "0" antes do próximo. Treinador varia o ritmo.', cue:'Bate → volta pro JEDI antes do próximo!'},
+        ],
+      },
+      {
+        fase:'JOGO DIRIGIDO — GOL A GOL', duracao:'12 min', cor:'#1E8449',
+        desc:'Aplicação da posição e arremesso em jogo. Quadra 10×6 sem rede.',
+        drills:[
+          {nome:'Gol a Gol Introdução', desc:'1 arremesso + 3 devoluções com bola rolando. Gol = cone derrubado. Primeiras 5 partidas sem contar pontos (foco na execução).', cue:'Anuncia quando errar — "fora!" em voz alta!'},
+          {nome:'Gol a Gol com Contagem', desc:'Mesmo jogo mas com placar. Sacador anuncia "1 a 0", "2 a 0" etc. antes de arremessar.', cue:'Conta em voz alta — parceiro precisa ouvir!'},
+        ],
+      },
+      {
+        fase:'VOLTA À CALMA / REVISÃO', duracao:'3 min', cor:'#7D3C98',
+        desc:'Alongamento suave + treinador faz perguntas sobre o que cada aluno aprendeu.',
+        drills:[
+          {nome:'3 Perguntas Rápidas', desc:'Treinador pergunta: 1) Como é a posição "0"? 2) O que é "Fora" e "Dentro"? 3) Quantas devoluções no gol a gol?', cue:'Aluno que responde melhor escolhe a próxima brincadeira!'},
+        ],
+      },
+    ],
+    obs: 'Primeira aula do semestre. Apresentação do sistema de pulseiras. Foto do aluno para o perfil ACE.',
+  },
+  'Vermelho-Vermelho_C1_S2': {
+    meta: 'Realizar 1 arremesso + 2 trocas de FH — quadra 12×8×0,80m',
+    estrutura: [
+      {
+        fase:'AQUECIMENTO PERCEPÇÃO', duracao:'10 min', cor:'#2E86C1',
+        desc:'Navette + TIC-TAC. Ativar percepção temporal e movimentação.',
+        drills:[
+          {nome:'Navette 1 Ida + Volta', desc:'6m ida e 6m volta. 6 repetições com 15seg pausa. Treinador cronometra.', cue:'Olha a rede ANTES de frear — não de lado!'},
+          {nome:'TIC-TAC com Mão', desc:'Treinador lança bola de mão. Aluno diz em voz alta "TIC" na saída e "TAC" no quique. 20 bolas.', cue:'TIC quando eu solto, TAC quando bater no chão!'},
+        ],
+      },
+      {
+        fase:'TÉCNICA — EMPUNHADURA E 1+2 FH', duracao:'20 min', cor:'#D35400',
+        desc:'Consolidar empunhadura eastern FH e sequência 1+2 forehand para alvo.',
+        drills:[
+          {nome:'Empunhadura Check Coletivo', desc:'Todos os alunos checam empunhadura com o treinador simultaneamente. Almofadinha na 3ª bisel. Treinador circula e corrige.', cue:'Sente a almofadinha — passarinha que não pode apertar!'},
+          {nome:'1+2 FH Exercício Fechado', desc:'Treinador arremessa bola vermelha. Aluno faz 2 trocas de FH para cone. 20 repetições. Pause a cada 5 para corrigir posição "0".', cue:'Depois de bater, volta pro JEDI antes do próximo!'},
+          {nome:'Recorde de Trocas FH', desc:'Duplas tentam bater recorde de trocas de FH consecutivas. Máximo de altura = joelho. Gritar o número.', cue:'Quem chega mais longe? Conta em voz alta!'},
+        ],
+      },
+      {
+        fase:'JOGO — SAQ + CONTAGEM', duracao:'10 min', cor:'#1E8449',
+        desc:'Partida com saque simples e contagem 1/2 · 2/1.',
+        drills:[
+          {nome:'Jogo com Saque e Contagem', desc:'Saque = arremesso por baixo. Cada ponto vale. Anunciar "1 a 0", "2 a 0". Primeiro a 7 pontos.', cue:'Sacador anuncia SEMPRE antes de arremessar!'},
+        ],
+      },
+    ],
+    obs: 'Semana 2 — foco em consolidar empunhadura. Se a maioria não domina ainda, estender S2 por mais uma aula.',
+  },
+  'Laranja-Laranja_C2_S2': {
+    meta: 'Direcionar jogadas no 18m · fase dinâmica do saque com efeito',
+    estrutura: [
+      {
+        fase:'AQUECIMENTO + TMC', duracao:'10 min', cor:'#2E86C1',
+        desc:'Lateral com split + ativação de movimentação rápida.',
+        drills:[
+          {nome:'Lateral Split × 5 Cones', desc:'5 cones em linha com 1m entre eles. Aluno se desloca lateralmente com passos cruzados + split no cone central. 6 séries.', cue:'Split equilibrado — dois pés juntos ao mesmo tempo!'},
+          {nome:'Iniciação à Corda', desc:'3 min de corda contínua ou 30 pulos × 3 séries para coordenação.', cue:'Pés juntos ou alternados — mantém o ritmo!'},
+        ],
+      },
+      {
+        fase:'TÉCNICA — DIRECIONAMENTO E BASE', duracao:'20 min', cor:'#D35400',
+        desc:'Base ½ aberta para cruzada e neutra para paralela. Ação mão no spin.',
+        drills:[
+          {nome:'Base ½ Aberta para Cruzar', desc:'Treinador alimenta na diagonal. Aluno posiciona com pé externo rotado (½ aberta) e bate cruzado. 15 repetições FH + 15 BH.', cue:'Pé externo aponta para a rede cruzada — planta antes de bater!'},
+          {nome:'Base Neutra para Paralela', desc:'Bola vem da mesma posição mas aluno agora bate paralela com base neutra (pés alinhados).', cue:'Paralela = pés alinhados, olha para baixo da rede!'},
+          {nome:'Spin: Ação Mão-Antebraço', desc:'Foco na aceleração do antebraço na bola. Lento até o contato, rápido no contato. "Chicote".', cue:'Lento → RÁPIDO na bola — chicote que acelera!'},
+        ],
+      },
+      {
+        fase:'DEVOLUÇÃO 2º SAQUE (D2)', duracao:'10 min', cor:'#7D3C98',
+        desc:'Introdução ao padrão D2: split no toss + escolha ponto fraco ou paralela.',
+        drills:[
+          {nome:'D2 Ponto Fraco', desc:'Treinador saca (2º saque). Aluno devolve para o BH do treinador (ponto fraco simulado). 10 devoluções.', cue:'D2 vai para o lado mais fraco — sempre!'},
+          {nome:'D2 Acelerada', desc:'Quando a devolução é boa, aluno tenta acelerar para paralela. Identificar oportunidade.', cue:'Bola curta no D2 = presente! Vai com tudo!'},
+        ],
+      },
+    ],
+    obs: 'Introduzir a regra noAD nesta semana para torneios internos. Explicar escolha de lado.',
+  },
+  'Verde-Amarelo_C3_S3': {
+    meta: 'Vencer pontos na rede · set curto com autonomia na quadra oficial 24m',
+    estrutura: [
+      {
+        fase:'AQUECIMENTO DINÂMICO', duracao:'10 min', cor:'#2E86C1',
+        desc:'Zig-zag com HOP + aquecimento de quadra completa.',
+        drills:[
+          {nome:'Zig-Zag HOP Acelerado', desc:'6 cones em zig-zag. Velocidade máxima. HOP obrigatório a cada cone ímpar. Treinador cronometra.', cue:'HOP mais rápido que na S1 — agilidade que cresceu!'},
+          {nome:'Aquecimento de Quadra', desc:'3 min de troca de FH cruzado na quadra completa. Foco em profundidade e ritmo.', cue:'Aquece a mão — jogo começa nos primeiros golpes!'},
+        ],
+      },
+      {
+        fase:'JOGO DE REDE — V1 + V2', duracao:'20 min', cor:'#D35400',
+        desc:'Aplicação do 1º e 2º voleio em situação de jogo. Approach + rede.',
+        drills:[
+          {nome:'Approach + V1 + V2 Completo', desc:'Treinador alimenta bola curta. Aluno faz approach → split na T → V1 cruzado → passo frente → V2 en angle. 12 repetições cada lado.', cue:'Approach coloca, V1 empurra, V2 finaliza — sequência!'},
+          {nome:'Jogo de Rede (Reinado)', desc:'Reinado de rede: quem fica na rede faz pontos com voleio/smash. 3 alunos alternando.', cue:'Rede = teu terreno agora — defende com confiança!'},
+        ],
+      },
+      {
+        fase:'SET 6 GAMES — AUTÔNOMO', duracao:'20 min', cor:'#1E8449',
+        desc:'Set completo com arbitragem autônoma, regra noAD, trocas de lado no 3.',
+        drills:[
+          {nome:'Set 6 Games noAD', desc:'Alunos jogam set completo sem intervenção do treinador. Treinador apenas observa e anota. Árbitro rotativo.', cue:'Treinador assiste — jogador decide!'},
+        ],
+      },
+    ],
+    obs: 'Semana de aplicação em jogo real. Intervenção mínima do treinador. Deixar o aluno resolver.',
+  },
+};
+
+/* ════════════════════════════════════════════════════════
+   SUPABASE
+════════════════════════════════════════════════════════ */
+const SB_URL = 'https://elihmklizdmjnvstgiqq.supabase.co';
+const SB_KEY = 'sb_publishable_Q9mcknF35hu-6kWPoRv7Pg_MAfS23a2';
+let _db = null;
+function getDb() {
+  if (!_db) _db = window.supabase.createClient(SB_URL, SB_KEY);
+  return _db;
+}
+
+let currentUser = null;
+let currentAcademia = null;
+let turmasData = [];
+let calProgressData = {}; // turma_id → ciclo_index
+
+async function initPlanner() {
+  try {
+    const { data: { session } } = await getDb().auth.getSession();
+    if (!session) { window.location.href = 'index.html'; return; }
+    currentUser = session.user;
+
+    // Academia do coach
+    const { data: ca } = await getDb()
+      .from('coach_academias')
+      .select('academia_id, academias(nome)')
+      .eq('coach_id', currentUser.id)
+      .eq('ativo', true)
+      .single();
+    if (ca) {
+      currentAcademia = { id: ca.academia_id, nome: ca.academias?.nome || '' };
+      const el = document.getElementById('hdr-academia');
+      if (el) el.textContent = currentAcademia.nome;
+    }
+
+    // Turmas da academia
+    const { data: tms } = await getDb()
+      .from('turmas')
+      .select('*')
+      .eq('academia_id', currentAcademia.id)
+      .order('label');
+    turmasData = tms || [];
+
+    // Progresso das turmas (qual aula estão)
+    const { data: cp } = await getDb()
+      .from('cal_progress')
+      .select('turma_id, ciclo_index')
+      .eq('academia_id', currentAcademia.id);
+    (cp || []).forEach(p => { calProgressData[p.turma_id] = p.ciclo_index; });
+
+    renderSbTurmas();
+  } catch(e) {
+    console.error('initPlanner:', e);
+  }
+  document.getElementById('ci-data').value = new Date().toISOString().split('T')[0];
+  setView('cal');
+}
+
+// Mapa: pulseira do app → nome no planejador
+const PULS_MAP = {
+  roxa:'Roxa', verm_branca:'Vermelho-Branco', verm_verm:'Vermelho-Vermelho',
+  verm_laranja:'Vermelho-Tangerina', laranja:'Laranja-Laranja',
+  laranja_verde:'Laranja-Limão', verde:'Verde-Verde', verde_amarela:'Verde-Amarelo', amarela:'Verde-Verde'
+};
+
+function renderSbTurmas() {
+  const el = document.getElementById('sb-turmas');
+  if (!el) return;
+  if (!turmasData.length) {
+    el.innerHTML = '<div style="font-size:11px;color:var(--t3);padding:6px 8px">Nenhuma turma cadastrada</div>';
+    return;
+  }
+  el.innerHTML = turmasData.map(t => {
+    const pulsNome = PULS_MAP[t.pulseira] || t.pulseira || '';
+    const cor = CORES[pulsNome] || 'var(--gold)';
+    const aulaIdx = calProgressData[t.id] ?? 0;
+    const aulasNivel = AULAS.filter(a => a.p === pulsNome);
+    const aulaAtual = aulasNivel[aulaIdx];
+    const progTxt = aulaAtual ? `${aulaAtual.c}.${aulaAtual.a.split('.')[1]} — ${aulaAtual.tema}` : 'Início';
+    return `<div onclick="setSbPulsNome('${pulsNome}')"
+      style="padding:7px 8px;border-radius:6px;cursor:pointer;margin-bottom:3px;border:1px solid var(--border);transition:all .15s"
+      onmouseover="this.style.background='rgba(255,255,255,.04)'" onmouseout="this.style.background='none'">
+      <div style="display:flex;align-items:center;gap:7px">
+        <span style="width:7px;height:7px;border-radius:50%;background:${cor};flex-shrink:0"></span>
+        <span style="font-size:12px;font-weight:600;color:var(--t1)">${t.label}</span>
+      </div>
+      <div style="font-size:10px;color:var(--t3);margin-top:2px;padding-left:14px">${progTxt}</div>
+    </div>`;
+  }).join('');
+}
+
+function setSbPulsNome(pulsNome) {
+  const el = document.querySelector(`.sb-item[data-p="${pulsNome}"]`);
+  if (el) setSbPuls(el, pulsNome);
+}
+
+/* ════════════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════════════ */
+let curPuls = '';
+let curView = 'cal';
+let curTab = 'plano';
+let activeFilters = { hab:[], tipo:[], formato:[], foco:[], puls:[], ciclo:[] };
+let minhaSessao = [];
+
+const MESES_BR = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const DIAS_BR = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+/* ════════════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════════════ */
+initPlanner();
+
+/* ════════════════════════════════════════════════════════
+   NAVEGAÇÃO
+════════════════════════════════════════════════════════ */
+function setSbPuls(el, p) {
+  document.querySelectorAll('.sb-item[data-p]').forEach(i => i.classList.remove('on'));
+  el.classList.add('on');
+  curPuls = p;
+  if (p && document.getElementById('ci-puls')) document.getElementById('ci-puls').value = p;
+  if (curView === 'busca') renderBusca();
+}
+
+function setView(v) {
+  curView = v;
+  ['cal','busca','sessao'].forEach(x => {
+    const el = document.getElementById('view-' + x);
+    if (el) el.style.display = x === v ? '' : 'none';
+  });
+  ['sv-cal','sv-busca','sv-sessao'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('on');
+  });
+  const sv = document.getElementById('sv-' + v);
+  if (sv) sv.classList.add('on');
+  if (v === 'busca') renderBusca();
+  if (v === 'sessao') renderSessao();
+}
+
+function setTab(el, tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
+  el.classList.add('on');
+  curTab = tab;
+}
+
+/* ════════════════════════════════════════════════════════
+   CALENDÁRIO
+════════════════════════════════════════════════════════ */
+function buildCal() {
+  const dateVal = document.getElementById('ci-data').value;
+  const puls = document.getElementById('ci-puls').value;
+  const diasStr = document.getElementById('ci-dias').value;
+  const dur = document.getElementById('ci-dur').value;
+  if (!dateVal) { alert('Selecione a data de início.'); return; }
+
+  const startDate = new Date(dateVal + 'T12:00:00');
+  const diasNums = diasStr.split('').map(Number); // 1=Seg...7=Dom
+  const dayMap = {1:1,2:2,3:3,4:4,5:5,6:6,7:0};
+
+  const aulasP = AULAS.filter(a => a.p === puls).sort((a,b) => {
+    const ci = {C1:0,C2:1,C3:2};
+    const ai = parseInt(a.a.split('.')[1]);
+    const bi = parseInt(b.a.split('.')[1]);
+    return (ci[a.c]-ci[b.c])*100 + (ai-bi);
+  });
+
+  // Gerar datas de treino
+  let trainDates = [];
+  let d = new Date(startDate);
+  while (trainDates.length < aulasP.length + 5) {
+    if (diasNums.some(dn => dayMap[dn] === d.getDay())) trainDates.push(new Date(d));
+    d.setDate(d.getDate()+1);
+    if (trainDates.length > 200) break;
+  }
+
+  // Mapear aulas → datas
+  const events = {};
+  aulasP.forEach((a, i) => {
+    if (i < trainDates.length) {
+      const key = trainDates[i].toISOString().split('T')[0];
+      if (!events[key]) events[key] = [];
+      events[key].push({ ...a, date: trainDates[i] });
+    }
+  });
+
+  const endDate = trainDates[Math.min(aulasP.length-1, trainDates.length-1)] || startDate;
+  const cor = CORES[puls] || '#888';
+  const sig = SIGLAS[puls] || puls;
+
+  document.getElementById('st-puls').textContent = sig;
+  document.getElementById('st-aulas').textContent = aulasP.length;
+
+  let html = `<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:10px 16px;background:var(--card);border:1px solid var(--border);border-radius:8px">
+    <div style="width:12px;height:12px;border-radius:50%;background:${cor};flex-shrink:0"></div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px">${puls}</div>
+    <div style="font-size:11px;color:var(--t2)">Início: ${startDate.toLocaleDateString('pt-BR')} · Fim: ${endDate.toLocaleDateString('pt-BR')} · ${aulasP.length} aulas · ${dur} min cada</div>
+  </div>`;
+
+  // Meses
+  let curMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+  const lastMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  while (curMonth <= lastMonth) {
+    const y = curMonth.getFullYear(), m = curMonth.getMonth();
+    const firstDay = new Date(y,m,1).getDay();
+    const daysInMonth = new Date(y,m+1,0).getDate();
+
+    html += `<div class="cal-month"><div class="cal-m-title">${MESES_BR[m]} ${y}</div><div class="cal-grid">`;
+    DIAS_BR.forEach(d => html += `<div class="cal-dow">${d}</div>`);
+    for (let i=0; i<firstDay; i++) html += `<div class="cal-day empty"></div>`;
+
+    for (let day=1; day<=daysInMonth; day++) {
+      const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      const evs = events[ds] || [];
+      const hasEv = evs.length > 0;
+      const isToday = ds === todayStr;
+      html += `<div class="cal-day${hasEv?' has-ev':''}${isToday?' today':''}" ${hasEv ? `onclick="openDayModal('${ds}',${JSON.stringify(evs).replace(/"/g,'&quot;')},'${puls}','${dur}')"` : ''}>`;
+      html += `<div class="cal-day-n">${day}</div>`;
+      evs.forEach(ev => {
+        const semCls = {S1:'ev-s1',S2:'ev-s2',S3:'ev-s3',S4:'ev-s4'}[ev.s] || 'ev-s1';
+        const isAv = ev.tema.includes('Avaliação');
+        html += `<div class="cal-ev ${isAv ? 'ev-av' : semCls}" title="${ev.obj}">${ev.a} ${ev.tema.substring(0,22)}…</div>`;
+      });
+      html += '</div>';
+    }
+    const rem = (firstDay + daysInMonth) % 7;
+    if (rem > 0) for (let i=0; i<7-rem; i++) html += `<div class="cal-day empty"></div>`;
+    html += '</div></div>';
+    curMonth.setMonth(curMonth.getMonth()+1);
+  }
+
+  document.getElementById('cal-output').innerHTML = html;
+}
+
+/* ════════════════════════════════════════════════════════
+   MODAL — DIA / PLANO DE AULA
+════════════════════════════════════════════════════════ */
+function openDayModal(dateStr, evs, puls, dur) {
+  const dt = new Date(dateStr + 'T12:00:00');
+  const fmt = dt.toLocaleDateString('pt-BR', {weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const cor = CORES[puls] || '#888';
+  const sig = SIGLAS[puls] || puls;
+
+  document.getElementById('m-title').textContent = fmt.charAt(0).toUpperCase() + fmt.slice(1);
+  document.getElementById('m-sub').textContent = `${puls} · ${evs.length} aula(s) · ${dur} min · Clique nos exercícios para adicionar à sua sessão`;
+
+  const SEM_NOMES = {S1:'S1 — Introdução',S2:'S2 — Construção',S3:'S3 — Aplicação',S4:'S4 — Avaliação'};
+  const SEM_CORS = {S1:'#2E86C1',S2:'#D35400',S3:'#1E8449',S4:'#7D3C98'};
+  const CICLO_METAS = {
+    'Roxa_C1':'Trocar bolas em parceria — gol a gol, 1 arremesso + 3 devoluções rolando',
+    'Roxa_C2':'FDQ com adversidade — perceber trajetória, equilíbrio e ponto de contato',
+    'Roxa_C3':'Conseguir sacar — base semi-aberta, toss controlado, contato acima da cabeça',
+    'Vermelho-Vermelho_C1':'1 arremesso + 2 trocas FH — quadra 12×8×0,80m',
+    'Vermelho-Vermelho_C2':'1 arremesso approach + interceptar com voleio',
+    'Vermelho-Vermelho_C3':'1+2 FH/BH · tie-break de simples',
+    'Laranja-Laranja_C1':'Trocar de FDQ respeitando empunhaduras — quadra 18×8×0,80m',
+    'Laranja-Laranja_C2':'Direcionar jogadas no 18m · fase dinâmica do saque',
+    'Laranja-Laranja_C3':'Subir rede e finalizar · 2 games contagem + noAD',
+    'Verde-Amarelo_C1':'Jogar com consistência na situação neutra — quadra 24m',
+    'Verde-Amarelo_C2':'Ponto forte · inside out · D2 avançada',
+    'Verde-Amarelo_C3':'Vencer pontos na rede · set curto autônomo 24m',
+    'Verde-Verde_C1':'Construir ponto na quadra 24m movimentando o adversário',
+    'Verde-Verde_C2':'Defender FDQ · neutralizar 1º saque · slice FH/BH',
+    'Verde-Verde_C3':'Vencer pontos na rede · S1 agressivo · set autônomo',
+  };
+
+  let html = '';
+
+  evs.forEach(ev => {
+    const meta = CICLO_METAS[`${puls}_${ev.c}`] || '—';
+    const semCor = SEM_CORS[ev.s] || '#555';
+    const semNome = SEM_NOMES[ev.s] || ev.s;
+    const planoKey = `${puls}_${ev.c}_${ev.s}`;
+    const plano = PLANOS[planoKey];
+
+    html += `<div style="margin-bottom:22px">
+      <div class="m-chips-row">
+        <span class="chip chip-hab">${ev.c}</span>
+        <span class="chip" style="background:rgba(255,255,255,.06);color:${semCor};border:1px solid ${semCor}40">${semNome}</span>
+        <span class="chip chip-foco">${ev.a}</span>
+        <span class="chip ${ev.foco==='Olho'?'chip-drill':ev.foco==='Pé'?'chip-jogo':'chip-game'}">${ev.foco}</span>
+        <span class="chip chip-foco">${ev.cat}</span>
+      </div>
+
+      <div class="m-sec">
+        <div class="m-sec-lbl">Tema da Aula</div>
+        <div style="font-size:14px;font-weight:700;color:var(--t1);margin-bottom:6px">${ev.tema}</div>
+      </div>
+
+      <div class="m-sec">
+        <div class="m-sec-lbl">Objetivo Específico</div>
+        <div class="m-obj-box">${ev.obj}</div>
+      </div>
+
+      <div class="m-sec">
+        <div class="m-sec-lbl">Meta do ${ev.c}</div>
+        <div style="font-size:12px;color:var(--t2);line-height:1.5;background:var(--bg3);padding:8px 12px;border-radius:6px;border-left:3px solid ${cor}">${meta}</div>
+      </div>`;
+
+    if (plano) {
+      html += `<div class="m-sec">
+        <div class="m-sec-lbl">Plano de Sessão — ${dur} min</div>`;
+      plano.estrutura.forEach(fase => {
+        html += `<div class="fase-block">
+          <div class="fase-hdr" style="background:${fase.cor}22">
+            <div style="width:3px;height:32px;background:${fase.cor};border-radius:2px;flex-shrink:0"></div>
+            <div>
+              <div class="fase-hdr-title">${fase.fase}</div>
+              <div style="font-size:10px;color:var(--t3)">${fase.duracao} · ${fase.desc}</div>
+            </div>
+          </div>
+          <div class="fase-body">`;
+        fase.drills.forEach(drill => {
+          const drillId = `drill_${Date.now()}_${Math.random().toString(36).substr(2,5)}`;
+          html += `<div class="drill-item" onclick="addToSessao('${drillId}','${drill.nome.replace(/'/g,'\\\'').replace(/"/g,'&quot;')}','${ev.a} — ${ev.tema.replace(/'/g,'\\\'').replace(/"/g,'&quot;')}','${fase.fase}','${fase.duracao}')">
+            <div class="drill-title">▸ ${drill.nome} <span style="font-size:9px;color:var(--gold);background:var(--gold-glow);padding:1px 5px;border-radius:3px;font-weight:600;cursor:pointer">+ Sessão</span></div>
+            <div class="drill-body">${drill.desc}</div>
+            <div class="drill-cue">💬 "${drill.cue}"</div>
+          </div>`;
+        });
+        html += `</div></div>`;
+      });
+      if (plano.obs) {
+        html += `<div style="background:rgba(212,168,67,.06);border:1px solid rgba(212,168,67,.15);border-radius:6px;padding:8px 12px;margin-top:8px">
+          <span style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)">NOTA DO TREINADOR</span>
+          <div style="font-size:12px;color:var(--t2);margin-top:4px;line-height:1.5">${plano.obs}</div>
+        </div>`;
+      }
+      html += '</div>';
+    } else {
+      // Gerar estrutura genérica baseada na semana
+      html += `<div class="m-sec">
+        <div class="m-sec-lbl">Estrutura Sugerida (${semNome})</div>
+        ${getEstruturaGenerica(ev.s, ev.obj, dur)}
+      </div>`;
+    }
+
+    // Treinos relacionados
+    const relacionados = TREINOS.filter(t =>
+      t.habilidades.some(h => ev.cat.toLowerCase().includes(h) || ev.obj.toLowerCase().includes(h) || ev.tema.toLowerCase().includes(h)) ||
+      (t.puls.includes(puls) && t.ciclos.includes(ev.c))
+    ).slice(0, 3);
+
+    if (relacionados.length) {
+      html += `<div class="m-sec">
+        <div class="m-sec-lbl">Treinos Relacionados do Banco</div>`;
+      relacionados.forEach(t => {
+        html += renderTreinoCompact(t, true);
+      });
+      html += '</div>';
+    }
+
+    html += '</div>';
+  });
+
+  document.getElementById('m-body').innerHTML = html;
+  document.getElementById('modal-bg').classList.add('open');
+}
+
+function getEstruturaGenerica(sem, obj, dur) {
+  const structs = {
+    S1:`<div class="fase-block"><div class="fase-hdr" style="background:#2E86C122"><div style="width:3px;height:28px;background:#2E86C1;border-radius:2px;flex-shrink:0"></div><div><div class="fase-hdr-title">AQUECIMENTO + INTRODUÇÃO DO TEMA</div><div style="font-size:10px;color:var(--t3)">10–12 min · Exercício fechado com alimentação controlada</div></div></div><div class="fase-body"><div class="drill-item"><div class="drill-title">▸ Apresentação do Objetivo</div><div class="drill-body">Apresentar o objetivo da semana de forma clara e visual. Demonstrar o exercício antes de pedir ao aluno.</div><div class="drill-cue">💬 "Hoje vamos aprender/trabalhar: ${obj.substring(0,60)}…"</div></div><div class="drill-item"><div class="drill-title">▸ Exercício Fechado — Alto Volume</div><div class="drill-body">Alimentação controlada pelo treinador. 20–30 repetições. Paradas frequentes para correção técnica.</div><div class="drill-cue">💬 "Quantidade ANTES de qualidade — instalar o gesto primeiro!"</div></div></div></div>`,
+    S2:`<div class="fase-block"><div class="fase-hdr" style="background:#D3540022"><div style="width:3px;height:28px;background:#D35400;border-radius:2px;flex-shrink:0"></div><div><div class="fase-hdr-title">CONSTRUÇÃO TÉCNICA — SEMI-ABERTO</div><div style="font-size:10px;color:var(--t3)">15–18 min · 1-2 variáveis · Ritmo crescente</div></div></div><div class="fase-body"><div class="drill-item"><div class="drill-title">▸ Revisão Rápida do Tema S1</div><div class="drill-body">5 min relembrar o gesto da semana anterior. Checar se foi assimilado antes de adicionar complexidade.</div></div><div class="drill-item"><div class="drill-title">▸ Semi-Aberto com Variável</div><div class="drill-body">Adicionar 1 variável ao exercício: direção, altura, velocidade, ou decisão simples. Treinador reduz intervenção gradualmente.</div><div class="drill-cue">💬 "Mesma técnica, agora com uma escolha a mais!"</div></div></div></div>`,
+    S3:`<div class="fase-block"><div class="fase-hdr" style="background:#1E844922"><div style="width:3px;height:28px;background:#1E8449;border-radius:2px;flex-shrink:0"></div><div><div class="fase-hdr-title">APLICAÇÃO EM JOGO</div><div style="font-size:10px;color:var(--t3)">20 min · Regra adaptada ao tema · Intervenção mínima</div></div></div><div class="fase-body"><div class="drill-item"><div class="drill-title">▸ Jogo Dirigido Temático</div><div class="drill-body">Ponto livre com regra especial que reforça o tema. Treinador observa e intervém apenas se o tema for completamente ignorado.</div><div class="drill-cue">💬 "O tema está no jogo — não preciso lembrar a cada ponto!"</div></div><div class="drill-item"><div class="drill-title">▸ Pontos Curtos — Score Real</div><div class="drill-body">Partida com contagem real. Árbitro rotativo. Autonomia crescente.</div></div></div></div>`,
+    S4:`<div class="fase-block"><div class="fase-hdr" style="background:#7D3C9822"><div style="width:3px;height:28px;background:#7D3C98;border-radius:2px;flex-shrink:0"></div><div><div class="fase-hdr-title">AVALIAÇÃO / PRÉ-EVENTO</div><div style="font-size:10px;color:var(--t3)">25 min · Torneio interno · Avaliação formativa/somativa</div></div></div><div class="fase-body"><div class="drill-item"><div class="drill-title">▸ Revisão dos Objetivos do Ciclo</div><div class="drill-body">Treinador pergunta ao aluno o que aprendeu no ciclo. Aluno demonstra os 3 objetivos principais sem ajuda.</div></div><div class="drill-item"><div class="drill-title">▸ Torneio Interno / Simulação</div><div class="drill-body">Partida autônoma com ficha de avaliação. Treinador preenche a ficha de critérios observáveis.</div><div class="drill-cue">💬 "Avaliação não é prova — é mostrar o que já sabe fazer!"</div></div></div></div>`,
+  };
+  return structs[sem] || structs.S1;
+}
+
+/* ════════════════════════════════════════════════════════
+   BUSCA DE TREINOS
+════════════════════════════════════════════════════════ */
+function toggleTag(el, group) {
+  el.classList.toggle('on');
+  // Atualizar cor dos tags de pulseira
+  if (group === 'puls') {
+    const cor = el.dataset.cor;
+    if (el.classList.contains('on')) {
+      el.style.background = cor + '33';
+      el.style.borderColor = cor;
+      el.style.color = cor;
+    } else {
+      el.style.background = '';
+      el.style.borderColor = '';
+      el.style.color = '';
+    }
+  }
+
+  activeFilters[group] = [...document.querySelectorAll(`.tag-${group === 'hab' ? 'habilidade' : group === 'tipo' ? 'tipo' : group === 'formato' ? 'formato' : group === 'foco' ? 'foco' : group === 'puls' ? 'puls' : 'ciclo'}.on`)].map(t => t.dataset.v);
+  renderBusca();
+}
+
+function renderBusca() {
+  const q = (document.getElementById('search-treino').value || '').toLowerCase();
+  const { hab, tipo, formato, foco, puls: fp, ciclo } = activeFilters;
+
+  const filtered = TREINOS.filter(t => {
+    if (hab.length && !hab.some(h => t.habilidades.some(th => th.includes(h) || h.includes(th)))) return false;
+    if (tipo.length && !tipo.some(tp => t.tipo.includes(tp))) return false;
+    if (formato.length && !formato.some(f => t.formato === f)) return false;
+    if (foco.length && !foco.some(f => t.foco === f)) return false;
+    if (fp.length && !fp.some(p => t.puls.includes(p))) return false;
+    if (ciclo.length && !ciclo.some(c => t.ciclos.includes(c))) return false;
+    if (q) {
+      const str = (t.titulo + ' ' + t.descricao + ' ' + t.habilidades.join(' ')).toLowerCase();
+      if (!str.includes(q)) return false;
+    }
+    return true;
+  });
+
+  document.getElementById('treinos-count').textContent = `${filtered.length} treino${filtered.length !== 1 ? 's' : ''} encontrado${filtered.length !== 1 ? 's' : ''}`;
+  document.getElementById('treinos-output').innerHTML = filtered.length
+    ? filtered.map(t => renderTreinoCard(t)).join('')
+    : '<div class="empty">Nenhum treino encontrado com esses filtros.<br>Tente remover alguns filtros.</div>';
+}
+
+function renderTreinoCard(t) {
+  const tipoCls = {drill:'drill',jogo:'jogo','jogo dirigido':'jogo','jogo livre':'jogo',competição:'game','físico':'fisico',psicomotor:'fisico',aquecimento:'fisico'}[t.tipo] || 'drill';
+  const tipoChip = `<span class="chip chip-${tipoCls}">${t.tipo}</span>`;
+  const habChips = t.habilidades.slice(0,3).map(h => `<span class="chip chip-hab">${h}</span>`).join('');
+  const formChip = `<span class="chip chip-formato">${t.formato}</span>`;
+  const focoChip = `<span class="chip chip-foco">${t.foco}</span>`;
+
+  return `<div class="treino-card ${tipoCls}" onclick="openTreinoModal('${t.id}')">
+    <div class="tc-header">
+      <div class="tc-title">${t.titulo}</div>
+      <div class="tc-chips">${tipoChip}${formChip}</div>
+    </div>
+    <div class="tc-chips" style="margin-bottom:8px">${habChips}${focoChip}</div>
+    <div class="tc-desc">${t.descricao.substring(0,160)}…</div>
+    <div class="tc-cue">💬 "${t.cue}"</div>
+    <div class="tc-footer">
+      <div class="tc-dur">⏱ ${t.duracao}</div>
+      <button class="tc-add-btn" onclick="event.stopPropagation();addTreinoToSessao('${t.id}')">+ Adicionar à Sessão</button>
+    </div>
+  </div>`;
+}
+
+function renderTreinoCompact(t, withAdd) {
+  const tipoCls = {drill:'drill','jogo dirigido':'jogo','jogo livre':'jogo',competição:'game','físico':'fisico',psicomotor:'fisico',aquecimento:'fisico'}[t.tipo] || 'drill';
+  return `<div class="drill-item" style="cursor:pointer" onclick="${withAdd ? `addTreinoToSessao('${t.id}')` : `openTreinoModal('${t.id}')`}">
+    <div class="drill-title">${t.titulo} ${withAdd ? `<span style="font-size:9px;color:var(--gold);background:var(--gold-glow);padding:1px 5px;border-radius:3px;font-weight:600">+ Sessão</span>` : ''}
+      <span class="chip chip-${tipoCls}" style="font-size:9px">${t.tipo}</span>
+      <span class="chip chip-hab" style="font-size:9px">${t.habilidades[0]||''}</span>
+    </div>
+    <div class="drill-body" style="font-size:11px">${t.descricao.substring(0,120)}…</div>
+    <div class="drill-cue">💬 "${t.cue}"</div>
+  </div>`;
+}
+
+/* ════════════════════════════════════════════════════════
+   MODAL TREINO COMPLETO
+════════════════════════════════════════════════════════ */
+function openTreinoModal(id) {
+  const t = TREINOS.find(x => x.id === id);
+  if (!t) return;
+  const tipoCls = {drill:'drill','jogo dirigido':'jogo','jogo livre':'jogo',competição:'game','físico':'fisico',psicomotor:'fisico',aquecimento:'fisico'}[t.tipo] || 'drill';
+
+  document.getElementById('m-title').textContent = t.titulo;
+  document.getElementById('m-sub').textContent = `${t.tipo} · ${t.formato} · Foco: ${t.foco} · ${t.duracao}`;
+
+  let html = `<div class="m-chips-row">
+    <span class="chip chip-${tipoCls}">${t.tipo}</span>
+    <span class="chip chip-formato">${t.formato}</span>
+    <span class="chip chip-foco">${t.foco}</span>
+    ${t.habilidades.map(h => `<span class="chip chip-hab">${h}</span>`).join('')}
+  </div>
+  <div class="m-sec">
+    <div class="m-sec-lbl">Descrição Geral</div>
+    <div class="m-obj-box">${t.descricao}</div>
+  </div>
+  <div class="m-sec">
+    <div class="m-sec-lbl">Exercícios</div>`;
+
+  t.exercicios.forEach(ex => {
+    html += `<div class="drill-item">
+      <div class="drill-title">▸ ${ex.nome}</div>
+      <div class="drill-body">${ex.desc}</div>
+      <div class="drill-cue">💬 "${ex.cue}"</div>
+    </div>`;
+  });
+
+  html += `</div>`;
+
+  if (t.variacoes) {
+    html += `<div class="var-block"><div class="var-title">🔀 Variações e Progressões</div><div class="var-body">${t.variacoes}</div></div>`;
+  }
+
+  html += `<div style="margin-top:14px;display:flex;gap:8px">
+    <span style="font-size:10px;color:var(--t2)">Pulseiras: ${t.puls.map(p => `<span style="color:${CORES[p]||'#888'};font-weight:600">${SIGLAS[p]||p}</span>`).join(', ')}</span>
+    <span style="font-size:10px;color:var(--t2);margin-left:auto">Ciclos: ${t.ciclos.join(', ')}</span>
+  </div>
+  <button style="width:100%;margin-top:14px;background:var(--gold);color:var(--bg);font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;border:none;border-radius:7px;padding:10px;cursor:pointer" onclick="addTreinoToSessao('${t.id}');closeModalDirect()">+ ADICIONAR À MINHA SESSÃO</button>`;
+
+  document.getElementById('m-body').innerHTML = html;
+  document.getElementById('modal-bg').classList.add('open');
+}
+
+/* ════════════════════════════════════════════════════════
+   MINHA SESSÃO
+════════════════════════════════════════════════════════ */
+function addTreinoToSessao(id) {
+  const t = TREINOS.find(x => x.id === id);
+  if (!t) return;
+  if (minhaSessao.find(x => x.id === id)) {
+    showToast('Já está na sessão!');
+    return;
+  }
+  minhaSessao.push({ id: t.id, nome: t.titulo, det: `${t.tipo} · ${t.formato} · ${t.duracao}`, tipo: t.tipo });
+  updateSessaoCount();
+  showToast('✓ Adicionado à sessão!');
+}
+
+function addToSessao(drillId, nome, aula, fase, dur) {
+  if (minhaSessao.find(x => x.id === drillId)) {
+    showToast('Já está na sessão!');
+    return;
+  }
+  minhaSessao.push({ id: drillId, nome, det: `${fase} · ${aula} · ${dur}`, tipo: 'drill' });
+  updateSessaoCount();
+  showToast('✓ Adicionado à sessão!');
+}
+
+function updateSessaoCount() {
+  const n = minhaSessao.length;
+  document.getElementById('st-sessao').textContent = n;
+  const sb = document.getElementById('sessao-count-sb');
+  if (sb) { sb.textContent = n; sb.style.display = n > 0 ? '' : 'none'; }
+}
+
+function removeFromSessao(id) {
+  minhaSessao = minhaSessao.filter(x => x.id !== id);
+  updateSessaoCount();
+  renderSessao();
+}
+
+function clearSessao() {
+  if (!minhaSessao.length) return;
+  if (confirm('Limpar toda a sessão?')) {
+    minhaSessao = [];
+    updateSessaoCount();
+    renderSessao();
+  }
+}
+
+function renderSessao() {
+  const out = document.getElementById('sessao-output');
+  if (!minhaSessao.length) {
+    out.innerHTML = '<div class="empty">Sua sessão está vazia.<br>Adicione treinos pelo Buscador ou clicando nos exercícios dentro de um plano de aula.</div>';
+    return;
+  }
+
+  // Agrupar por fase
+  const grupos = { drill:[], jogo:[], game:[], fisico:[], outro:[] };
+  minhaSessao.forEach(item => {
+    const g = ['jogo dirigido','jogo livre'].includes(item.tipo) ? 'jogo' : grupos[item.tipo] ? item.tipo : 'outro';
+    grupos[g] = grupos[g] || [];
+    grupos[g].push(item);
+  });
+
+  const ordem = ['fisico','drill','jogo','game','outro'];
+  const nomes = {fisico:'🏃 Físico / Aquecimento',drill:'🎾 Drills Técnicos',jogo:'⚡ Jogos Dirigidos',game:'🏆 Competição / Game',outro:'📌 Outros'};
+  const cors = {fisico:'#D35400',drill:'#2E86C1',jogo:'#1E8449',game:'#7D3C98',outro:'#7A8899'};
+
+  let html = '';
+  let totalItens = 0;
+
+  ordem.forEach(g => {
+    if (!grupos[g] || !grupos[g].length) return;
+    totalItens += grupos[g].length;
+    html += `<div class="sessao-container">
+      <div class="sessao-title">
+        <span style="color:${cors[g]}">${nomes[g]}</span>
+        <button class="print-btn" style="font-size:10px" onclick="printSessao()">🖨 Imprimir sessão</button>
+      </div>`;
+    grupos[g].forEach((item, idx) => {
+      html += `<div class="sessao-item">
+        <div class="sessao-ordem">${idx+1}</div>
+        <div class="sessao-info">
+          <div class="sessao-nome">${item.nome}</div>
+          <div class="sessao-det">${item.det}</div>
+        </div>
+        <button class="sessao-rm" onclick="removeFromSessao('${item.id}')">✕</button>
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  out.innerHTML = html;
+}
+
+function printSessao() {
+  if (!minhaSessao.length) { alert('A sessão está vazia.'); return; }
+  const win = window.open('', '_blank');
+  const itens = minhaSessao.map((item, i) => `<div style="padding:6px 0;border-bottom:1px solid #eee"><b>${i+1}. ${item.nome}</b><br><span style="color:#666;font-size:12px">${item.det}</span></div>`).join('');
+  win.document.write(`<html><head><title>Plano de Sessão — ACE</title>
+  <style>body{font-family:Arial,sans-serif;max-width:800px;margin:40px auto;padding:20px}h1{color:#1A2B4A}h2{color:#D4A843;font-size:16px}</style></head>
+  <body><h1>ACE Player Passport — Plano de Sessão</h1>
+  <h2>${new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</h2>
+  <p style="color:#666">${minhaSessao.length} exercícios</p>
+  ${itens}
+  </body></html>`);
+  win.print();
+}
+
+/* ════════════════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════════════════ */
+let toastTimeout;
+function showToast(msg) {
+  let t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#1E8449;color:#fff;font-family:"Space Grotesk",sans-serif;font-size:13px;font-weight:600;padding:10px 18px;border-radius:8px;z-index:999;opacity:0;transition:opacity .2s;letter-spacing:.02em';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => t.style.opacity = '0', 2000);
+}
+
+/* ════════════════════════════════════════════════════════
+   MODAL CONTROLS
+════════════════════════════════════════════════════════ */
+function closeModal(e) { if (e.target === document.getElementById('modal-bg')) closeModalDirect(); }
+function closeModalDirect() { document.getElementById('modal-bg').classList.remove('open'); }
+
+// Init busca
+renderBusca();
+</script>
+</body>
+</html>
