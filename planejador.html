@@ -1265,12 +1265,23 @@ async function marcarConcluida(aulaIdx) {
   if (!curTurmaId) { showToast('Selecione uma turma no painel lateral primeiro'); return; }
   if (!currentUser || !currentAcademia) { showToast('Erro: sessão não encontrada'); return; }
   const novoCiclo = aulaIdx + 1;
+  // Store metadata of the NEXT lesson so the mobile app can show "Plano de Hoje"
+  const nextAula = aulasNivel[novoCiclo];
+  const aulaJson = nextAula ? {
+    planner_idx: novoCiclo,
+    tema:  nextAula.tema,
+    obj:   nextAula.obj,
+    ciclo: nextAula.c,
+    semana: nextAula.s,
+    foco:  nextAula.foco || '',
+    cat:   nextAula.cat  || ''
+  } : { planner_idx: novoCiclo, concluido: true };
   const { error } = await getDb().from('cal_progress').upsert({
-    turma_id:   curTurmaId,
+    turma_id:    curTurmaId,
     academia_id: currentAcademia.id,
-    coach_id:   currentUser.id,
+    coach_id:    currentUser.id,
     ciclo_index: novoCiclo,
-    aulas_json:  {},
+    aulas_json:  aulaJson,
     updated_at:  new Date().toISOString()
   }, { onConflict: 'turma_id' });
   if (error) { showToast('Erro ao salvar: ' + error.message); return; }
@@ -1286,6 +1297,7 @@ async function marcarConcluida(aulaIdx) {
 ════════════════════════════════════════════════════════ */
 let curPuls = '';
 let curTurmaId = null;
+let aulasNivel = []; // flat sorted AULAS for current pulseira
 let curView = 'cal';
 let curTab = 'plano';
 let activeFilters = { hab:[], tipo:[], formato:[], foco:[], puls:[], ciclo:[] };
@@ -1352,6 +1364,7 @@ function buildCal() {
     const bi = parseInt(b.a.split('.')[1]);
     return (ci[a.c]-ci[b.c])*100 + (ai-bi);
   });
+  aulasNivel = aulasP; // expose for marcarConcluida
 
   // Gerar datas de treino
   let trainDates = [];
