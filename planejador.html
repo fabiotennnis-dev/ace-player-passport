@@ -99,6 +99,11 @@ body { font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(-
 .cal-day.has-ev { border-color:rgba(212,168,67,.25); cursor:pointer; }
 .cal-day.has-ev:hover { border-color:var(--gold); transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,.35),0 0 0 1px rgba(212,168,67,.2); }
 .cal-day.today { border-color:rgba(212,168,67,.5); }
+.cal-day.cal-done { opacity:.55; }
+.cal-day.cal-done .cal-ev { opacity:.6; }
+.cal-day.cal-done::after { content:'✓'; position:absolute; top:5px; right:6px; font-size:11px; color:#4ade80; font-weight:700; }
+.cal-day.cal-current { border-color:#4ade80 !important; box-shadow:0 0 0 2px rgba(74,222,128,.15); }
+.cal-day.cal-current .cal-day-n { color:#4ade80; }
 .cal-day-n { font-size:11px; font-weight:600; color:var(--t3); margin-bottom:4px; }
 .cal-day.today .cal-day-n { color:var(--gold); }
 .cal-ev { border-radius:3px; padding:2px 5px; font-size:9px; font-weight:600; margin-bottom:2px; line-height:1.4; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; letter-spacing:.02em; }
@@ -1220,12 +1225,14 @@ function renderSbTurmas() {
     const aulasNivel = AULAS.filter(a => a.p === pulsNome);
     const aulaAtual = aulasNivel[aulaIdx];
     const progTxt = aulaAtual ? `${aulaAtual.c}.${aulaAtual.a.split('.')[1]} — ${aulaAtual.tema}` : 'Início';
-    return `<div onclick="setSbPulsNome('${pulsNome}')"
-      style="padding:7px 8px;border-radius:6px;cursor:pointer;margin-bottom:3px;border:1px solid var(--border);transition:all .15s"
-      onmouseover="this.style.background='rgba(255,255,255,.04)'" onmouseout="this.style.background='none'">
+    const isSelected = curTurmaId === t.id;
+    return `<div onclick="selectTurma('${t.id}','${pulsNome}')"
+      style="padding:7px 8px;border-radius:6px;cursor:pointer;margin-bottom:3px;border:1px solid ${isSelected ? '#4ade80' : 'var(--border)'};background:${isSelected ? 'rgba(74,222,128,.06)' : 'none'};transition:all .15s"
+      onmouseover="this.style.background='rgba(255,255,255,.04)'" onmouseout="this.style.background='${isSelected ? 'rgba(74,222,128,.06)' : 'none'}'">
       <div style="display:flex;align-items:center;gap:7px">
         <span style="width:7px;height:7px;border-radius:50%;background:${cor};flex-shrink:0"></span>
         <span style="font-size:12px;font-weight:600;color:var(--t1)">${t.label}</span>
+        ${isSelected ? '<span style="font-size:9px;color:#4ade80;font-weight:700;margin-left:auto">●</span>' : ''}
       </div>
       <div style="font-size:10px;color:var(--t3);margin-top:2px;padding-left:14px">${progTxt}</div>
     </div>`;
@@ -1233,14 +1240,52 @@ function renderSbTurmas() {
 }
 
 function setSbPulsNome(pulsNome) {
+  curTurmaId = null;
   const el = document.querySelector(`.sb-item[data-p="${pulsNome}"]`);
   if (el) setSbPuls(el, pulsNome);
+}
+
+function selectTurma(turmaId, pulsNome) {
+  curTurmaId = turmaId;
+  curPuls = pulsNome;
+  const inp = document.getElementById('ci-puls');
+  if (inp) inp.value = pulsNome;
+  // Sync sidebar pulseira highlight
+  const el = document.querySelector(`.sb-item[data-p="${pulsNome}"]`);
+  if (el) {
+    document.querySelectorAll('.sb-item[data-p]').forEach(i => i.classList.remove('on'));
+    el.classList.add('on');
+  }
+  renderSbTurmas(); // refresh selection indicator
+  setView('cal');
+  if (document.getElementById('ci-data').value) buildCal();
+}
+
+async function marcarConcluida(aulaIdx) {
+  if (!curTurmaId) { showToast('Selecione uma turma no painel lateral primeiro'); return; }
+  if (!currentUser || !currentAcademia) { showToast('Erro: sessão não encontrada'); return; }
+  const novoCiclo = aulaIdx + 1;
+  const { error } = await getDb().from('cal_progress').upsert({
+    turma_id:   curTurmaId,
+    academia_id: currentAcademia.id,
+    coach_id:   currentUser.id,
+    ciclo_index: novoCiclo,
+    aulas_json:  {},
+    updated_at:  new Date().toISOString()
+  }, { onConflict: 'turma_id' });
+  if (error) { showToast('Erro ao salvar: ' + error.message); return; }
+  calProgressData[curTurmaId] = novoCiclo;
+  renderSbTurmas();
+  closeModalDirect();
+  showToast('✅ Aula concluída! Avançando para a próxima.');
+  buildCal();
 }
 
 /* ════════════════════════════════════════════════════════
    STATE
 ════════════════════════════════════════════════════════ */
 let curPuls = '';
+let curTurmaId = null;
 let curView = 'cal';
 let curTab = 'plano';
 let activeFilters = { hab:[], tipo:[], formato:[], foco:[], puls:[], ciclo:[] };
@@ -1323,7 +1368,7 @@ function buildCal() {
     if (i < trainDates.length) {
       const key = trainDates[i].toISOString().split('T')[0];
       if (!events[key]) events[key] = [];
-      events[key].push({ ...a, date: trainDates[i] });
+      events[key].push({ ...a, date: trainDates[i], idx: i });
     }
   });
 
@@ -1359,7 +1404,10 @@ function buildCal() {
       const evs = events[ds] || [];
       const hasEv = evs.length > 0;
       const isToday = ds === todayStr;
-      html += `<div class="cal-day${hasEv?' has-ev':''}${isToday?' today':''}" ${hasEv ? `onclick="openDayModal('${ds}',${JSON.stringify(evs).replace(/"/g,'&quot;')},'${puls}','${dur}')"` : ''}>`;
+      const progIdx = curTurmaId ? (calProgressData[curTurmaId] ?? 0) : -1;
+      const isDone    = hasEv && progIdx > 0 && evs[0].idx < progIdx;
+      const isCurrent = hasEv && progIdx >= 0 && evs[0].idx === progIdx;
+      html += `<div class="cal-day${hasEv?' has-ev':''}${isToday?' today':''}${isDone?' cal-done':''}${isCurrent?' cal-current':''}" ${hasEv ? `onclick="openDayModal('${ds}',${JSON.stringify(evs).replace(/"/g,'&quot;')},'${puls}','${dur}')"` : ''}>`;
       html += `<div class="cal-day-n">${day}</div>`;
       evs.forEach(ev => {
         const semCls = {S1:'ev-s1',S2:'ev-s2',S3:'ev-s3',S4:'ev-s4'}[ev.s] || 'ev-s1';
@@ -1493,6 +1541,29 @@ function openDayModal(dateStr, evs, puls, dur) {
         html += renderTreinoCompact(t, true);
       });
       html += '</div>';
+    }
+
+    // Botão de progresso — só aparece se turma selecionada
+    if (curTurmaId) {
+      const aulaIdx = ev.idx ?? 0;
+      const progIdx = calProgressData[curTurmaId] ?? 0;
+      const jaDone  = aulaIdx < progIdx;
+      const proxima = aulaIdx > progIdx;
+      html += `<div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px">`;
+      if (jaDone) {
+        html += `<div style="display:flex;align-items:center;gap:8px;padding:9px 16px;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.25);border-radius:8px;font-size:12px;font-weight:600;color:#4ade80">
+          ✅ Aula já concluída
+        </div>`;
+      } else if (proxima) {
+        html += `<div style="display:flex;align-items:center;gap:8px;padding:9px 16px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--t3)">
+          ⏳ Aulas anteriores ainda pendentes (aula ${aulaIdx+1} de ${progIdx+1})
+        </div>`;
+      } else {
+        html += `<button onclick="marcarConcluida(${aulaIdx})" style="display:flex;align-items:center;gap:8px;padding:10px 20px;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.4);border-radius:8px;font-size:13px;font-weight:700;color:#4ade80;cursor:pointer;transition:all .15s" onmouseover="this.style.background='rgba(74,222,128,.2)'" onmouseout="this.style.background='rgba(74,222,128,.12)'">
+          ✅ Marcar Aula como Concluída
+        </button>`;
+      }
+      html += `</div>`;
     }
 
     html += '</div>';
