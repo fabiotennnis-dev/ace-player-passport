@@ -2717,8 +2717,39 @@ function sFb(btn,idx){const cs=['s0','s1','s2','s3'];btn.closest('.fbg').querySe
 
 const CATS={history:'📖 História',raw:'🎾 Raw Tennis',tactics:'♟️ Táticas',technique:'💪 Técnicas',rules:'📋 Regras',athletes:'🏆 Atletas'};
 const XPMAP={orange:20,green:35,yellow:50};
-function opQz(){qx=0;qc=0;document.getElementById('qxp').textContent='+0 XP';document.getElementById('qb').innerHTML=bQS();opnM('m-quiz');}
-function bQS(){return `<div class="lbl">Dificuldade</div><div style="display:flex;gap:7px;margin-bottom:18px;overflow-x:auto">${[['orange','🟠 Laranja'],['green','🟢 Verde'],['yellow','🟡 Amarela']].map(([v,l])=>`<button style="padding:7px 16px;border-radius:20px;border:1.5px solid ${ql===v?'var(--g)':'var(--bo)'};background:${ql===v?'var(--gl)':'var(--bg3)'};color:${ql===v?'var(--g)':'var(--t2)'};font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0" onclick="ql='${v}';document.getElementById('qb').innerHTML=bQS()">${l}</button>`).join('')}</div><div class="lbl">Categoria</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${Object.entries(CATS).map(([k,v])=>`<button onclick="stQ('${k}')" style="padding:16px 14px;border-radius:var(--rs);border:1px solid var(--bo);background:var(--card);cursor:pointer;text-align:left;box-shadow:var(--shadow);transition:all .15s"><div style="font-size:24px;margin-bottom:6px">${v.split(' ')[0]}</div><div style="font-size:13px;font-weight:700;color:var(--t)">${v.split(' ').slice(1).join(' ')}</div></button>`).join('')}</div>`;}
+function opQz(){
+  qx=0;qc=0;
+  document.getElementById('qxp').textContent='+0 XP';
+  if(!sid){
+    // Sem aluno selecionado — mostrar seletor primeiro
+    document.getElementById('qb').innerHTML=bQAluno();
+  } else {
+    rQHeader();
+    document.getElementById('qb').innerHTML=bQS();
+  }
+  opnM('m-quiz');
+}
+function rQHeader(){
+  const s=sid?gSt(sid):null;
+  const el=document.querySelector('#m-quiz .mh span[style]');
+  if(el)el.textContent=s?('🧠 '+s.nome.split(' ')[0]):'Quiz de Tênis';
+}
+function bQAluno(){
+  return `<div style="padding:8px 0 4px">
+    <div style="font-size:15px;font-weight:700;color:var(--t);margin-bottom:6px">Para qual aluno?</div>
+    <div style="font-size:13px;color:var(--t2);margin-bottom:14px;line-height:1.5">O resultado do quiz será salvo no bonequinho do aluno (10% do progresso).</div>
+    <select onchange="sid=this.value;rQHeader();document.getElementById('qb').innerHTML=(this.value?bQS():bQAluno())"
+      style="width:100%;padding:12px 14px;border-radius:var(--rs);border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:14px;font-weight:600;outline:none">
+      <option value="">— Selecionar aluno —</option>
+      ${sts.map(s=>`<option value="${s.id}">${s.nome} · ${gP(s.pulseira).ball} ${gP(s.pulseira).label}</option>`).join('')}
+    </select>
+  </div>`;
+}
+function bQS(){
+  const s=sid?gSt(sid):null;
+  const alunoTag=s?`<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:10px 12px;background:var(--gl);border:1.5px solid var(--gb);border-radius:var(--rs)"><span style="font-size:13px;font-weight:700;color:var(--g);flex:1">👤 ${s.nome} · ${gP(s.pulseira).ball}</span><button onclick="sid=null;rQHeader();document.getElementById('qb').innerHTML=bQAluno()" style="border:none;background:none;font-size:12px;color:var(--t3);cursor:pointer">trocar</button></div>`:'';
+  return alunoTag+`<div class="lbl">Dificuldade</div><div style="display:flex;gap:7px;margin-bottom:18px;overflow-x:auto">${[['orange','🟠 Laranja'],['green','🟢 Verde'],['yellow','🟡 Amarela']].map(([v,l])=>`<button style="padding:7px 16px;border-radius:20px;border:1.5px solid ${ql===v?'var(--g)':'var(--bo)'};background:${ql===v?'var(--gl)':'var(--bg3)'};color:${ql===v?'var(--g)':'var(--t2)'};font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0" onclick="ql='${v}';document.getElementById('qb').innerHTML=bQS()">${l}</button>`).join('')}</div><div class="lbl">Categoria</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${Object.entries(CATS).map(([k,v])=>`<button onclick="stQ('${k}')" style="padding:16px 14px;border-radius:var(--rs);border:1px solid var(--bo);background:var(--card);cursor:pointer;text-align:left;box-shadow:var(--shadow);transition:all .15s"><div style="font-size:24px;margin-bottom:6px">${v.split(' ')[0]}</div><div style="font-size:13px;font-weight:700;color:var(--t)">${v.split(' ').slice(1).join(' ')}</div></button>`).join('')}</div>`;
+}
 
 async function stQ(cat){qa2=cat;qi=0;qc=0;document.getElementById('qb').innerHTML=`<div style="text-align:center;padding:60px 0"><div class="spin"></div><div style="margin-top:16px;color:var(--t2);font-size:14px;font-weight:500">Gerando com IA...</div></div>`;try{const cD={history:'história do tênis',raw:'Raw Tennis Academy, metodologia Play & Stay',tactics:'táticas T-A-T, padrões de ponto',technique:'forehand, backhand, saque, voleio, split step',rules:'pontuação, let, fault, tiebreak',athletes:'Nadal, Djokovic, Federer, Alcaraz, Guga'};const lD={orange:'intermediário 8-10 anos',green:'avançado 11-12 anos',yellow:'expert 12+ anos'};const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:`Crie 5 perguntas sobre ${cD[cat]} para ${lD[ql]}. APENAS JSON sem markdown:\n[{"question":"...","options":["A","B","C","D"],"correct":0,"explanation":"..."}]`}]})});const data=await r.json();qq=JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());}catch(e){qq=fbQ(cat);}rQ();}
 
