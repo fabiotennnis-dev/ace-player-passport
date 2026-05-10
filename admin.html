@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ACE Admin Panel — Raw Tennis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --navy:       #0F1F35;
+      --navy-2:     #1C3454;
+      --gold:       #D4A843;
+      --gold-light: #FDF3DC;
+      --gold-dark:  #B8911F;
+      --bg:         #F4F7FB;
+      --card:       #FFFFFF;
+      --border:     #D8E2F0;
+      --text:       #0F1F35;
+      --text-2:     #3A5272;
+      --text-3:     #7A95BB;
+      --red:        #DC2626;
+      --red-light:  #FEF2F2;
+      --green:      #16a34a;
+      --green-light:#F0FDF4;
+      --shadow:     0 1px 4px rgba(15,31,53,.06), 0 2px 8px rgba(15,31,53,.04);
+      --shadow-lg:  0 4px 24px rgba(15,31,53,.10);
+      --radius:     14px;
+      --radius-sm:  10px;
+    }
+
+    body {
+      background: var(--bg);
+      font-family: 'Space Grotesk', -apple-system, sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ─── LOADING SCREEN ─── */
+    #loading {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      gap: 16px;
+    }
+
+    .loading-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .loading-mark {
+      width: 44px;
+      height: 44px;
+      background: var(--navy);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loading-mark svg { width: 26px; height: 26px; }
+
+    .loading-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: .06em;
+      color: var(--navy);
+    }
+
+    .loading-sub {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-top: 2px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.4; } }
+
+    .spinner-ring {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin .75s linear infinite;
+    }
+
+    .loading-text {
+      font-size: 13px;
+      color: var(--text-3);
+      font-weight: 500;
+      animation: pulse 1.5s ease infinite;
+    }
+
+    /* ─── ACCESS DENIED ─── */
+    #access-denied {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .access-denied-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      padding: 48px 36px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .access-denied-icon {
+      font-size: 56px;
+      line-height: 1;
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    .access-denied-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 30px;
+      letter-spacing: .04em;
+      color: var(--navy);
+      margin-bottom: 10px;
+    }
+
+    .access-denied-text {
+      font-size: 14px;
+      color: var(--text-2);
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 24px;
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    .btn-back:hover { background: var(--navy-2); }
+
+    /* ─── MAIN CONTENT ─── */
+    #main-content {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── HEADER ─── */
+    .admin-header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 1px 0 var(--border), var(--shadow);
+    }
+
+    .admin-header-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .header-logo-mark {
+      width: 38px;
+      height: 38px;
+      background: var(--navy);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .header-logo-mark svg { width: 22px; height: 22px; }
+
+    .header-brand-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1;
+    }
+
+    .header-ace {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px;
+      letter-spacing: .08em;
+      color: var(--navy);
+    }
+
+    .header-sub {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-top: 1px;
+    }
+
+    .header-divider {
+      width: 1px;
+      height: 28px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    .header-panel-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--gold-light);
+      border: 1px solid rgba(212,168,67,.35);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--gold-dark);
+      flex-shrink: 0;
+    }
+
+    .header-spacer { flex: 1; }
+
+    /* Raw Tennis branding area */
+    .header-rt-area {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .rt-logo-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--navy);
+      border-radius: 20px;
+      padding: 6px 14px 6px 8px;
+    }
+
+    .rt-ball {
+      width: 22px;
+      height: 22px;
+      background: var(--gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .rt-ball svg { width: 14px; height: 14px; }
+
+    .rt-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 14px;
+      letter-spacing: .1em;
+      color: #fff;
+    }
+
+    .header-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 4px;
+    }
+
+    .user-avatar {
+      width: 34px;
+      height: 34px;
+      background: var(--gold-light);
+      border: 2px solid var(--gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    .user-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      max-width: 160px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .btn-logout {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 7px 14px;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-2);
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .btn-logout:hover {
+      border-color: var(--red);
+      color: var(--red);
+      background: var(--red-light);
+    }
+
+    /* ─── PAGE BODY ─── */
+    .admin-body {
+      flex: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px 60px;
+      width: 100%;
+    }
+
+    /* ─── PAGE TITLE ROW ─── */
+    .page-title-row {
+      margin-bottom: 28px;
+    }
+
+    .page-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 34px;
+      letter-spacing: .04em;
+      color: var(--navy);
+      line-height: 1;
+    }
+
+    .page-title-sub {
+      font-size: 13px;
+      color: var(--text-3);
+      font-weight: 500;
+      margin-top: 4px;
+    }
+
+    /* ─── STATS BAR ─── */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    @media (max-width: 740px) {
+      .stats-bar { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 420px) {
+      .stats-bar { grid-template-columns: 1fr; }
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      overflow: hidden;
+      transition: box-shadow .2s, transform .15s;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--gold);
+      opacity: 0;
+      transition: opacity .2s;
+    }
+
+    .stat-card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-1px);
+    }
+
+    .stat-card:hover::before { opacity: 1; }
+
+    .stat-icon-label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .stat-icon {
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+
+    .stat-value {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 42px;
+      letter-spacing: .02em;
+      color: var(--navy);
+      line-height: 1;
+    }
+
+    .stat-value.loading-dots::after {
+      content: '...';
+      animation: pulse 1s ease infinite;
+    }
+
+    .stat-hint {
+      font-size: 11px;
+      color: var(--text-3);
+      font-weight: 500;
+    }
+
+    /* ─── SECTION HEADER ─── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px;
+      letter-spacing: .05em;
+      color: var(--navy);
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .search-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      pointer-events: none;
+      opacity: .5;
+    }
+
+    #search-ac {
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 9px 14px 9px 34px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      outline: none;
+      width: 220px;
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    #search-ac:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(212,168,67,.15);
+    }
+
+    #search-ac::placeholder { color: var(--text-3); }
+
+    /* ─── TABLE CARD ─── */
+    .table-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .ac-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .ac-table thead th {
+      padding: 12px 16px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      text-align: left;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .ac-table thead th.center { text-align: center; }
+
+    .ac-table tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+    }
+
+    .ac-table tbody tr:last-child { border-bottom: none; }
+
+    .ac-table tbody tr:hover { background: #fafcff; }
+
+    .ac-table tbody td {
+      padding: 14px 16px;
+      font-size: 13px;
+      vertical-align: middle;
+    }
+
+    .ac-table tbody tr.detail-row {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ac-table tbody tr.detail-row:hover { background: none; }
+
+    .ac-name {
+      font-weight: 700;
+      color: var(--navy);
+      font-size: 14px;
+    }
+
+    .ac-cidade {
+      color: var(--text-2);
+    }
+
+    .ac-count {
+      text-align: center;
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    .ac-date {
+      color: var(--text-3);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .status-cell {
+      white-space: nowrap;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--green);
+      background: var(--green-light);
+      border: 1px solid #bbf7d0;
+      border-radius: 20px;
+      padding: 3px 10px;
+    }
+
+    .btn-expand {
+      background: none;
+      border: 1.5px solid var(--border);
+      border-radius: 7px;
+      padding: 4px 9px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-2);
+      margin-left: 7px;
+      transition: all .2s;
+      vertical-align: middle;
+    }
+
+    .btn-expand:hover {
+      border-color: var(--navy);
+      color: var(--navy);
+      background: var(--bg);
+    }
+
+    .btn-expand.open {
+      border-color: var(--gold);
+      color: var(--gold-dark);
+      background: var(--gold-light);
+    }
+
+    /* ─── DETAIL PANEL ─── */
+    .detail-panel {
+      padding: 16px 20px 20px 24px;
+      background: var(--bg);
+      border-top: 1px dashed var(--border);
+    }
+
+    .detail-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 10px;
+    }
+
+    .coach-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 4px;
+    }
+
+    .coach-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 13px;
+      font-size: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .coach-chip-avatar {
+      width: 22px;
+      height: 22px;
+      background: var(--gold-light);
+      border: 1.5px solid var(--gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+
+    .coach-chip-cargo {
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    .coach-chip-email {
+      color: var(--text-3);
+      font-size: 11px;
+    }
+
+    .detail-actions {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-deactivate {
+      padding: 8px 16px;
+      background: var(--red-light);
+      border: 1.5px solid #fecaca;
+      border-radius: var(--radius-sm);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--red);
+      cursor: pointer;
+      transition: all .2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-deactivate:hover {
+      background: #fee2e2;
+      border-color: #fca5a5;
+    }
+
+    .btn-deactivate:active { transform: scale(.97); }
+
+    .deactivate-note {
+      font-size: 11px;
+      color: var(--text-3);
+    }
+
+    /* ─── EMPTY STATE ─── */
+    .empty-state {
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--text-3);
+      font-size: 14px;
+    }
+
+    .empty-icon { font-size: 36px; margin-bottom: 10px; }
+
+    /* ─── TOAST ─── */
+    #toast-container {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: var(--navy);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 4px 20px rgba(0,0,0,.25);
+      animation: toastIn .25s ease forwards;
+      pointer-events: auto;
+      max-width: 400px;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    .toast.warning { background: #92400e; }
+    .toast.success { background: #14532d; }
+    .toast.error   { background: #7f1d1d; }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes toastOut {
+      from { opacity: 1; transform: translateY(0); }
+      to   { opacity: 0; transform: translateY(8px); }
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 860px) {
+      .admin-header-inner { padding: 0 16px; }
+      .header-rt-area { display: none; }
+      .admin-body { padding: 20px 16px 48px; }
+    }
+
+    @media (max-width: 600px) {
+      .ac-table thead th:nth-child(3),
+      .ac-table tbody td:nth-child(3),
+      .ac-table thead th:nth-child(4),
+      .ac-table tbody td:nth-child(4) { display: none; }
+      #search-ac { width: 160px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ──────────────────────────────────────────────────────
+     LOADING STATE
+────────────────────────────────────────────────────── -->
+<div id="loading">
+  <div class="loading-logo">
+    <div class="loading-mark">
+      <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="11" cy="11" r="9" stroke="#D4A843" stroke-width="2"/>
+        <path d="M4 11 Q7 6 11 11 Q15 16 18 11" stroke="#D4A843" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="loading-title">ACE Admin</div>
+      <div class="loading-sub">Raw Tennis · Brasília</div>
+    </div>
+  </div>
+  <div class="spinner-ring"></div>
+  <div class="loading-text">Verificando acesso...</div>
+</div>
+
+<!-- ──────────────────────────────────────────────────────
+     ACCESS DENIED STATE
+────────────────────────────────────────────────────── -->
+<div id="access-denied" style="display:none">
+  <div class="access-denied-card">
+    <span class="access-denied-icon">🔒</span>
+    <div class="access-denied-title">Acesso Restrito</div>
+    <p class="access-denied-text">
+      Você não tem permissão para acessar o painel administrativo.<br>
+      Esta área é exclusiva para administradores Raw Tennis.
+    </p>
+    <a href="index.html" class="btn-back">
+      ← Voltar ao app
+    </a>
+  </div>
+</div>
+
+<!-- ──────────────────────────────────────────────────────
+     MAIN CONTENT
+────────────────────────────────────────────────────── -->
+<div id="main-content" style="display:none">
+
+  <!-- HEADER -->
+  <header class="admin-header">
+    <div class="admin-header-inner">
+
+      <!-- Brand left -->
+      <div class="header-brand">
+        <div class="header-logo-mark">
+          <svg viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="11" cy="11" r="9" stroke="#D4A843" stroke-width="2"/>
+            <path d="M4 11 Q7 6 11 11 Q15 16 18 11" stroke="#D4A843" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="header-brand-text">
+          <span class="header-ace">ACE Passport</span>
+          <span class="header-sub">Player Platform</span>
+        </div>
+      </div>
+
+      <div class="header-divider"></div>
+
+      <div class="header-panel-badge">
+        ⚡ Admin Panel
+      </div>
+
+      <div class="header-spacer"></div>
+
+      <!-- Raw Tennis logo area -->
+      <div class="header-rt-area">
+        <div class="rt-logo-pill">
+          <div class="rt-ball">
+            <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="7" cy="7" r="5.5" stroke="#0F1F35" stroke-width="1.5"/>
+              <path d="M2.5 7 Q4.5 4 7 7 Q9.5 10 11.5 7" stroke="#0F1F35" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="rt-name">Raw Tennis</span>
+        </div>
+      </div>
+
+      <!-- User / logout -->
+      <div class="header-user">
+        <div class="user-avatar">👤</div>
+        <span class="user-name" id="admin-nome">Admin</span>
+      </div>
+
+      <button class="btn-logout" onclick="logout()">
+        Sair
+      </button>
+
+    </div>
+  </header>
+
+  <!-- BODY -->
+  <main class="admin-body">
+
+    <!-- Page Title -->
+    <div class="page-title-row">
+      <div class="page-title">Visão Geral</div>
+      <div class="page-title-sub" id="last-updated">Carregando dados...</div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-icon-label">
+          <span class="stat-icon">🏢</span>
+          <span class="stat-label">Academias ativas</span>
+        </div>
+        <div class="stat-value" id="stat-academias">–</div>
+        <div class="stat-hint">cadastradas na plataforma</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon-label">
+          <span class="stat-icon">👥</span>
+          <span class="stat-label">Total coaches</span>
+        </div>
+        <div class="stat-value" id="stat-coaches">–</div>
+        <div class="stat-hint">coaches ativos</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon-label">
+          <span class="stat-icon">🎾</span>
+          <span class="stat-label">Total alunos</span>
+        </div>
+        <div class="stat-value" id="stat-alunos">–</div>
+        <div class="stat-hint">alunos cadastrados</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon-label">
+          <span class="stat-icon">📅</span>
+          <span class="stat-label">Aulas hoje</span>
+        </div>
+        <div class="stat-value" id="stat-aulas">0</div>
+        <div class="stat-hint">agendadas para hoje</div>
+      </div>
+    </div>
+
+    <!-- Academias Section -->
+    <div class="section-header">
+      <div class="section-title">Academias Cadastradas</div>
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          id="search-ac"
+          placeholder="Buscar academia ou cidade..."
+          oninput="filterAcademias()"
+          autocomplete="off"
+        >
+      </div>
+    </div>
+
+    <div class="table-card">
+      <table class="ac-table">
+        <thead>
+          <tr>
+            <th>Academia</th>
+            <th>Cidade</th>
+            <th class="center">Coaches</th>
+            <th class="center">Alunos</th>
+            <th>Cadastro</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="ac-tbody">
+          <tr>
+            <td colspan="6">
+              <div class="empty-state">
+                <div class="spinner-ring" style="margin:0 auto 10px"></div>
+                <div>Carregando academias...</div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- Supabase CDN -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+
+<script>
+  /*
+   * ACE Player Passport — Admin Panel
+   * Raw Tennis, Brasília
+   *
+   * NOTE: Stats queries (academias, coaches_academia, alunos) are subject
+   * to RLS policies configured in Supabase. If the admin user is also a coach
+   * in the Raw Tennis academia, the helper function `get_my_academia_id()` will
+   * scope results to that single academia. To expose cross-academy aggregates,
+   * either:
+   *   a) Add an RLS bypass policy for rows in the `admins` table, or
+   *   b) Use a Postgres function with SECURITY DEFINER + service role.
+   * For now, counts reflect data visible to the authenticated user's RLS context.
+   */
+
+  const SB_URL = 'https://elihmklizdmjnvstgiqq.supabase.co';
+  const SB_KEY = 'sb_publishable_Q9mcknF35hu-6kWPoRv7Pg_MAfS23a2';
+  const sb = supabase.createClient(SB_URL, SB_KEY);
+
+  let adminData  = null;
+  let allAcademias = [];
+
+  /* ──────────────────────────────
+     INIT
+  ────────────────────────────── */
+  async function initAdmin() {
+    try {
+      // 1. Check auth session
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      // 2. Verify admin table
+      const { data: adm, error: admErr } = await sb
+        .from('admins')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .single();
+
+      if (admErr || !adm) {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('access-denied').style.display = '';
+        return;
+      }
+
+      adminData = adm;
+      document.getElementById('admin-nome').textContent =
+        adm.nome || session.user.email || 'Admin';
+
+      // 3. Load data in parallel
+      await Promise.all([loadStats(), loadAcademias()]);
+
+      // Update last-updated timestamp
+      const now = new Date();
+      document.getElementById('last-updated').textContent =
+        'Atualizado às ' + now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) +
+        ' · ' + now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+      // 4. Show content
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('main-content').style.display = '';
+
+    } catch (err) {
+      console.error('initAdmin error:', err);
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('access-denied').style.display = '';
+    }
+  }
+
+  /* ──────────────────────────────
+     STATS
+  ────────────────────────────── */
+  async function loadStats() {
+    const [
+      { count: acCount,    error: e1 },
+      { count: coachCount, error: e2 },
+      { count: alunoCount, error: e3 },
+    ] = await Promise.all([
+      sb.from('academias').select('*', { count: 'exact', head: true }),
+      sb.from('coaches_academia').select('*', { count: 'exact', head: true }).eq('ativo', true),
+      sb.from('alunos').select('*', { count: 'exact', head: true }),
+    ]);
+
+    if (e1) console.warn('academias count error:', e1.message);
+    if (e2) console.warn('coaches count error:',   e2.message);
+    if (e3) console.warn('alunos count error:',    e3.message);
+
+    animateCount('stat-academias', acCount    ?? 0);
+    animateCount('stat-coaches',   coachCount ?? 0);
+    animateCount('stat-alunos',    alunoCount ?? 0);
+  }
+
+  /* Smooth number count-up animation */
+  function animateCount(id, target) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const duration = 600;
+    const start    = performance.now();
+    const from     = 0;
+
+    function step(now) {
+      const elapsed  = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased    = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      el.textContent = Math.round(from + (target - from) * eased);
+      if (progress < 1) requestAnimationFrame(step);
+      else el.textContent = target;
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  /* ──────────────────────────────
+     ACADEMIAS TABLE
+  ────────────────────────────── */
+  async function loadAcademias() {
+    const [
+      { data: academias, error: e1 },
+      { data: coaches,   error: e2 },
+      { data: alunos,    error: e3 },
+    ] = await Promise.all([
+      sb.from('academias').select('*').order('created_at', { ascending: false }),
+      sb.from('coaches_academia').select('coach_id, academia_id, cargo, ativo'),
+      sb.from('alunos').select('id, academia_id'),
+    ]);
+
+    if (e1) { console.warn('academias load error:', e1.message); }
+    if (e2) { console.warn('coaches load error:',   e2.message); }
+    if (e3) { console.warn('alunos load error:',    e3.message); }
+
+    const rows = (academias || []).map(ac => {
+      const acCoaches = (coaches || []).filter(c => c.academia_id === ac.id && c.ativo);
+      const acAlunos  = (alunos  || []).filter(a => a.academia_id === ac.id);
+      return {
+        ...ac,
+        coachCount: acCoaches.length,
+        alunoCount: acAlunos.length,
+        coaches:    acCoaches,
+      };
+    });
+
+    renderAcademias(rows);
+  }
+
+  function renderAcademias(rows) {
+    allAcademias = rows;
+    filterAcademias();
+  }
+
+  function filterAcademias() {
+    const q = (document.getElementById('search-ac')?.value || '').toLowerCase().trim();
+    const filtered = q
+      ? allAcademias.filter(a =>
+          (a.nome   || '').toLowerCase().includes(q) ||
+          (a.cidade || '').toLowerCase().includes(q)
+        )
+      : allAcademias;
+
+    const tbody = document.getElementById('ac-tbody');
+    if (!tbody) return;
+
+    if (!filtered.length) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6">
+            <div class="empty-state">
+              <div class="empty-icon">🔍</div>
+              <div>Nenhuma academia encontrada${q ? ' para "' + escapeHtml(q) + '"' : ''}</div>
+            </div>
+          </td>
+        </tr>`;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(ac => buildRowHtml(ac)).join('');
+  }
+
+  function buildRowHtml(ac) {
+    const dateStr = ac.created_at
+      ? new Date(ac.created_at).toLocaleDateString('pt-BR')
+      : '—';
+
+    const coachChips = ac.coaches.length
+      ? ac.coaches.map(c => `
+          <div class="coach-chip">
+            <div class="coach-chip-avatar">👤</div>
+            <span class="coach-chip-cargo">${escapeHtml(c.cargo || 'Coach')}</span>
+          </div>`).join('')
+      : `<span style="color:var(--text-3);font-size:12px">Nenhum coach ativo</span>`;
+
+    return `
+      <tr id="row-${ac.id}" class="data-row">
+        <td class="ac-name">${escapeHtml(ac.nome || '—')}</td>
+        <td class="ac-cidade">${escapeHtml(ac.cidade || '—')}</td>
+        <td class="ac-count">${ac.coachCount}</td>
+        <td class="ac-count">${ac.alunoCount}</td>
+        <td class="ac-date">${dateStr}</td>
+        <td class="status-cell">
+          <span class="status-badge">✅ Ativa</span>
+          <button
+            id="expand-${ac.id}"
+            class="btn-expand"
+            onclick="toggleDetails('${ac.id}')"
+            aria-expanded="false"
+            aria-label="Ver detalhes de ${escapeHtml(ac.nome || '')}"
+          >▼</button>
+        </td>
+      </tr>
+      <tr id="detail-${ac.id}" class="detail-row" style="display:none">
+        <td colspan="6">
+          <div class="detail-panel">
+            <div class="detail-section-label">Coaches (${ac.coachCount})</div>
+            <div class="coach-chips">${coachChips}</div>
+            <div class="detail-actions">
+              <button
+                class="btn-deactivate"
+                onclick="desativarAcademia('${ac.id}', ${JSON.stringify(ac.nome || '')})"
+              >
+                🔴 Desativar academia
+              </button>
+              <span class="deactivate-note">Os coaches perderão acesso ao app.</span>
+            </div>
+          </div>
+        </td>
+      </tr>`;
+  }
+
+  /* ──────────────────────────────
+     ROW INTERACTIONS
+  ────────────────────────────── */
+  function toggleDetails(id) {
+    const detailRow = document.getElementById('detail-' + id);
+    const expandBtn = document.getElementById('expand-' + id);
+    if (!detailRow) return;
+
+    const isOpen = detailRow.style.display !== 'none';
+    detailRow.style.display = isOpen ? 'none' : '';
+
+    if (expandBtn) {
+      expandBtn.textContent = isOpen ? '▼' : '▲';
+      expandBtn.classList.toggle('open', !isOpen);
+      expandBtn.setAttribute('aria-expanded', String(!isOpen));
+    }
+  }
+
+  async function desativarAcademia(id, nome) {
+    const confirmed = confirm(
+      `Desativar "${nome}"?\n\nOs coaches não conseguirão mais acessar o app.`
+    );
+    if (!confirmed) return;
+
+    /*
+     * Full deactivation requires a service-role key or a SECURITY DEFINER
+     * Postgres function to bypass RLS. The anon key is intentionally limited.
+     * Use the Supabase dashboard or a backend endpoint to perform this action.
+     */
+    showToast(
+      '⚠️ Para desativar, use o painel do Supabase (requer permissão de admin).',
+      'warning'
+    );
+  }
+
+  /* ──────────────────────────────
+     LOGOUT
+  ────────────────────────────── */
+  async function logout() {
+    await sb.auth.signOut();
+    window.location.href = 'index.html';
+  }
+
+  /* ──────────────────────────────
+     TOAST
+  ────────────────────────────── */
+  function showToast(msg, type = '') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = 'toast' + (type ? ' ' + type : '');
+    toast.textContent = msg;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.animation = 'toastOut .25s ease forwards';
+      setTimeout(() => toast.remove(), 260);
+    }, 3200);
+  }
+
+  /* ──────────────────────────────
+     UTILS
+  ────────────────────────────── */
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  /* ──────────────────────────────
+     BOOT
+  ────────────────────────────── */
+  initAdmin();
+</script>
+</body>
+</html>
