@@ -33,6 +33,89 @@
   --fisico-c:#7A3B0A; --fisico-l:#FDF0E0;
 }
 
+[data-theme="light"] {
+  --bg:        #F4F7FB;
+  --bg2:       #FFFFFF;
+  --bg3:       #EEF2F8;
+  --card:      #FFFFFF;
+  --border:    #D8E2F0;
+  --border2:   #C0CFE4;
+  --gold:      #B8860B;
+  --gold2:     #D4A017;
+  --gold-glow: rgba(184,134,11,.12);
+  --t1:        #0F1F35;
+  --t2:        #3A5272;
+  --t3:        #7A95BB;
+  --drill-c:#E8F4FD; --drill-l:#1A4A6E;
+  --jogo-c:#E8F8EE;  --jogo-l:#1A5E35;
+  --game-c:#F4E8FD;  --game-l:#5C1A7A;
+  --fisico-c:#FDF0E0; --fisico-l:#7A3B0A;
+}
+
+[data-theme="light"] body {
+  background: var(--bg);
+  color: var(--t1);
+}
+
+[data-theme="light"] .hdr {
+  background: linear-gradient(90deg, #FFFFFF, #F4F7FB);
+  border-bottom-color: var(--border);
+  box-shadow: 0 1px 8px rgba(0,0,0,.08);
+}
+
+[data-theme="light"] .sb {
+  background: #FFFFFF;
+  border-right-color: var(--border);
+}
+
+[data-theme="light"] .sb-item { color: var(--t2); }
+[data-theme="light"] .sb-item:hover { background: rgba(0,0,0,.03); }
+[data-theme="light"] .sb-item.on { background: rgba(184,134,11,.06); border-left-color: var(--gold); }
+
+[data-theme="light"] .setup-card,
+[data-theme="light"] .modal-content {
+  background: #FFFFFF;
+  border-color: var(--border);
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+}
+
+[data-theme="light"] .fld-inp,
+[data-theme="light"] input,
+[data-theme="light"] select,
+[data-theme="light"] textarea {
+  background: var(--bg3) !important;
+  border-color: var(--border) !important;
+  color: var(--t1) !important;
+}
+
+[data-theme="light"] .cal-day {
+  background: #FFFFFF;
+  border-color: var(--border);
+}
+
+[data-theme="light"] .cal-day.has-ev { border-color: rgba(184,134,11,.35); }
+[data-theme="light"] .cal-day.today  { border-color: var(--gold); }
+
+[data-theme="light"] .treino-card,
+[data-theme="light"] .drill-item {
+  background: #FFFFFF;
+  border-color: var(--border);
+}
+
+[data-theme="light"] .tab-btn { color: var(--t3); }
+[data-theme="light"] .tab-btn.on { color: var(--gold); border-bottom-color: var(--gold); }
+
+[data-theme="light"] .fase-block { background: var(--bg3); }
+[data-theme="light"] .fase-body  { background: #FFFFFF; }
+
+[data-theme="light"] .modal-bg { background: rgba(0,0,0,.35); }
+
+[data-theme="light"] .gen-btn { background: var(--gold); color: #FFFFFF; }
+[data-theme="light"] .gen-btn:hover { background: var(--gold2); }
+
+[data-theme="light"] .ace { color: var(--gold); }
+[data-theme="light"] .hdr-badge { background: rgba(184,134,11,.1); border-color: rgba(184,134,11,.3); color: var(--gold); }
+
 body { font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(--t1); min-height:100vh; overflow-x:hidden; }
 
 /* ── HEADER ── */
@@ -240,6 +323,7 @@ body { font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(-
   <div style="display:flex;align-items:center;gap:10px">
     <span id="hdr-academia" style="font-size:11px;color:var(--t3);font-weight:500"></span>
     <div class="hdr-badge">Planejador de Sessão</div>
+    <button id="theme-toggle" onclick="toggleTheme()" title="Alternar tema" style="background:none;border:1px solid var(--border2);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:16px;color:var(--t2);transition:all .15s" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border2)'">☀️</button>
   </div>
 </header>
 
@@ -1360,6 +1444,28 @@ let minhaSessao = [];
 
 const MESES_BR = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const DIAS_BR = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+/* ── THEME TOGGLE ── */
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  const btn = document.getElementById('theme-toggle');
+  if (btn) btn.textContent = isDark ? '🌙' : '☀️';
+  localStorage.setItem('planner-theme', isDark ? 'light' : 'dark');
+}
+
+// Restore saved theme
+(function() {
+  const saved = localStorage.getItem('planner-theme');
+  if (saved === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+    // btn not rendered yet — will be set after DOM ready
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('theme-toggle');
+      if (btn) btn.textContent = '🌙';
+    });
+  }
+})();
 
 /* ════════════════════════════════════════════════════════
    INIT
