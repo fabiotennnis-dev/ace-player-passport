@@ -566,6 +566,19 @@
   <h1 class="page-title">Crie sua conta</h1>
   <p class="page-subtitle">Plataforma de gestão para academias de tênis</p>
 
+  <!-- Invite banner (hidden by default) -->
+  <div id="invite-banner" style="display:none;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:14px 16px;margin-bottom:20px;text-align:center">
+    <div style="font-size:18px;margin-bottom:4px">🎾</div>
+    <div style="font-size:14px;font-weight:700;color:#166534">Convite recebido!</div>
+    <div style="font-size:13px;color:#15803d;margin-top:3px">Você foi convidado para a academia <strong class="invite-academia"></strong></div>
+  </div>
+  <!-- Invite error -->
+  <div id="invite-error" style="display:none;background:#fef2f2;border:1.5px solid #fecaca;border-radius:12px;padding:14px 16px;margin-bottom:20px;text-align:center">
+    <div style="font-size:18px;margin-bottom:4px">⚠️</div>
+    <div style="font-size:14px;font-weight:700;color:#dc2626">Convite inválido ou expirado</div>
+    <div style="font-size:13px;color:#ef4444;margin-top:3px">Este link de convite não é mais válido. Solicite um novo convite.</div>
+  </div>
+
   <!-- PROGRESS -->
   <div class="progress" id="progress">
     <div class="prog-step active" id="ps1">
@@ -723,6 +736,64 @@
     const SB_URL = 'https://elihmklizdmjnvstgiqq.supabase.co';
     const SB_KEY = 'sb_publishable_Q9mcknF35hu-6kWPoRv7Pg_MAfS23a2';
     const sb = supabase.createClient(SB_URL, SB_KEY);
+
+    // Check for invite token
+    let inviteData = null;
+
+    async function checkInviteToken() {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('convite');
+      if (!token) return;
+
+      const { data, error } = await sb
+        .from('convites')
+        .select('*, academias(nome, cidade)')
+        .eq('token', token)
+        .eq('usado', false)
+        .gt('expires_at', new Date().toISOString())
+        .single();
+
+      if (error || !data) {
+        // Invalid or expired token — show error
+        document.getElementById('invite-banner').style.display = 'none';
+        document.getElementById('invite-error').style.display = '';
+        return;
+      }
+
+      inviteData = data;
+
+      // Show invite banner
+      const banner = document.getElementById('invite-banner');
+      banner.style.display = '';
+      banner.querySelector('.invite-academia').textContent = data.academias?.nome || 'academia';
+
+      // Pre-fill and lock step 1
+      document.getElementById('nome_academia').value = data.academias?.nome || '';
+      document.getElementById('nome_academia').readOnly = true;
+      document.getElementById('nome_academia').style.opacity = '0.7';
+      document.getElementById('cidade').value = data.academias?.cidade || '';
+      document.getElementById('cidade').readOnly = true;
+      document.getElementById('cidade').style.opacity = '0.7';
+
+      // Pre-fill step 2
+      if (document.getElementById('nome_completo')) {
+        document.getElementById('nome_completo').value = data.nome || '';
+      }
+      if (document.getElementById('email')) {
+        document.getElementById('email').value = data.email || '';
+        document.getElementById('email').readOnly = true;
+        document.getElementById('email').style.opacity = '0.7';
+      }
+
+      // Change title
+      document.querySelector('.page-title').textContent = 'Você foi convidado!';
+      document.querySelector('.page-subtitle').textContent = `Crie sua conta de coach na ${data.academias?.nome || 'academia'}`;
+
+      // Store token for use in submitCadastro
+      window._inviteToken = token;
+      window._inviteAcademiaId = data.academia_id;
+      window._inviteCargo = data.cargo;
+    }
 
     let currentStep = 1;
     let formData = {};
@@ -895,36 +966,55 @@
 
         const user = authData.user;
 
-        /* 2. Insert academia */
-        const { data: academia, error: acadErr } = await sb
-          .from('academias')
-          .insert({
-            nome: formData.academia,
-            cidade: formData.cidade,
-            porte: formData.porte,
-          })
-          .select()
-          .single();
-
-        if (acadErr) {
-          showBanner('Conta criada, mas houve um erro ao registrar a academia. Entre em contato com o suporte.');
-          setLoading('btn-step2', false);
-          return;
-        }
-
-        /* 3. Insert coach relation */
-        const { error: coachErr } = await sb
-          .from('coaches_academia')
-          .insert({
+        if (window._inviteToken) {
+          /* Invite flow: link to existing academia */
+          const { error: coachErr } = await sb.from('coaches_academia').insert({
             coach_id: user.id,
-            academia_id: academia.id,
-            cargo: 'Head Coach',
+            academia_id: window._inviteAcademiaId,
+            cargo: window._inviteCargo || 'Coach',
             ativo: true,
           });
 
-        if (coachErr) {
-          // Non-fatal — account and academia exist, just log
-          console.warn('coaches_academia insert error:', coachErr.message);
+          if (coachErr) {
+            console.warn('coaches_academia insert error (invite):', coachErr.message);
+          }
+
+          await sb.from('convites').update({ usado: true }).eq('token', window._inviteToken);
+
+        } else {
+          /* Normal flow: create new academia */
+
+          /* 2. Insert academia */
+          const { data: academia, error: acadErr } = await sb
+            .from('academias')
+            .insert({
+              nome: formData.academia,
+              cidade: formData.cidade,
+              porte: formData.porte,
+            })
+            .select()
+            .single();
+
+          if (acadErr) {
+            showBanner('Conta criada, mas houve um erro ao registrar a academia. Entre em contato com o suporte.');
+            setLoading('btn-step2', false);
+            return;
+          }
+
+          /* 3. Insert coach relation */
+          const { error: coachErr } = await sb
+            .from('coaches_academia')
+            .insert({
+              coach_id: user.id,
+              academia_id: academia.id,
+              cargo: 'Head Coach',
+              ativo: true,
+            });
+
+          if (coachErr) {
+            // Non-fatal — account and academia exist, just log
+            console.warn('coaches_academia insert error:', coachErr.message);
+          }
         }
 
         /* 4. Success */
@@ -955,6 +1045,7 @@
       requestAnimationFrame(() => {
         requestAnimationFrame(() => { s1.classList.add('in'); });
       });
+      checkInviteToken();
     });
   </script>
 </body>
