@@ -13,14 +13,13 @@ CREATE TABLE IF NOT EXISTS convites (
 
 ALTER TABLE convites ENABLE ROW LEVEL SECURITY;
 
--- Head coach can create invites for their academia
+-- Any coach from the academia can create invites
 DROP POLICY IF EXISTS "Head coach cria convites" ON convites;
 CREATE POLICY "Head coach cria convites"
 ON convites FOR INSERT
 WITH CHECK (
   academia_id = get_my_academia_id()
   AND convidado_por = auth.uid()
-  AND is_head_coach()
 );
 
 -- Head coach can see invites of their academia
