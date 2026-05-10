@@ -285,6 +285,10 @@ body { font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(-
   <div class="sb-item on" id="sv-cal" onclick="setView('cal')">📅 Calendário</div>
   <div class="sb-item" id="sv-busca" onclick="setView('busca')">🔎 Buscar Treinos</div>
   <div class="sb-item" id="sv-sessao" onclick="setView('sessao')">📋 Minha Sessão <span id="sessao-count-sb" style="margin-left:auto;background:var(--gold);color:var(--bg);border-radius:10px;padding:1px 6px;font-size:9px;font-weight:700;display:none">0</span></div>
+  <div class="sb-divider"></div>
+  <div class="sb-item" id="sv-exercicios" onclick="setView('exercicios')">
+    <span>🏃</span> Exercícios Livres
+  </div>
 </nav>
 
 <!-- MAIN -->
@@ -466,6 +470,55 @@ body { font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(-
       </div>
     </div>
     <div id="sessao-output"><div class="empty">Sua sessão está vazia.<br>Adicione treinos pelo Buscador ou clicando em exercícios dentro de um plano de aula.</div></div>
+  </div>
+
+  <!-- ========= EXERCÍCIOS LIVRES ========= -->
+  <div id="view-exercicios" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div class="busca-title" style="margin:0">🏃 Exercícios Livres</div>
+      <button id="btn-add-ex" onclick="openAddExercicio()" style="display:none;padding:8px 16px;background:var(--gold);color:var(--bg);font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;border:none;border-radius:7px;cursor:pointer">+ Novo Exercício</button>
+    </div>
+
+    <div style="position:relative;margin-bottom:20px">
+      <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:18px;pointer-events:none">🔍</span>
+      <input id="ex-search" type="text" placeholder="Digite o tema... ex: ponto de contato, slice, movimentação lateral"
+        style="width:100%;padding:13px 14px 13px 44px;background:var(--card);border:1px solid var(--border2);border-radius:10px;font-family:'Space Grotesk',sans-serif;font-size:14px;color:var(--t1);outline:none;transition:border-color .15s"
+        oninput="renderExercicios()" onfocus="this.style.borderColor='rgba(212,168,67,.5)'" onblur="this.style.borderColor='var(--border2)'">
+    </div>
+
+    <div id="ex-count" style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--t3);margin-bottom:14px">—</div>
+    <div id="ex-output"></div>
+
+    <!-- Add exercise form (hidden by default) -->
+    <div id="ex-form" style="display:none;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-top:20px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--gold);margin-bottom:16px">Novo Exercício</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div>
+          <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:5px">Título *</div>
+          <input id="ex-titulo" type="text" placeholder="Ex: Forehand — Ponto de Contato" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--t1);outline:none">
+        </div>
+        <div>
+          <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:5px">Descrição *</div>
+          <textarea id="ex-desc" rows="3" placeholder="Descreva o exercício em detalhes..." style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--t1);outline:none;resize:vertical"></textarea>
+        </div>
+        <div>
+          <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:5px">Cue (frase de ativação)</div>
+          <input id="ex-cue" type="text" placeholder='Ex: "Bola no bolso!"' style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--t1);outline:none">
+        </div>
+        <div>
+          <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:5px">Tags (separadas por vírgula)</div>
+          <input id="ex-tags" type="text" placeholder="forehand, ponto de contato, topspin" style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--t1);outline:none">
+        </div>
+        <div>
+          <div style="font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:5px">URL da Imagem (opcional)</div>
+          <input id="ex-img" type="url" placeholder="https://..." style="width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;font-family:'Space Grotesk',sans-serif;font-size:13px;color:var(--t1);outline:none">
+        </div>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button onclick="closeAddExercicio()" style="flex:1;padding:10px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;color:var(--t2);cursor:pointer">Cancelar</button>
+          <button onclick="saveExercicio()" style="flex:2;padding:10px;background:var(--gold);color:var(--bg);font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;border:none;border-radius:7px;cursor:pointer">SALVAR EXERCÍCIO</button>
+        </div>
+      </div>
+    </div>
   </div>
 
 </main>
@@ -1197,6 +1250,8 @@ async function initPlanner() {
     (cp || []).forEach(p => { calProgressData[p.turma_id] = p.ciclo_index; });
 
     renderSbTurmas();
+    await loadExercicios();
+    await checkHeadCoach();
   } catch(e) {
     console.error('initPlanner:', e);
   }
@@ -1324,11 +1379,11 @@ function setSbPuls(el, p) {
 
 function setView(v) {
   curView = v;
-  ['cal','busca','sessao'].forEach(x => {
+  ['cal','busca','sessao','exercicios'].forEach(x => {
     const el = document.getElementById('view-' + x);
     if (el) el.style.display = x === v ? '' : 'none';
   });
-  ['sv-cal','sv-busca','sv-sessao'].forEach(id => {
+  ['sv-cal','sv-busca','sv-sessao','sv-exercicios'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.remove('on');
   });
@@ -1830,6 +1885,158 @@ function printSessao() {
   ${itens}
   </body></html>`);
   win.print();
+}
+
+/* ════════════════════════════════════════════════════════
+   EXERCÍCIOS LIVRES
+════════════════════════════════════════════════════════ */
+let exerciciosSb = [];    // loaded from Supabase
+let isHeadCoach  = false; // set in initPlanner
+
+async function loadExercicios() {
+  if (!currentAcademia) return;
+  const { data } = await getDb()
+    .from('exercicios_livres')
+    .select('*')
+    .eq('academia_id', currentAcademia.id)
+    .order('created_at', { ascending: false });
+  exerciciosSb = data || [];
+}
+
+async function checkHeadCoach() {
+  if (!currentUser || !currentAcademia) return;
+  const { data } = await getDb()
+    .from('coaches_academia')
+    .select('cargo')
+    .eq('coach_id', currentUser.id)
+    .eq('academia_id', currentAcademia.id)
+    .single();
+  const hcRoles = ['Head Coach','Coordenador','Diretor','head_coach'];
+  isHeadCoach = data && hcRoles.includes(data.cargo);
+  const btn = document.getElementById('btn-add-ex');
+  if (btn) btn.style.display = isHeadCoach ? '' : 'none';
+}
+
+function renderExercicios() {
+  const q = (document.getElementById('ex-search')?.value || '').toLowerCase().trim();
+  const words = q ? q.split(/\s+/) : [];
+
+  // Map TREINOS to common shape
+  const fromTreinos = TREINOS.map(t => ({
+    _id:      't_' + t.id,
+    titulo:   t.titulo,
+    descricao: t.descricao,
+    cue:      t.exercicios?.[0]?.cue || '',
+    tags:     t.habilidades || [],
+    imagem_url: '',
+    source:   'local'
+  }));
+
+  // Combine with Supabase exercises
+  const all = [
+    ...exerciciosSb.map(e => ({ ...e, _id: 'sb_' + e.id, source: 'supabase' })),
+    ...fromTreinos
+  ];
+
+  // Filter
+  const filtered = words.length === 0 ? all : all.filter(e => {
+    const txt = [e.titulo, e.descricao, e.cue, ...(e.tags || [])].join(' ').toLowerCase();
+    return words.every(w => txt.includes(w));
+  });
+
+  const countEl = document.getElementById('ex-count');
+  const outEl   = document.getElementById('ex-output');
+  if (!outEl) return;
+
+  if (!q) {
+    countEl.textContent = 'Digite algo para buscar exercícios';
+    outEl.innerHTML = `<div class="empty">Pesquise por qualquer tema:<br>
+      <span style="color:var(--gold)">"top spin"</span> ·
+      <span style="color:var(--gold)">"ponto de contato"</span> ·
+      <span style="color:var(--gold)">"slice backhand"</span> ·
+      <span style="color:var(--gold)">"movimentação"</span></div>`;
+    return;
+  }
+
+  countEl.textContent = `${filtered.length} exercício${filtered.length !== 1 ? 's' : ''} encontrado${filtered.length !== 1 ? 's' : ''}`;
+
+  if (!filtered.length) {
+    outEl.innerHTML = `<div class="empty">Nenhum exercício encontrado para "<strong>${q}</strong>".<br>
+      ${isHeadCoach ? 'Use o botão <strong>+ Novo Exercício</strong> para adicionar.' : 'Solicite ao Head Coach que adicione exercícios sobre este tema.'}</div>`;
+    return;
+  }
+
+  outEl.innerHTML = filtered.map(e => {
+    const tagHtml = (e.tags || []).slice(0, 4).map(tg =>
+      `<span style="font-size:9px;font-weight:600;background:rgba(212,168,67,.12);border:1px solid rgba(212,168,67,.2);border-radius:4px;padding:2px 7px;color:var(--gold)">${tg}</span>`
+    ).join('');
+    const imgHtml = e.imagem_url
+      ? `<img src="${e.imagem_url}" alt="" style="width:100%;max-height:180px;object-fit:cover;border-radius:8px;margin-bottom:10px" onerror="this.style.display='none'">`
+      : '';
+    const srcBadge = e.source === 'supabase'
+      ? `<span style="font-size:9px;font-weight:700;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.25);border-radius:4px;padding:2px 7px;color:#4ade80">ACADEMY</span>`
+      : `<span style="font-size:9px;font-weight:700;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--t3)">BIBLIOTECA</span>`;
+    return `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px">
+      ${imgHtml}
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px">
+        <div style="font-size:14px;font-weight:700;color:var(--t1);flex:1">${e.titulo}</div>
+        ${srcBadge}
+      </div>
+      <div style="font-size:12px;color:var(--t2);line-height:1.6;margin-bottom:8px">${e.descricao}</div>
+      ${e.cue ? `<div style="font-size:11px;color:var(--gold);background:var(--gold-glow);border-radius:6px;padding:6px 10px;margin-bottom:8px">💬 "${e.cue}"</div>` : ''}
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">${tagHtml}</div>
+      <button onclick="addExToSessao(${JSON.stringify(e).replace(/"/g,'&quot;')})" style="width:100%;padding:7px;background:rgba(212,168,67,.1);border:1px solid rgba(212,168,67,.3);border-radius:7px;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;color:var(--gold);cursor:pointer;transition:all .15s" onmouseover="this.style.background='rgba(212,168,67,.2)'" onmouseout="this.style.background='rgba(212,168,67,.1)'">+ Adicionar à Sessão</button>
+    </div>`;
+  }).join('');
+}
+
+function addExToSessao(e) {
+  const item = {
+    id:   'ex_' + Date.now(),
+    nome: e.titulo,
+    aula: '',
+    fase: 'Exercício Livre',
+    dur:  '—'
+  };
+  minhaSessao.push(item);
+  updateSessaoCount();
+  showToast('✅ Adicionado à sessão!');
+}
+
+function openAddExercicio() {
+  document.getElementById('ex-form').style.display = '';
+  document.getElementById('ex-titulo').focus();
+}
+
+function closeAddExercicio() {
+  document.getElementById('ex-form').style.display = 'none';
+  ['ex-titulo','ex-desc','ex-cue','ex-tags','ex-img'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+}
+
+async function saveExercicio() {
+  if (!isHeadCoach) { showToast('Apenas Head Coaches podem adicionar exercícios'); return; }
+  const titulo = document.getElementById('ex-titulo')?.value?.trim();
+  const desc   = document.getElementById('ex-desc')?.value?.trim();
+  if (!titulo || !desc) { showToast('Título e descrição são obrigatórios'); return; }
+  const cue    = document.getElementById('ex-cue')?.value?.trim() || '';
+  const tagsRaw= document.getElementById('ex-tags')?.value || '';
+  const tags   = tagsRaw.split(',').map(t => t.trim()).filter(Boolean);
+  const imgUrl = document.getElementById('ex-img')?.value?.trim() || '';
+
+  const { data, error } = await getDb().from('exercicios_livres').insert({
+    academia_id: currentAcademia.id,
+    coach_id:    currentUser.id,
+    titulo, descricao: desc, cue, tags, imagem_url: imgUrl
+  }).select().single();
+
+  if (error) { showToast('Erro ao salvar: ' + error.message); return; }
+  exerciciosSb.unshift(data);
+  closeAddExercicio();
+  showToast('✅ Exercício salvo!');
+  renderExercicios();
 }
 
 /* ════════════════════════════════════════════════════════
