@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revisão de Conteúdo — ACE Player Passport</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #F8FAFC;
+    color: #1E293B;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ── Header ── */
+  header {
+    background: #FFFFFF;
+    border-bottom: 2px solid #E2E8F0;
+    padding: 20px 24px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .back-link {
+    font-size: 13px;
+    color: #64748B;
+    text-decoration: none;
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+    padding: 4px 10px;
+  }
+  .back-link:hover { background: #F1F5F9; }
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0F172A;
+    flex: 1;
+  }
+
+  /* ── Notice bar ── */
+  .notice {
+    background: #FFF7ED;
+    border: 1px solid #FED7AA;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 13px;
+    color: #92400E;
+    margin: 0 24px 16px;
+  }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex;
+    gap: 4px;
+  }
+  .tab-btn {
+    padding: 10px 20px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748B;
+    border-bottom: 3px solid transparent;
+    transition: color .15s, border-color .15s;
+  }
+  .tab-btn.active {
+    color: #2563EB;
+    border-bottom-color: #2563EB;
+  }
+  .tab-btn:hover:not(.active) { color: #1E293B; }
+
+  /* ── Main content ── */
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 20px 60px;
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Ball level section ── */
+  .ball-section {
+    margin-bottom: 32px;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .ball-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    cursor: pointer;
+    user-select: none;
+    background: #F8FAFC;
+    border-bottom: 1px solid #E2E8F0;
+  }
+  .ball-header:hover { background: #F1F5F9; }
+  .ball-title {
+    font-size: 16px;
+    font-weight: 700;
+    flex: 1;
+  }
+  .ball-subtitle {
+    font-size: 12px;
+    color: #64748B;
+    font-weight: 400;
+  }
+  .chevron {
+    font-size: 12px;
+    color: #94A3B8;
+    transition: transform .2s;
+  }
+  .ball-section.collapsed .chevron { transform: rotate(-90deg); }
+  .ball-body {
+    padding: 0 20px 16px;
+  }
+  .ball-section.collapsed .ball-body { display: none; }
+
+  /* ── Divider ── */
+  .divider {
+    height: 1px;
+    background: #E2E8F0;
+    margin: 16px 0;
+  }
+
+  /* ── Prova card (Avaliações) ── */
+  .prova-card {
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    margin-top: 16px;
+    overflow: hidden;
+  }
+  .prova-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: #F8FAFC;
+    border-bottom: 1px solid #E2E8F0;
+    flex-wrap: wrap;
+  }
+  .prova-num {
+    font-size: 11px;
+    font-weight: 700;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    min-width: 52px;
+  }
+  .prova-nome {
+    font-weight: 600;
+    font-size: 14px;
+    flex: 1;
+  }
+  .prova-tipo {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-weight: 600;
+    background: #EFF6FF;
+    color: #1D4ED8;
+  }
+  .prova-tipo.Física, .prova-tipo.Físico { background: #F0FDF4; color: #15803D; }
+  .prova-tipo.Tático, .prova-tipo.Táticas { background: #FFF7ED; color: #C2410C; }
+  .prova-tipo.Jogo { background: #FAF5FF; color: #7E22CE; }
+  .prova-pts {
+    font-size: 12px;
+    color: #64748B;
+    white-space: nowrap;
+  }
+  .prova-desc {
+    padding: 8px 14px 4px;
+    font-size: 13px;
+    color: #475569;
+    font-style: italic;
+  }
+  .criterios-list {
+    padding: 4px 14px 12px;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .criterio-item {
+    display: flex;
+    gap: 8px;
+    font-size: 13.5px;
+    align-items: baseline;
+  }
+  .crit-id {
+    font-weight: 700;
+    min-width: 22px;
+    color: #334155;
+  }
+  .crit-pts {
+    font-size: 11px;
+    color: #94A3B8;
+    white-space: nowrap;
+  }
+  .crit-desc { color: #334155; flex: 1; }
+
+  /* ── Requirements (Requisitos) ── */
+  .cat-block { margin-top: 16px; }
+  .cat-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    color: #475569;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .cat-count {
+    font-size: 11px;
+    font-weight: 400;
+    color: #94A3B8;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .req-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .req-list li {
+    font-size: 13.5px;
+    color: #334155;
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+  }
+  .req-list li::before {
+    content: attr(data-n) ".";
+    min-width: 24px;
+    color: #94A3B8;
+    font-size: 12px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* ── Print ── */
+  @media print {
+    header { position: static; box-shadow: none; }
+    .tab-btn { display: none; }
+    .tab-panel { display: block !important; }
+    .ball-section.collapsed .ball-body { display: block; }
+    .notice { break-inside: avoid; }
+    .prova-card { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <a class="back-link" href="index.html">← Voltar ao App</a>
+    <h1>📋 Revisão de Conteúdo — ACE Player Passport</h1>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('avaliacoes', this)">Avaliações</button>
+    <button class="tab-btn" onclick="switchTab('requisitos', this)">Requisitos</button>
+  </div>
+</header>
+
+<div class="notice">
+  Use esta página para revisar o conteúdo. Para reportar correções, envie:
+  <strong>Bola X · Prova/Requisito Y · [o que está errado] → [o que deve ser]</strong>
+</div>
+
+<main>
+
+<!-- ════════════════ AVALIAÇÕES ════════════════ -->
+<div id="tab-avaliacoes" class="tab-panel active"></div>
+
+<!-- ════════════════ REQUISITOS ════════════════ -->
+<div id="tab-requisitos" class="tab-panel"></div>
+
+</main>
+
+<script>
+const EVAL = {"roxa":{"label":"Bola Roxa","color":"#7c3aed","ball":"🟣","quadra":"Quadra reduzida · Rede baixa","bola":"Bola de espuma / Roxa","provas":[{"num":1,"nome":"Posição de espera","tipo":"Técnica","descricao":"Avalia se o aluno assume a posição correta de espera (tenista) e a posição de surfista no FH e BH.","min":4,"total":6,"criterios":[{"id":"A","desc":"Posição de expectativa (tenista) — joelhos dobrados, pé na frente do outro","pts":2},{"id":"B","desc":"Posição surfista no Forehand — lado esquerdo à frente","pts":2},{"id":"C","desc":"Posição surfista no Backhand — lado direito à frente","pts":2}]},{"num":2,"nome":"Arremesso","tipo":"Técnica","descricao":"Avalia arremesso com a mão e com a raquete dentro da quadra.","min":4,"total":6,"criterios":[{"id":"A","desc":"Arremessar a bola com a mão para dentro da quadra (3 de 4)","pts":2},{"id":"B","desc":"Arremessar a bola com a raquete para dentro da quadra (3 de 4)","pts":2},{"id":"C","desc":"Posição surfista durante o arremesso","pts":2}]},{"num":3,"nome":"Troca de bola com o treinador","tipo":"Técnica","descricao":"Avalia a capacidade de trocar bola cooperativamente com o treinador.","min":4,"total":6,"criterios":[{"id":"A","desc":"Trocar 4 bolas seguidas com o treinador","pts":2},{"id":"B","desc":"Bater a bola frente ao corpo","pts":2},{"id":"C","desc":"Manter posição surfista durante a troca","pts":2}]},{"num":4,"nome":"Jogo mão/mão e mão/raquete","tipo":"Jogo","descricao":"Avalia coordenação motora básica — jogar com a mão e depois com a raquete.","min":4,"total":6,"criterios":[{"id":"A","desc":"Conseguir jogar mão/mão com o treinador (rally de 3)","pts":2},{"id":"B","desc":"Conseguir jogar mão/raquete com o treinador (rally de 3)","pts":2},{"id":"C","desc":"Manter foco e disposição durante o jogo","pts":2}]},{"num":5,"nome":"Regras básicas","tipo":"Tático","descricao":"Avalia se o aluno entende dentro/fora e consegue acompanhar a contagem.","min":3,"total":4,"criterios":[{"id":"A","desc":"Saber distinguir bola dentro e fora (3 de 4 tentativas)","pts":2},{"id":"B","desc":"Entender a contagem de um game (love, 15, 30, 40)","pts":2}]}]},"vermelha_branca":{"label":"Vermelha-Branca","color":"#ff6666","ball":"🔴","quadra":"12,80m × 5,50m · Rede 80cm","bola":"Bola Vermelha (75% mais lenta)","provas":[{"num":1,"nome":"Troca de bola com o professor","tipo":"Técnica","descricao":"8 bolas trocadas com o professor dentro da quadra reduzida. Avalia fundamentos básicos do FH e BH.","min":7,"total":12,"criterios":[{"id":"A","desc":"Mantém 6 de 8 bolas dentro da quadra","pts":2},{"id":"B","desc":"Bater a bola frente ao corpo no FH e no BH","pts":2},{"id":"C","desc":"Preparação com raquete mais elevada que a mão dominante","pts":2},{"id":"D","desc":"Posição de expectativa dinâmica com 2 mãos na raquete","pts":2},{"id":"E","desc":"Estar equilibrado no FH e no BH","pts":2},{"id":"F","desc":"Recuperar a raquete com as 2 mãos entre os golpes","pts":2}]},{"num":2,"nome":"Troca de bola com coleguinha","tipo":"Técnica","descricao":"Dois alunos trocam bolas cooperativamente. Avalia controle, dinâmica e atitude colaborativa.","min":5,"total":8,"criterios":[{"id":"A","desc":"Mantém rally de 4 bolas seguidas com o colega","pts":2},{"id":"B","desc":"Ser dinâmico entre os golpes","pts":2},{"id":"C","desc":"Esperar o colega estar pronto antes de arremessar","pts":2},{"id":"D","desc":"Posição de expectativa com mão livre no coração da raquete","pts":2}]},{"num":3,"nome":"Arremesso + continuação 4 golpes","tipo":"Técnica","descricao":"Aluno arremessa para o professor e continua o rally por 4 golpes. Avalia combo e empunhaduras.","min":5,"total":8,"criterios":[{"id":"A","desc":"Combo: arremesso + 2 golpes (FH e BH) executado com controle","pts":2},{"id":"B","desc":"Bater na frente do corpo nos 4 golpes","pts":2},{"id":"C","desc":"Empunhaduras diferentes no FH e no BH","pts":2},{"id":"D","desc":"Saber onde se recuperar após o golpe","pts":2}]},{"num":4,"nome":"Empunhadura continental","tipo":"Técnica","descricao":"Avalia domínio da empunhadura continental no voleio e saque.","min":4,"total":6,"criterios":[{"id":"A","desc":"Empunhadura continental no voleio (3 de 4 tentativas)","pts":2},{"id":"B","desc":"Segurar a raquete no fim do cabo","pts":2},{"id":"C","desc":"Identifica e demonstra a empunhadura continental quando solicitado","pts":2}]},{"num":5,"nome":"Saque","tipo":"Técnica","descricao":"Avalia posição inicial, troféu, ponto de contato, laçada, equilíbrio e precisão.","min":7,"total":12,"criterios":[{"id":"A","desc":"Posição inicial com base alinhada no saque","pts":2},{"id":"B","desc":"Posição troféu no saque","pts":2},{"id":"C","desc":"Ponto de contato acima da cabeça","pts":2},{"id":"D","desc":"Executar a laçada","pts":2},{"id":"E","desc":"Sacar com equilíbrio","pts":2},{"id":"F","desc":"4 de 6 saques dentro da área de serviço","pts":2}]},{"num":6,"nome":"Partida + arbitragem simples","tipo":"Jogo","descricao":"Partida com arbitragem simples. Avalia regras, postura e intenção tática básica.","min":7,"total":12,"criterios":[{"id":"A","desc":"Anunciar bolas fora e o placar durante a partida","pts":2},{"id":"B","desc":"Distinguir bolas fora e dentro corretamente (4 de 5)","pts":2},{"id":"C","desc":"Acompanhar e saber o placar durante o jogo","pts":2},{"id":"D","desc":"Respeitar a organização do jogo","pts":2},{"id":"E","desc":"Conseguir continuação dos golpes na partida","pts":2},{"id":"F","desc":"Jogar no espaço vazio com intenção","pts":2}]},{"num":7,"nome":"Critérios Técnicos — Bola Vermelha","tipo":"Técnica","descricao":"Checklist completo dos critérios técnicos da Bola Vermelha.","min":23,"total":38,"criterios":[{"id":"A","desc":"Bater a bola frente ao corpo no FH e no BH","pts":2},{"id":"B","desc":"Estar equilibrado no FH e no BH","pts":2},{"id":"C","desc":"Combo: arremesso + 2 golpes (FH e BH)","pts":2},{"id":"D","desc":"Posição de expectativa dinâmica com 2 mãos na raquete","pts":2},{"id":"E","desc":"Preparação com raquete mais elevada que a altura da mão dominante","pts":2},{"id":"F","desc":"Empunhadura continental a eastern (2-3) no forehand","pts":2},{"id":"G","desc":"Empunhadura continental a eastern (2-1) no backhand","pts":2},{"id":"H","desc":"Empunhadura continental no voleio","pts":2},{"id":"I","desc":"Posição inicial com base alinhada no saque","pts":2},{"id":"J","desc":"Segurar a raquete no fim do cabo","pts":2},{"id":"K","desc":"Ponto de contato acima da cabeça no saque","pts":2},{"id":"L","desc":"Posição troféu no saque","pts":2},{"id":"M","desc":"Sacar com equilíbrio","pts":2},{"id":"N","desc":"Executar a laçada","pts":2},{"id":"O","desc":"Recuperar a raquete com as 2 mãos entre os golpes","pts":2},{"id":"P","desc":"Empunhaduras diferentes no FH e no BH","pts":2},{"id":"Q","desc":"Preparação do FH com raquete mais elevada que a mão","pts":2},{"id":"R","desc":"Preparação do BH com raquete mais elevada que a mão","pts":2},{"id":"S","desc":"Jogo na rede: golpear frente ao corpo","pts":2}]},{"num":8,"nome":"Critérios Táticos e Mentais — Bola Vermelha","tipo":"Tático","descricao":"Checklist completo dos critérios táticos e mentais da Bola Vermelha.","min":19,"total":32,"criterios":[{"id":"A","desc":"Anunciar bolas fora e o placar","pts":2},{"id":"B","desc":"Distinguir bolas fora e dentro","pts":2},{"id":"C","desc":"Acompanhar e saber o placar","pts":2},{"id":"D","desc":"Conseguir continuação dos golpes","pts":2},{"id":"E","desc":"Posição de expectativa com mão livre no coração da raquete na devolução","pts":2},{"id":"F","desc":"Ser dinâmico entre os golpes","pts":2},{"id":"G","desc":"Deslocar o adversário","pts":2},{"id":"H","desc":"Conhecimento das regras do tie-break","pts":2},{"id":"I","desc":"Realizar voleios","pts":2},{"id":"J","desc":"Movimentação: ficar dinâmico entre os pontos","pts":2},{"id":"K","desc":"Recuperar a posição na quadra","pts":2},{"id":"L","desc":"Defender-se (bola alta na cruzada)","pts":2},{"id":"M","desc":"Jogar no espaço vazio","pts":2},{"id":"N","desc":"Respeitar a organização do jogo","pts":2},{"id":"O","desc":"Esperar o colega estar pronto antes de arremessar","pts":2},{"id":"P","desc":"Saber onde se recuperar após o golpe","pts":2}]}]},"vermelha_vermelha":{"label":"Vermelha-Vermelha","color":"#e53e3e","ball":"🔴","quadra":"18m × 6,40m · Rede 80cm","bola":"Bola Vermelha (75% mais lenta)","provas":[{"num":1,"nome":"Jogo de fundo de quadra","tipo":"Técnica","descricao":"Troca de bola com o professor na quadra vermelha. Avalia fundamentos e empunhaduras.","min":8,"total":14,"criterios":[{"id":"A","desc":"Mantém 6 de 8 bolas dentro da quadra vermelha","pts":2},{"id":"B","desc":"Bater a bola frente ao corpo no FH e no BH","pts":2},{"id":"C","desc":"Preparação do FH com raquete mais elevada que a mão","pts":2},{"id":"D","desc":"Preparação do BH com raquete mais elevada que a mão","pts":2},{"id":"E","desc":"Posição de expectativa dinâmica com 2 mãos na raquete","pts":2},{"id":"F","desc":"Empunhadura continental a eastern (2-3) no FH","pts":2},{"id":"G","desc":"Empunhadura continental a eastern (2-1) no BH","pts":2}]},{"num":2,"nome":"Troca de bola com coleguinha","tipo":"Técnica","descricao":"Rally cooperativo mais longo. Avalia dinâmica, recuperação e posição de espera.","min":6,"total":10,"criterios":[{"id":"A","desc":"Mantém rally de 6 bolas com o colega","pts":2},{"id":"B","desc":"Ser dinâmico entre os golpes","pts":2},{"id":"C","desc":"Recuperar a posição na quadra após cada golpe","pts":2},{"id":"D","desc":"Posição de expectativa com mão livre no coração da raquete","pts":2},{"id":"E","desc":"Esperar o colega estar pronto antes de arremessar","pts":2}]},{"num":3,"nome":"Arremesso + continuação 4 golpes","tipo":"Técnica","descricao":"Arremesso preciso + sequência de 4 golpes encadeados.","min":5,"total":8,"criterios":[{"id":"A","desc":"Arremesso preciso para zona definida (3 de 4)","pts":2},{"id":"B","desc":"Combo: arremesso + 2 golpes (FH e BH) encadeados","pts":2},{"id":"C","desc":"Bater na frente do corpo nos 4 golpes","pts":2},{"id":"D","desc":"Saber onde se recuperar após o golpe","pts":2}]},{"num":4,"nome":"Jogo na rede","tipo":"Técnica","descricao":"Avalia voleios — empunhadura, preparação, dinâmica e deslocamento do adversário.","min":6,"total":10,"criterios":[{"id":"A","desc":"Empunhadura continental no voleio (4 de 5)","pts":2},{"id":"B","desc":"Jogo na rede: golpear frente ao corpo","pts":2},{"id":"C","desc":"Realizar voleios com preparação curta","pts":2},{"id":"D","desc":"Movimentação: ficar dinâmico entre os pontos","pts":2},{"id":"E","desc":"Deslocar o adversário com o voleio","pts":2}]},{"num":5,"nome":"Empunhadura continental","tipo":"Técnica","descricao":"Demonstração espontânea da empunhadura continental no voleio e saque.","min":4,"total":6,"criterios":[{"id":"A","desc":"Empunhadura continental no voleio espontaneamente (4 de 5)","pts":2},{"id":"B","desc":"Segurar a raquete no fim do cabo","pts":2},{"id":"C","desc":"Empunhadura continental no saque","pts":2}]},{"num":6,"nome":"Saque","tipo":"Técnica","descricao":"Avalia todos os elementos do saque com maior exigência de precisão.","min":7,"total":12,"criterios":[{"id":"A","desc":"Posição inicial com base alinhada","pts":2},{"id":"B","desc":"Posição troféu no saque","pts":2},{"id":"C","desc":"Ponto de contato acima da cabeça","pts":2},{"id":"D","desc":"Executar a laçada","pts":2},{"id":"E","desc":"Sacar com equilíbrio","pts":2},{"id":"F","desc":"5 de 6 saques dentro da área de serviço","pts":2}]},{"num":7,"nome":"Arbitragem simples","tipo":"Jogo","descricao":"Avalia conhecimento das regras, distinção dentro/fora e tie-break.","min":5,"total":8,"criterios":[{"id":"A","desc":"Anunciar bolas fora e o placar corretamente","pts":2},{"id":"B","desc":"Distinguir bolas fora e dentro (4 de 5)","pts":2},{"id":"C","desc":"Conhecimento das regras do tie-break","pts":2},{"id":"D","desc":"Respeitar a organização do jogo","pts":2}]},{"num":8,"nome":"Partida — Tie-break","tipo":"Jogo","descricao":"Partida em formato tie-break. Avalia tática e gestão do jogo.","min":6,"total":10,"criterios":[{"id":"A","desc":"Defender-se com bola alta na cruzada","pts":2},{"id":"B","desc":"Jogar no espaço vazio com intenção","pts":2},{"id":"C","desc":"Ser dinâmico entre os golpes","pts":2},{"id":"D","desc":"Acompanhar e saber o placar","pts":2},{"id":"E","desc":"Recuperar a posição na quadra","pts":2}]},{"num":9,"nome":"Critérios Técnicos — Bola Vermelha","tipo":"Técnica","descricao":"Checklist completo dos critérios técnicos da Bola Vermelha.","min":23,"total":38,"criterios":[{"id":"A","desc":"Bater a bola frente ao corpo no FH e no BH","pts":2},{"id":"B","desc":"Estar equilibrado no FH e no BH","pts":2},{"id":"C","desc":"Combo: arremesso + 2 golpes (FH e BH)","pts":2},{"id":"D","desc":"Posição de expectativa dinâmica com 2 mãos na raquete","pts":2},{"id":"E","desc":"Preparação com raquete mais elevada que a altura da mão dominante","pts":2},{"id":"F","desc":"Empunhadura continental a eastern (2-3) no forehand","pts":2},{"id":"G","desc":"Empunhadura continental a eastern (2-1) no backhand","pts":2},{"id":"H","desc":"Empunhadura continental no voleio","pts":2},{"id":"I","desc":"Posição inicial com base alinhada no saque","pts":2},{"id":"J","desc":"Segurar a raquete no fim do cabo","pts":2},{"id":"K","desc":"Ponto de contato acima da cabeça no saque","pts":2},{"id":"L","desc":"Posição troféu no saque","pts":2},{"id":"M","desc":"Sacar com equilíbrio","pts":2},{"id":"N","desc":"Executar a laçada","pts":2},{"id":"O","desc":"Recuperar a raquete com as 2 mãos entre os golpes","pts":2},{"id":"P","desc":"Empunhaduras diferentes no FH e no BH","pts":2},{"id":"Q","desc":"Preparação do FH com raquete mais elevada que a mão","pts":2},{"id":"R","desc":"Preparação do BH com raquete mais elevada que a mão","pts":2},{"id":"S","desc":"Jogo na rede: golpear frente ao corpo","pts":2}]},{"num":10,"nome":"Critérios Táticos e Mentais — Bola Vermelha","tipo":"Tático","descricao":"Checklist completo dos critérios táticos e mentais da Bola Vermelha.","min":19,"total":32,"criterios":[{"id":"A","desc":"Anunciar bolas fora e o placar","pts":2},{"id":"B","desc":"Distinguir bolas fora e dentro","pts":2},{"id":"C","desc":"Acompanhar e saber o placar","pts":2},{"id":"D","desc":"Conseguir continuação dos golpes","pts":2},{"id":"E","desc":"Posição de expectativa com mão livre no coração da raquete na devolução","pts":2},{"id":"F","desc":"Ser dinâmico entre os golpes","pts":2},{"id":"G","desc":"Deslocar o adversário","pts":2},{"id":"H","desc":"Conhecimento das regras do tie-break","pts":2},{"id":"I","desc":"Realizar voleios","pts":2},{"id":"J","desc":"Movimentação: ficar dinâmico entre os pontos","pts":2},{"id":"K","desc":"Recuperar a posição na quadra","pts":2},{"id":"L","desc":"Defender-se (bola alta na cruzada)","pts":2},{"id":"M","desc":"Jogar no espaço vazio","pts":2},{"id":"N","desc":"Respeitar a organização do jogo","pts":2},{"id":"O","desc":"Esperar o colega estar pronto antes de arremessar","pts":2},{"id":"P","desc":"Saber onde se recuperar após o golpe","pts":2}]}]},"vermelha_laranja":{"label":"Vermelha-Laranja","color":"#ff8533","ball":"🔴","quadra":"Quadra vermelha completa","bola":"Bola Vermelha (75% mais lenta)","provas":[{"num":1,"nome":"Torneio de simples com Tie-break","tipo":"Jogo","descricao":"Disputa real de simples em formato tie-break. Avalia técnica e tática em situação de jogo.","min":13,"total":22,"criterios":[{"id":"A","desc":"Disputar o tie-break respeitando as regras e controlando a pontuação","pts":2},{"id":"B","desc":"Deslocar o adversário (tática)","pts":2},{"id":"C","desc":"Realizar voleios (tática)","pts":2},{"id":"D","desc":"Saque com posição do Troféu (técnica)","pts":2},{"id":"E","desc":"Sacar com equilíbrio (técnica)","pts":2},{"id":"F","desc":"Recuperar a raquete com as 2 mãos entre os golpes (técnica)","pts":2},{"id":"G","desc":"Empunhaduras diferentes no FH e BH (técnica)","pts":2},{"id":"H","desc":"Preparação do FH com a raquete mais elevada que a mão (técnica)","pts":2},{"id":"I","desc":"Preparação do BH com a raquete mais elevada que a mão (técnica)","pts":2},{"id":"J","desc":"Jogo na rede: golpear frente ao corpo (técnica)","pts":2},{"id":"K","desc":"Movimentação: ficar dinâmico entre os pontos (técnica)","pts":2}]},{"num":2,"nome":"Torneio de duplas com 2 Tie-breaks","tipo":"Jogo","descricao":"Disputa real de duplas em dois tie-breaks. Avalia técnica e tática em situação de jogo coletivo.","min":13,"total":22,"criterios":[{"id":"A","desc":"Disputar respeitando as regras, controlando pontuação","pts":2},{"id":"B","desc":"Deslocar o adversário (tática)","pts":2},{"id":"C","desc":"Realizar voleios (tática)","pts":2},{"id":"D","desc":"Saque com posição do Troféu (técnica)","pts":2},{"id":"E","desc":"Sacar com equilíbrio (técnica)","pts":2},{"id":"F","desc":"Recuperar raquete com 2 mãos entre os golpes (técnica)","pts":2},{"id":"G","desc":"Empunhaduras diferentes no FH e BH (técnica)","pts":2},{"id":"H","desc":"Preparação FH com raquete mais elevada que a mão (técnica)","pts":2},{"id":"I","desc":"Preparação BH com raquete mais elevada que a mão (técnica)","pts":2},{"id":"J","desc":"Jogo na rede: golpear frente ao corpo (técnica)","pts":2},{"id":"K","desc":"Movimentação: ficar dinâmico entre os pontos (técnica)","pts":2}]},{"num":3,"nome":"Critérios Técnicos — Bola Vermelha (completo)","tipo":"Técnica","descricao":"Checklist completo dos critérios técnicos da Bola Vermelha.","min":23,"total":38,"criterios":[{"id":"A","desc":"Bater a bola frente ao corpo no FH e no BH","pts":2},{"id":"B","desc":"Estar equilibrado no FH e no BH","pts":2},{"id":"C","desc":"Combo: arremesso + 2 golpes (FH e BH)","pts":2},{"id":"D","desc":"Posição de expectativa dinâmica com 2 mãos na raquete","pts":2},{"id":"E","desc":"Preparação com raquete mais elevada que a altura da mão dominante","pts":2},{"id":"F","desc":"Empunhadura continental a eastern (2-3) no forehand","pts":2},{"id":"G","desc":"Empunhadura continental a eastern (2-1) no backhand","pts":2},{"id":"H","desc":"Empunhadura continental no voleio","pts":2},{"id":"I","desc":"Posição inicial com base alinhada no saque","pts":2},{"id":"J","desc":"Segurar a raquete no fim do cabo","pts":2},{"id":"K","desc":"Ponto de contato acima da cabeça no saque","pts":2},{"id":"L","desc":"Posição troféu no saque","pts":2},{"id":"M","desc":"Sacar com equilíbrio","pts":2},{"id":"N","desc":"Executar a laçada","pts":2},{"id":"O","desc":"Recuperar a raquete com as 2 mãos entre os golpes","pts":2},{"id":"P","desc":"Empunhaduras diferentes no FH e no BH","pts":2},{"id":"Q","desc":"Preparação do FH com raquete mais elevada que a mão","pts":2},{"id":"R","desc":"Preparação do BH com raquete mais elevada que a mão","pts":2},{"id":"S","desc":"Jogo na rede: golpear frente ao corpo","pts":2}]},{"num":4,"nome":"Critérios Táticos e Mentais — Bola Vermelha (completo)","tipo":"Tático","descricao":"Checklist completo dos critérios táticos e mentais da Bola Vermelha.","min":19,"total":32,"criterios":[{"id":"A","desc":"Anunciar bolas fora e o placar","pts":2},{"id":"B","desc":"Distinguir bolas fora e dentro","pts":2},{"id":"C","desc":"Acompanhar e saber o placar","pts":2},{"id":"D","desc":"Conseguir continuação dos golpes","pts":2},{"id":"E","desc":"Posição de expectativa com mão livre no coração da raquete na devolução","pts":2},{"id":"F","desc":"Ser dinâmico entre os golpes","pts":2},{"id":"G","desc":"Deslocar o adversário","pts":2},{"id":"H","desc":"Conhecimento das regras do tie-break","pts":2},{"id":"I","desc":"Realizar voleios","pts":2},{"id":"J","desc":"Movimentação: ficar dinâmico entre os pontos","pts":2},{"id":"K","desc":"Recuperar a posição na quadra","pts":2},{"id":"L","desc":"Defender-se (bola alta na cruzada)","pts":2},{"id":"M","desc":"Jogar no espaço vazio","pts":2},{"id":"N","desc":"Respeitar a organização do jogo","pts":2},{"id":"O","desc":"Esperar o colega estar pronto antes de arremessar","pts":2},{"id":"P","desc":"Saber onde se recuperar após o golpe","pts":2}]}]},"laranja_laranja":{"label":"Laranja-Laranja","color":"#f5a623","ball":"🟠","quadra":"18m × 6,40m · Rede 91cm","bola":"Bola Laranja (50% mais lenta)","provas":[{"num":1,"nome":"Jogo de fundo de quadra","tipo":"Técnica","descricao":"Série drill: cruzada-cruzada-paralela. Avalia qualidade do movimento e do swing.","min":6,"total":10,"criterios":[{"id":"A","desc":"Série completa (cruzada-cruzada-paralela=2pts · incompleta=1pt) — ×4 séries","pts":2},{"id":"B","desc":"Posição de expectativa dinâmica com ombros e braços soltos","pts":2},{"id":"C","desc":"Fim da preparação acima da altura do ponto de contato","pts":2},{"id":"D","desc":"Soltar a cabeça da raquete abaixo do ponto de contato no início do swing","pts":2},{"id":"E","desc":"Movimentação equilibrada e contínua","pts":2}]},{"num":2,"nome":"Jogo na rede — approach + voleio","tipo":"Técnica","descricao":"Sequência approach + voleio em lados opostos. Avalia empunhadura, preparação e avanço.","min":5,"total":8,"criterios":[{"id":"A","desc":"Acertar série (approach + voleio em lados opostos) — ×4","pts":2},{"id":"B","desc":"Empunhadura continental (FH) a eastern de backhand (BH)","pts":2},{"id":"C","desc":"Preparação curta dos voleios","pts":2},{"id":"D","desc":"Bater na frente do corpo ao avançar durante o golpe","pts":2}]},{"num":3,"nome":"Jogo na rede — smash","tipo":"Técnica","descricao":"Avalia smash: acerto, deslocamento e posição troféu.","min":4,"total":6,"criterios":[{"id":"A","desc":"Acertar smash — 1pt cada (×4)","pts":2},{"id":"B","desc":"Deslocamento com passos laterais ou cruzados ficando de lado","pts":2},{"id":"C","desc":"Posição troféu no smash","pts":2}]},{"num":4,"nome":"Saque","tipo":"Técnica","descricao":"Avalia precisão e elementos técnicos do saque com efeito slice.","min":6,"total":10,"criterios":[{"id":"A","desc":"Saques dentro da quadra — 1pt cada (×6)","pts":2},{"id":"B","desc":"Pés alinhados na posição inicial e subida sincronizada dos braços","pts":2},{"id":"C","desc":"Sacar com slice (escovar a bola)","pts":2},{"id":"D","desc":"Sacar com ritmo justo (lento → rápido → muito rápido)","pts":2},{"id":"E","desc":"Sacar com corpo esticado","pts":2}]},{"num":5,"nome":"O jogo","tipo":"Jogo","descricao":"Partida real com placar tradicional. Avalia gestão tática e comportamental.","min":5,"total":8,"criterios":[{"id":"A","desc":"Conseguir participar corretamente","pts":2},{"id":"B","desc":"Saber e acompanhar a contagem do placar tradicional","pts":2},{"id":"C","desc":"Atacar ao acelerar o jogo; defender ao diminuir o ritmo","pts":2},{"id":"D","desc":"Acelerar o 1º saque; comandar a partir da devolução do 2º saque","pts":2}]},{"num":6,"nome":"Arremesso","tipo":"Físico","descricao":"Avalia arremesso físico — meta zona 3+.","min":5,"total":8,"criterios":[{"id":"A","desc":"Pontuação do melhor arremesso (1 a 4 pontos)","pts":2},{"id":"B","desc":"Posição inicial de lado","pts":2},{"id":"C","desc":"Posição 'troféu' com braço livre e cotovelo direito","pts":2},{"id":"D","desc":"Força explosiva do ombro dominante","pts":2}]},{"num":7,"nome":"Critérios Técnicos — Bola Laranja","tipo":"Técnica","descricao":"Checklist completo dos critérios técnicos da Bola Laranja.","min":23,"total":38,"criterios":[{"id":"A","desc":"Série drill: cruzada + cruzada + paralela (FH e BH)","pts":2},{"id":"B","desc":"Posição de expectativa dinâmica com ombros e braços soltos","pts":2},{"id":"C","desc":"Fim da preparação acima da altura do ponto de contato","pts":2},{"id":"D","desc":"Soltar a cabeça da raquete abaixo do ponto de contato no início do swing","pts":2},{"id":"E","desc":"Movimentação equilibrada e contínua","pts":2},{"id":"F","desc":"Approach com FH cruzado ou paralelo + voleio do lado oposto","pts":2},{"id":"G","desc":"Topspin de forehand","pts":2},{"id":"H","desc":"Topspin de backhand","pts":2},{"id":"I","desc":"Empunhadura continental a eastern de BH no voleio","pts":2},{"id":"J","desc":"Preparação curta dos voleios","pts":2},{"id":"K","desc":"Smash: deslocamento com passos laterais ou cruzados ficando de lado","pts":2},{"id":"L","desc":"Posição troféu no smash","pts":2},{"id":"M","desc":"Saque com pés alinhados e subida sincronizada dos braços","pts":2},{"id":"N","desc":"Sacar com slice (escovar a bola)","pts":2},{"id":"O","desc":"Sacar com ritmo justo (lento → rápido → muito rápido)","pts":2},{"id":"P","desc":"Sacar com corpo esticado","pts":2},{"id":"Q","desc":"Preparação do BH com raquete mais elevada que a mão","pts":2},{"id":"R","desc":"Jogo na rede: golpes frente ao corpo e avançando","pts":2},{"id":"S","desc":"Sacar utilizando efeito slice","pts":2}]},{"num":8,"nome":"Critérios Táticos e Mentais — Bola Laranja","tipo":"Tático","descricao":"Checklist completo dos critérios táticos e mentais da Bola Laranja.","min":18,"total":30,"criterios":[{"id":"A","desc":"Contagem do placar tradicional","pts":2},{"id":"B","desc":"Atacar ao acelerar o jogo","pts":2},{"id":"C","desc":"Defender ao diminuir/frear o ritmo do jogo","pts":2},{"id":"D","desc":"Acelerar o 1º saque","pts":2},{"id":"E","desc":"Comandar o ponto a partir da devolução do 2º saque","pts":2},{"id":"F","desc":"Utilizar efeitos nos golpes","pts":2},{"id":"G","desc":"Saber posicionar-se no início do ponto no simples","pts":2},{"id":"H","desc":"Saber posicionar-se no início do ponto nas duplas","pts":2},{"id":"I","desc":"Saber gerir desacordos com o adversário","pts":2},{"id":"J","desc":"Variação de jogo","pts":2},{"id":"K","desc":"Comportamento e arbitragem: respeitar e gerir desacordos","pts":2},{"id":"L","desc":"Contar os pontos de um game com autonomia","pts":2},{"id":"M","desc":"Posicionar-se corretamente nas duplas","pts":2},{"id":"N","desc":"Ir na toalha","pts":2},{"id":"O","desc":"Rotinas positivas","pts":2}]}]},"laranja_verde":{"label":"Laranja-Verde","color":"#7db529","ball":"🟠","quadra":"Quadra laranja completa","bola":"Bola Laranja (50% mais lenta)","provas":[{"num":1,"nome":"Torneio de simples com 'O jogo'","tipo":"Jogo","descricao":"Torneio real de simples. Avalia comportamento, tática e técnica em jogo.","min":17,"total":28,"criterios":[{"id":"A","desc":"Saber gerir desacordos com o adversário (comportamento e arbitragem)","pts":2},{"id":"B","desc":"Contar os pontos de um game (comportamento e arbitragem)","pts":2},{"id":"C","desc":"Atacar ao acelerar o jogo (tática)","pts":2},{"id":"D","desc":"Defender ao desacelerar/frear o jogo (tática)","pts":2},{"id":"E","desc":"Utilizar efeitos nos golpes (tática)","pts":2},{"id":"F","desc":"Acelerar o 1º saque (tática)","pts":2},{"id":"G","desc":"Comandar o ponto a partir da devolução do 2º saque (tática)","pts":2},{"id":"H","desc":"Saber posicionar-se no início do ponto no simples (tática)","pts":2},{"id":"I","desc":"Saber posicionar-se no início do ponto nas duplas (tática)","pts":2},{"id":"J","desc":"Sacar utilizando efeito 'slice' (técnica)","pts":2},{"id":"K","desc":"Posição de expectativa dinâmica com ombros e braços soltos (técnica)","pts":2},{"id":"L","desc":"Preparação do BH com a raquete mais elevada que a mão (técnica)","pts":2},{"id":"M","desc":"Jogo na rede: golpes frente ao corpo e avançando (técnica)","pts":2},{"id":"N","desc":"Movimentação: equilibrar-se e dar continuação (técnica)","pts":2}]},{"num":2,"nome":"Torneio de duplas com 'O jogo'","tipo":"Jogo","descricao":"Torneio real de duplas. Avalia comportamento, tática e técnica em jogo coletivo.","min":17,"total":28,"criterios":[{"id":"A","desc":"Saber gerir desacordos com o adversário (comportamento e arbitragem)","pts":2},{"id":"B","desc":"Contar os pontos de um game (comportamento e arbitragem)","pts":2},{"id":"C","desc":"Atacar ao acelerar o jogo (tática)","pts":2},{"id":"D","desc":"Defender ao desacelerar/frear o jogo (tática)","pts":2},{"id":"E","desc":"Utilizar efeitos nos golpes (tática)","pts":2},{"id":"F","desc":"Acelerar o 1º saque (tática)","pts":2},{"id":"G","desc":"Comandar o ponto a partir da devolução do 2º saque (tática)","pts":2},{"id":"H","desc":"Saber posicionar-se no início do ponto no simples (tática)","pts":2},{"id":"I","desc":"Saber posicionar-se no início do ponto nas duplas (tática)","pts":2},{"id":"J","desc":"Sacar utilizando efeito 'slice' (técnica)","pts":2},{"id":"K","desc":"Posição de expectativa dinâmica com ombros e braços soltos (técnica)","pts":2},{"id":"L","desc":"Preparação do BH com a raquete mais elevada que a mão (técnica)","pts":2},{"id":"M","desc":"Jogo na rede: golpes frente ao corpo e avançando (técnica)","pts":2},{"id":"N","desc":"Movimentação: equilibrar-se e dar continuação (técnica)","pts":2}]},{"num":3,"nome":"Critérios Técnicos — Bola Laranja (completo)","tipo":"Técnica","descricao":"Checklist completo dos critérios técnicos da Bola Laranja.","min":23,"total":38,"criterios":[{"id":"A","desc":"Série drill: cruzada + cruzada + paralela (FH e BH)","pts":2},{"id":"B","desc":"Posição de expectativa dinâmica com ombros e braços soltos","pts":2},{"id":"C","desc":"Fim da preparação acima da altura do ponto de contato","pts":2},{"id":"D","desc":"Soltar a cabeça da raquete abaixo do ponto de contato no início do swing","pts":2},{"id":"E","desc":"Movimentação equilibrada e contínua","pts":2},{"id":"F","desc":"Approach com FH cruzado ou paralelo + voleio do lado oposto","pts":2},{"id":"G","desc":"Topspin de forehand","pts":2},{"id":"H","desc":"Topspin de backhand","pts":2},{"id":"I","desc":"Empunhadura continental a eastern de BH no voleio","pts":2},{"id":"J","desc":"Preparação curta dos voleios","pts":2},{"id":"K","desc":"Smash: deslocamento com passos laterais ou cruzados ficando de lado","pts":2},{"id":"L","desc":"Posição troféu no smash","pts":2},{"id":"M","desc":"Saque com pés alinhados e subida sincronizada dos braços","pts":2},{"id":"N","desc":"Sacar com slice (escovar a bola)","pts":2},{"id":"O","desc":"Sacar com ritmo justo (lento → rápido → muito rápido)","pts":2},{"id":"P","desc":"Sacar com corpo esticado","pts":2},{"id":"Q","desc":"Preparação do BH com raquete mais elevada que a mão","pts":2},{"id":"R","desc":"Jogo na rede: golpes frente ao corpo e avançando","pts":2},{"id":"S","desc":"Sacar utilizando efeito slice","pts":2}]},{"num":4,"nome":"Critérios Táticos e Mentais — Bola Laranja (completo)","tipo":"Tático","descricao":"Checklist completo dos critérios táticos e mentais da Bola Laranja.","min":18,"total":30,"criterios":[{"id":"A","desc":"Contagem do placar tradicional","pts":2},{"id":"B","desc":"Atacar ao acelerar o jogo","pts":2},{"id":"C","desc":"Defender ao diminuir/frear o ritmo do jogo","pts":2},{"id":"D","desc":"Acelerar o 1º saque","pts":2},{"id":"E","desc":"Comandar o ponto a partir da devolução do 2º saque","pts":2},{"id":"F","desc":"Utilizar efeitos nos golpes","pts":2},{"id":"G","desc":"Saber posicionar-se no início do ponto no simples","pts":2},{"id":"H","desc":"Saber posicionar-se no início do ponto nas duplas","pts":2},{"id":"I","desc":"Saber gerir desacordos com o adversário","pts":2},{"id":"J","desc":"Variação de jogo","pts":2},{"id":"K","desc":"Comportamento e arbitragem: respeitar e gerir desacordos","pts":2},{"id":"L","desc":"Contar os pontos de um game com autonomia","pts":2},{"id":"M","desc":"Posicionar-se corretamente nas duplas","pts":2},{"id":"N","desc":"Ir na toalha","pts":2},{"id":"O","desc":"Rotinas positivas","pts":2}]}]},"verde_verde":{"label":"Verde-Verde","color":"#00c050","ball":"🟢","quadra":"Quadra completa · Rede 91cm","bola":"Bola Verde (25% mais lenta)","provas":[{"num":1,"nome":"Jogo de fundo de quadra","tipo":"Técnica","descricao":"Drill com bolas profundas — rebater cruzado com spin. Avalia split step, transferência de peso e movimentação.","min":6,"total":10,"criterios":[{"id":"A","desc":"Série completa=3pts · incompleta=1pt (×3 séries)","pts":2},{"id":"B","desc":"Recepção orientada do split step","pts":2},{"id":"C","desc":"Transferir o peso no golpe","pts":2},{"id":"D","desc":"Realizar spin acelerado com os 2 golpes (FH e BH)","pts":2},{"id":"E","desc":"Movimentação: frear e acelerar","pts":2}]},{"num":2,"nome":"Jogo na rede","tipo":"Técnica","descricao":"Sequência: 1º voleio profundo + 2º voleio próximo à rede + smash. Avalia interceptação e smash.","min":4,"total":6,"criterios":[{"id":"A","desc":"Golpe correto — 1pt por acerto (3 séries × 3 golpes = 9)","pts":2},{"id":"B","desc":"Avançar para interceptar as trajetórias","pts":2},{"id":"C","desc":"Smash com corpo esticado e pronação na batida","pts":2}]},{"num":3,"nome":"Saque","tipo":"Técnica","descricao":"Saque com efeito (slice ou spin) dentro da quadra. Avalia técnica de efeito.","min":5,"total":8,"criterios":[{"id":"A","desc":"Saques realizados corretamente (dentro + efeito) — 1pt cada (×6)","pts":2},{"id":"B","desc":"Pernas ligeiramente flexionadas","pts":2},{"id":"C","desc":"Lançamento de bola adequado ao efeito","pts":2},{"id":"D","desc":"Ação do punho adequada ao efeito (slice e/ou spin)","pts":2}]},{"num":4,"nome":"O Tie-break","tipo":"Jogo","descricao":"Tie-break com auto-arbitragem. Avalia postura, uso do golpe forte e 2º saque com efeito.","min":6,"total":10,"criterios":[{"id":"A","desc":"Participar corretamente (auto-arbitragem)","pts":2},{"id":"B","desc":"Auto arbitragem — respeito às regras","pts":2},{"id":"C","desc":"Postura correta em qualquer situação","pts":2},{"id":"D","desc":"Utilizar seu golpe forte","pts":2},{"id":"E","desc":"Sacar com efeito no 2º saque","pts":2}]},{"num":5,"nome":"Arremesso","tipo":"Físico","descricao":"Avalia arremesso físico — meta zona 4.","min":5,"total":8,"criterios":[{"id":"A","desc":"Pontuação do melhor arremesso (1 a 4 pontos)","pts":2},{"id":"B","desc":"Posição inicial de lado","pts":2},{"id":"C","desc":"Posição 'troféu' com braço livre e cotovelo direito","pts":2},{"id":"D","desc":"Força explosiva do ombro dominante","pts":2}]},{"num":6,"nome":"Critérios Técnicos — Bola Verde","tipo":"Técnica","descricao":"Checklist completo dos critérios técnicos da Bola Verde.","min":17,"total":28,"criterios":[{"id":"A","desc":"Drill com bolas profundas e distantes — rebater profundo e cruzado","pts":2},{"id":"B","desc":"Identificar bola 'fácil' e executar golpe de definição na paralela","pts":2},{"id":"C","desc":"Split step orientado para recepção","pts":2},{"id":"D","desc":"Transferir o peso no golpe","pts":2},{"id":"E","desc":"Realizar spin acelerado com FH e BH","pts":2},{"id":"F","desc":"Movimentação: frear e acelerar","pts":2},{"id":"G","desc":"1º voleio de construção profundo + 2º voleio próximo à rede + smash","pts":2},{"id":"H","desc":"Avançar para interceptar trajetórias","pts":2},{"id":"I","desc":"Smash com corpo esticado e pronação na batida","pts":2},{"id":"J","desc":"Saques com efeito slice ou spin — 3 de cada lado","pts":2},{"id":"K","desc":"Lançamento de bola adequado ao efeito","pts":2},{"id":"L","desc":"Ação do punho adequada ao efeito (slice e/ou spin)","pts":2},{"id":"M","desc":"Pernas ligeiramente flexionadas no saque","pts":2},{"id":"N","desc":"2º saque com efeito slice ou top spin","pts":2}]},{"num":7,"nome":"Critérios Táticos e Mentais — Bola Verde","tipo":"Tático","descricao":"Checklist completo dos critérios táticos e mentais da Bola Verde.","min":17,"total":28,"criterios":[{"id":"A","desc":"Auto-arbitragem","pts":2},{"id":"B","desc":"Utilizar golpe forte","pts":2},{"id":"C","desc":"Interceptar durante o jogo de duplas","pts":2},{"id":"D","desc":"Atacar ao acelerar o jogo","pts":2},{"id":"E","desc":"Defender ao frear o ritmo","pts":2},{"id":"F","desc":"Analisar o adversário","pts":2},{"id":"G","desc":"Variações com dropshot e slice","pts":2},{"id":"H","desc":"Respeitar adversário e manter atitude correta em qualquer situação","pts":2},{"id":"I","desc":"Ser autônomo na gestão completa das regras","pts":2},{"id":"J","desc":"Postura correta em qualquer situação","pts":2},{"id":"K","desc":"Transferir durante os golpes com consciência","pts":2},{"id":"L","desc":"Rotinas pré","pts":2},{"id":"M","desc":"Rotinas durante jogo","pts":2},{"id":"N","desc":"Rotinas pós jogo","pts":2}]}]},"verde_amarela":{"label":"Verde-Amarela","color":"#8fbb00","ball":"🟢","quadra":"Quadra completa · Rede 91cm","bola":"Bola Verde (25% mais lenta)","provas":[{"num":1,"nome":"Torneio de simples com 'set curto'","tipo":"Jogo","descricao":"Torneio de simples em set curto. Avalia comportamento, tática e técnica em jogo real.","min":10,"total":16,"criterios":[{"id":"A","desc":"Respeitar adversário e manter atitude correta em qualquer situação (comportamento e arbitragem)","pts":2},{"id":"B","desc":"Ser autônomo na gestão das regras (comportamento e arbitragem)","pts":2},{"id":"C","desc":"Atacar ao acelerar o jogo (tática)","pts":2},{"id":"D","desc":"Utilizar seu golpe forte (tática)","pts":2},{"id":"E","desc":"Interceptar durante o jogo de dupla (tática)","pts":2},{"id":"F","desc":"Ao sacar, utilizar efeito 'slice' ou 'top spin' no 2º saque (técnica)","pts":2},{"id":"G","desc":"Transferir o peso durante os golpes (técnica)","pts":2},{"id":"H","desc":"Movimentação: acelerar e frear (técnica)","pts":2}]},{"num":2,"nome":"Torneio de duplas com 'set curto'","tipo":"Jogo","descricao":"Torneio de duplas em set curto. Mesmos critérios aplicados em contexto coletivo.","min":10,"total":16,"criterios":[{"id":"A","desc":"Respeitar adversário e manter atitude correta em qualquer situação","pts":2},{"id":"B","desc":"Ser autônomo na gestão das regras","pts":2},{"id":"C","desc":"Atacar ao acelerar o jogo (tática)","pts":2},{"id":"D","desc":"Utilizar seu golpe forte (tática)","pts":2},{"id":"E","desc":"Interceptar durante o jogo de dupla (tática)","pts":2},{"id":"F","desc":"Ao sacar, utilizar efeito 'slice' ou 'top spin' no 2º saque (técnica)","pts":2},{"id":"G","desc":"Transferir o peso durante os golpes (técnica)","pts":2},{"id":"H","desc":"Movimentação: acelerar e frear (técnica)","pts":2}]},{"num":3,"nome":"Critérios Técnicos — Bola Verde (completo)","tipo":"Técnica","descricao":"Checklist completo dos critérios técnicos da Bola Verde.","min":17,"total":28,"criterios":[{"id":"A","desc":"Drill com bolas profundas e distantes — rebater profundo e cruzado","pts":2},{"id":"B","desc":"Identificar bola 'fácil' e executar golpe de definição na paralela","pts":2},{"id":"C","desc":"Split step orientado para recepção","pts":2},{"id":"D","desc":"Transferir o peso no golpe","pts":2},{"id":"E","desc":"Realizar spin acelerado com FH e BH","pts":2},{"id":"F","desc":"Movimentação: frear e acelerar","pts":2},{"id":"G","desc":"1º voleio de construção profundo + 2º voleio próximo à rede + smash","pts":2},{"id":"H","desc":"Avançar para interceptar trajetórias","pts":2},{"id":"I","desc":"Smash com corpo esticado e pronação na batida","pts":2},{"id":"J","desc":"Saques com efeito slice ou spin — 3 de cada lado","pts":2},{"id":"K","desc":"Lançamento de bola adequado ao efeito","pts":2},{"id":"L","desc":"Ação do punho adequada ao efeito (slice e/ou spin)","pts":2},{"id":"M","desc":"Pernas ligeiramente flexionadas no saque","pts":2},{"id":"N","desc":"2º saque com efeito slice ou top spin","pts":2}]},{"num":4,"nome":"Critérios Táticos e Mentais — Bola Verde (completo)","tipo":"Tático","descricao":"Checklist completo dos critérios táticos e mentais da Bola Verde.","min":17,"total":28,"criterios":[{"id":"A","desc":"Auto-arbitragem","pts":2},{"id":"B","desc":"Utilizar golpe forte","pts":2},{"id":"C","desc":"Interceptar durante o jogo de duplas","pts":2},{"id":"D","desc":"Atacar ao acelerar o jogo","pts":2},{"id":"E","desc":"Defender ao frear o ritmo","pts":2},{"id":"F","desc":"Analisar o adversário","pts":2},{"id":"G","desc":"Variações com dropshot e slice","pts":2},{"id":"H","desc":"Respeitar adversário e manter atitude correta em qualquer situação","pts":2},{"id":"I","desc":"Ser autônomo na gestão completa das regras","pts":2},{"id":"J","desc":"Postura correta em qualquer situação","pts":2},{"id":"K","desc":"Transferir durante os golpes com consciência","pts":2},{"id":"L","desc":"Rotinas pré","pts":2},{"id":"M","desc":"Rotinas durante jogo","pts":2},{"id":"N","desc":"Rotinas pós jogo","pts":2}]}]}};
+
+const REQS = {"vermelha":{"label":"Bola Vermelha","color":"#ff6666","ball":"🔴","levels":"Vermelha-Branca · Vermelha-Vermelha · Vermelha-Laranja","tecnico":["Bater a bola frente ao corpo no FH e no BH","Estar equilibrado no FH e no BH","Combo: arremesso + 2 golpes (FH e BH)","Posição de expectativa dinâmica com 2 mãos na raquete","Preparação com raquete mais elevada que a altura da mão dominante","Empunhadura continental a eastern (2-3) no forehand","Empunhadura continental a eastern (2-1) no backhand","Empunhadura continental no voleio","Bater na frente do corpo","Posição inicial com base alinhada no saque","Segurar a raquete no fim do cabo","Ponto de contato acima da cabeça no saque","Posição troféu no saque","Sacar com equilíbrio","Executar a laçada","Recuperar a raquete com as 2 mãos entre os golpes","Empunhaduras diferentes no FH e no BH","Preparação do FH com raquete mais elevada que a mão","Preparação do BH com raquete mais elevada que a mão","Jogo na rede: golpear frente ao corpo"],"tatico":["Anunciar bolas fora e o placar","Distinguir bolas fora e dentro","Acompanhar e saber o placar","Conseguir continuação dos golpes","Posição de expectativa com mão livre no coração da raquete na devolução","Ser dinâmico entre os golpes","Deslocar o adversário","Conhecimento das regras do tie-break","Realizar voleios","Movimentação: ficar dinâmico entre os pontos","Recuperar a posição na quadra","Defender-se (bola alta na cruzada)","Jogar no espaço vazio"],"fisico":["Circuito com bola na raquete sem erros (3 cones + bambolê)","Capacidade de aceleração","Equilibrar raquete e bola","Colocar bola no bambolê com domínio (flexão e ritmo lento)","Arremesso: arremesso por cima da cabeça (meta: zona 2+)","Posição inicial de lado no arremesso","Posição troféu com braço livre no arremesso","Força explosiva do ombro dominante","Desenvolvimento: 3 corridas — meta abaixo de 9 segundos"],"mental":["Respeitar a organização do jogo","Esperar o colega estar pronto antes de arremessar","Saber onde se recuperar após o golpe"]},"laranja":{"label":"Bola Laranja","color":"#f5a623","ball":"🟠","levels":"Laranja-Laranja · Laranja-Verde","tecnico":["Série drill: cruzada + cruzada + paralela (FH e BH)","Posição de expectativa dinâmica com ombros e braços soltos","Fim da preparação acima da altura do ponto de contato","Soltar a cabeça da raquete abaixo do ponto de contato no início do swing","Movimentação equilibrada e contínua","Approach com FH cruzado ou paralelo + voleio do lado oposto","Topspin de forehand","Topspin de backhand","Empunhadura continental a eastern de BH no voleio","Preparação curta dos voleios","Smash: deslocamento com passos laterais ou cruzados ficando de lado","Posição troféu no smash","Saque com pés alinhados e subida sincronizada dos braços","Sacar com slice (escovar a bola)","Sacar com ritmo justo (lento → rápido → muito rápido)","Sacar com corpo esticado","Preparação do BH com raquete mais elevada que a mão","Jogo na rede: golpes frente ao corpo e avançando","Sacar utilizando efeito slice"],"tatico":["Contagem do placar tradicional","Atacar ao acelerar o jogo","Defender ao diminuir/frear o ritmo do jogo","Acelerar o 1º saque","Comandar o ponto a partir da devolução do 2º saque","Utilizar efeitos nos golpes","Saber posicionar-se no início do ponto no simples","Saber posicionar-se no início do ponto nas duplas","Saber gerir desacordos com o adversário","Variação de jogo"],"fisico":["Arremesso: arremesso (meta: zona 3+)","Desenvolvimento 5 corridas (3 idas e 2 voltas) — meta abaixo de 13 segundos"],"mental":["Comportamento e arbitragem: respeitar e gerir desacordos","Contar os pontos de um game com autonomia","Posicionar-se corretamente nas duplas","Ir na toalha","Rotinas positivas"]},"verde":{"label":"Bola Verde","color":"#00c050","ball":"🟢","levels":"Verde-Verde · Verde-Amarela","tecnico":["Drill com bolas profundas e distantes — rebater profundo e cruzado","Identificar bola 'fácil' e executar golpe de definição na paralela","Split step orientado para recepção","Transferir o peso no golpe","Realizar spin acelerado com FH e BH","Movimentação: frear e acelerar","1º voleio de construção profundo + 2º voleio próximo à rede + smash","Avançar para interceptar trajetórias","Smash com corpo esticado e pronação na batida","Saques com efeito slice ou spin — 3 de cada lado","Lançamento de bola adequado ao efeito","Ação do punho adequada ao efeito (slice e/ou spin)","Pernas ligeiramente flexionadas no saque","2º saque com efeito slice ou top spin"],"tatico":["Auto-arbitragem","Utilizar golpe forte","Interceptar durante o jogo de duplas","Atacar ao acelerar o jogo","Defender ao frear o ritmo","Analisar o adversário","Variações com dropshot e slice"],"fisico":["Arremesso: arremesso (meta: zona 4)","Desenvolvimento 5 corridas — meta abaixo de 11 segundos"],"mental":["Respeitar adversário e manter atitude correta em qualquer situação","Ser autônomo na gestão completa das regras","Postura correta em qualquer situação","Transferir durante os golpes com consciência","Rotinas pré-jogo","Rotinas durante o jogo","Rotinas pós-jogo"]},"amarela":{"label":"Bola Amarela","color":"#ffd700","ball":"🟡","levels":"RAW Juniors avançado · Verde-Amarela","tecnico":["Drill com bolas profundas — rebater profundo e cruzado com consistência","Identificar bola fácil e executar golpe de definição na paralela","Split step orientado e dinâmico para recepção","Transferir o peso no golpe com equilíbrio","Spin acelerado com FH e BH em situações de pressão","Movimentação: frear, acelerar e recuperar","Sequência de voleios: construção + finalização + smash","Avançar para interceptar trajetórias na rede","Smash com corpo esticado e pronação","Saque com efeito slice e spin — consistência por lado","Lançamento de bola adequado ao efeito do saque","2º saque com efeito — controle de risco","Topspin de forehand com aceleração e controle de profundidade","Topspin de backhand com rotação completa do tronco","Giro de tronco e quadril nos golpes de fundo","Base aberta no forehand com rotação completa","Base semi-aberta como posição de transição","Base fechada no backhand (posição clássica)"],"tatico":["Auto-arbitragem com maturidade","Utilizar o golpe forte como arma principal","Interceptar durante o jogo de duplas","Atacar ao acelerar o jogo","Defender ao frear o ritmo","Analisar o adversário e adaptar o jogo","Variações com dropshot e slice","Compreensão do objetivo do ponto antes de bater","Controle de bola: regularidade, altura segura, reduzir erros","Direção de jogo: cruzada, paralela e ângulos com intenção","Posicionamento: recuperação ao centro após cada golpe","Leitura de situação: bola curta/profunda, rápida/lenta","Construção do ponto: abrir a quadra e trabalhar o rival","Ataque consciente: atacar com critério e escolha de alvo","Táticas específicas: saque +1 e devolução com intenção"],"fisico":["Arremesso: arremesso — meta zona 4","Desenvolvimento 5 corridas — meta abaixo de 11 segundos","Sprint 20m — meta abaixo de 4,0 segundos","T-Test 10m — meta abaixo de 12 segundos"],"mental":["Respeitar adversário e manter atitude correta em qualquer situação","Ser autônomo na gestão completa das regras","Postura correta em qualquer situação","Transferir durante os golpes com consciência","Rotinas pré-jogo estabelecidas","Rotinas durante o jogo — entre pontos e games","Rotinas pós-jogo — análise e aprendizado","Autoconhecimento tático: pontos fortes e limitações","Controle emocional sob pressão"]}};
+
+// ── Tab switching ──
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── Collapse toggle ──
+function toggleSection(el) {
+  el.closest('.ball-section').classList.toggle('collapsed');
+}
+
+// ── Tipo badge class ──
+function tipoClass(tipo) {
+  if (!tipo) return '';
+  const t = tipo.toLowerCase();
+  if (t.includes('físic') || t.includes('fisic')) return 'Físico';
+  if (t.includes('tátic') || t.includes('tatic')) return 'Tático';
+  if (t.includes('jogo')) return 'Jogo';
+  return '';
+}
+
+// ── Render Avaliações ──
+function renderAvaliacoes() {
+  const container = document.getElementById('tab-avaliacoes');
+  const order = ['roxa','vermelha_branca','vermelha_vermelha','vermelha_laranja',
+                 'laranja_laranja','laranja_verde','verde_verde','verde_amarela'];
+
+  container.innerHTML = order.map(key => {
+    const b = EVAL[key];
+    if (!b) return '';
+    const provCards = b.provas.map(p => {
+      const crits = p.criterios.map(c =>
+        `<li class="criterio-item">
+          <span class="crit-id">${c.id}</span>
+          <span class="crit-pts">(${c.pts}pts)</span>
+          <span class="crit-desc">${esc(c.desc)}</span>
+        </li>`
+      ).join('');
+      return `<div class="prova-card">
+        <div class="prova-header">
+          <span class="prova-num">Prova ${p.num}</span>
+          <span class="prova-nome">${esc(p.nome)}</span>
+          <span class="prova-tipo ${tipoClass(p.tipo)}">${esc(p.tipo)}</span>
+          <span class="prova-pts">${p.total} pts | mín ${p.min}</span>
+        </div>
+        <div class="prova-desc">${esc(p.descricao)}</div>
+        <ul class="criterios-list">${crits}</ul>
+      </div>`;
+    }).join('');
+
+    const meta = b.quadra ? `<span class="ball-subtitle">${esc(b.quadra)} · ${esc(b.bola)}</span>` : '';
+    return `<div class="ball-section">
+      <div class="ball-header" onclick="toggleSection(this)">
+        <span style="font-size:20px">${b.ball}</span>
+        <span class="ball-title" style="color:${b.color}">${esc(b.label)}</span>
+        ${meta}
+        <span class="chevron">▼</span>
+      </div>
+      <div class="ball-body">${provCards}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Render Requisitos ──
+function renderRequisitos() {
+  const container = document.getElementById('tab-requisitos');
+  const cats = [
+    { key: 'tecnico', icon: '🎾', label: 'TÉCNICO' },
+    { key: 'tatico',  icon: '♟️',  label: 'TÁTICO'  },
+    { key: 'fisico',  icon: '💪',  label: 'FÍSICO'  },
+    { key: 'mental',  icon: '🧠',  label: 'MENTAL'  },
+  ];
+
+  container.innerHTML = Object.entries(REQS).map(([key, b]) => {
+    const catBlocks = cats.map(cat => {
+      const items = b[cat.key] || [];
+      if (!items.length) return '';
+      const lis = items.map((item, i) =>
+        `<li data-n="${i+1}">${esc(item)}</li>`
+      ).join('');
+      return `<div class="cat-block">
+        <div class="cat-title">${cat.icon} ${cat.label} <span class="cat-count">(${items.length} ${items.length === 1 ? 'item' : 'itens'})</span></div>
+        <ul class="req-list">${lis}</ul>
+      </div>`;
+    }).filter(Boolean).join('<div class="divider"></div>');
+
+    return `<div class="ball-section">
+      <div class="ball-header" onclick="toggleSection(this)">
+        <span style="font-size:20px">${b.ball}</span>
+        <span class="ball-title" style="color:${b.color}">${esc(b.label)}</span>
+        <span class="ball-subtitle">${esc(b.levels)}</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="ball-body">${catBlocks}</div>
+    </div>`;
+  }).join('');
+}
+
+function esc(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+renderAvaliacoes();
+renderRequisitos();
+</script>
+</body>
+</html>
