@@ -36,7 +36,6 @@
   .ball-section.collapsed .chevron { transform:rotate(-90deg); }
   .ball-body { padding:0 20px 16px; }
   .ball-section.collapsed .ball-body { display:none; }
-  .divider { height:1px; background:#E2E8F0; margin:16px 0; }
   .prova-card { border:1px solid #E2E8F0; border-radius:8px; margin-top:16px; overflow:hidden; }
   .prova-header { display:flex; align-items:center; gap:8px; padding:10px 14px; background:#F8FAFC; border-bottom:1px solid #E2E8F0; flex-wrap:wrap; }
   .prova-num { font-size:11px; font-weight:700; color:#94A3B8; text-transform:uppercase; letter-spacing:.5px; min-width:52px; }
@@ -52,19 +51,20 @@
   .crit-id { font-weight:700; min-width:22px; color:#334155; }
   .crit-pts { font-size:11px; color:#94A3B8; white-space:nowrap; }
   .crit-desc { color:#334155; flex:1; }
+  .rotina-badge { display:inline-block; font-size:10px; font-weight:700; padding:1px 6px; border-radius:4px; background:#F0FDF4; color:#15803D; margin-left:6px; vertical-align:middle; }
+  /* EDIT MODE */
+  body.edit-mode [data-edit] { cursor:text; border-radius:3px; padding:1px 4px; margin:-1px -4px; }
+  body.edit-mode [data-edit]:hover { background:#FFF9C4; outline:1px dashed #F59E0B; }
+  body.edit-mode [data-edit]:focus { background:#FFFDE7; outline:2px solid #F59E0B; }
+  [data-edit].changed { background:#FEF9C3 !important; outline:1px solid #EAB308 !important; border-radius:3px; }
+  /* Requisitos */
   .cat-block { margin-top:16px; }
   .cat-title { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:#475569; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
   .cat-count { font-size:11px; font-weight:400; color:#94A3B8; text-transform:none; letter-spacing:0; }
   .req-list { list-style:none; display:flex; flex-direction:column; gap:4px; }
   .req-list li { font-size:13.5px; color:#334155; display:flex; gap:8px; align-items:baseline; }
   .req-list li::before { content:attr(data-n) "."; min-width:24px; color:#94A3B8; font-size:12px; text-align:right; flex-shrink:0; }
-  /* placeholder badge */
-  .placeholder-badge { display:inline-block; font-size:10px; font-weight:700; padding:1px 6px; border-radius:4px; background:#FEF3C7; color:#92400E; margin-left:6px; vertical-align:middle; }
-  /* EDIT MODE */
-  body.edit-mode [data-edit] { cursor:text; border-radius:3px; padding:1px 4px; margin:-1px -4px; transition:background .1s; }
-  body.edit-mode [data-edit]:hover { background:#FFF9C4; outline:1px dashed #F59E0B; }
-  body.edit-mode [data-edit]:focus { background:#FFFDE7; outline:2px solid #F59E0B; }
-  [data-edit].changed { background:#FEF9C3 !important; outline:1px solid #EAB308 !important; border-radius:3px; }
+  .divider { height:1px; background:#E2E8F0; margin:16px 0; }
   /* Changes Modal */
   #changes-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:200; align-items:flex-end; justify-content:center; }
   #changes-overlay.open { display:flex; }
@@ -94,7 +94,6 @@
 </style>
 </head>
 <body>
-
 <header>
   <div class="header-top">
     <a class="back-link" href="index.html">← Voltar</a>
@@ -107,19 +106,16 @@
     <button class="tab-btn" onclick="switchTab('requisitos',this)">Requisitos</button>
   </div>
 </header>
-
 <div class="notice" id="notice-default">
-  Clique em <strong>✏️ Editar</strong> para editar qualquer texto diretamente na página. Campos com <span class="placeholder-badge">preencher</span> ainda precisam de conteúdo. Quando terminar, clique em <strong>Ver Alterações</strong> para copiar tudo.
+  Clique em <strong>✏️ Editar</strong> para editar qualquer texto diretamente na página. Quando terminar, clique em <strong>Ver Alterações</strong> para copiar todas as correções.
 </div>
 <div class="notice notice-edit" id="notice-edit">
   ✅ <strong>Modo edição ativo.</strong> Passe o mouse sobre qualquer texto e edite diretamente. Campos alterados ficam destacados em amarelo.
 </div>
-
 <main>
   <div id="tab-avaliacoes" class="tab-panel active"></div>
   <div id="tab-requisitos" class="tab-panel"></div>
 </main>
-
 <div id="changes-overlay" onclick="closeChangesOnOverlay(event)">
   <div id="changes-panel">
     <div class="cp-header">
@@ -133,178 +129,390 @@
 
 <script>
 /* ══════════════════════════════════════════════════════════
-   AVALIAÇÕES — Nova estrutura de provas (todas as bolas)
-   Ordem: Saque → Troca c/ treinador → Troca c/ coleguinha
-          → Voleios → Arbitragem → Jogo (+ rotinas laranja+)
+   HELPERS — provas comuns (1, 2, 3 iguais em todos os níveis)
 ══════════════════════════════════════════════════════════ */
+const PROVA_SAQUE = {
+  num:1, nome:"Saque — Critérios Técnicos e Táticos", tipo:"Técnica",
+  descricao:"Avalia os fundamentos técnicos e táticos do saque.",
+  min:10, total:16,
+  criterios:[
+    {id:"A", desc:"Pés alinhados", pts:2},
+    {id:"B", desc:"Mão no coração da raquete", pts:2},
+    {id:"C", desc:"Corpo lateralizado", pts:2},
+    {id:"D", desc:"Posição troféu", pts:2},
+    {id:"E", desc:"Toss", pts:2},
+    {id:"F", desc:"Ponto de contato", pts:2},
+    {id:"G", desc:"Terminação", pts:2},
+    {id:"H", desc:"Acerta de 4 a 6 saques dentro", pts:2}
+  ]
+};
 
-// Provas comuns (Provas 1-3 iguais para todos os níveis)
-function p1(overrides){
-  return Object.assign({
-    num:1, nome:"Saque — Critérios Técnicos e Táticos", tipo:"Técnica",
-    descricao:"Avalia os fundamentos técnicos e táticos do saque.",
-    min:10, total:16,
-    criterios:[
-      {id:"A", desc:"Pés alinhados", pts:2},
-      {id:"B", desc:"Mão no coração da raquete", pts:2},
-      {id:"C", desc:"Corpo lateralizado", pts:2},
-      {id:"D", desc:"Posição troféu", pts:2},
-      {id:"E", desc:"Toss", pts:2},
-      {id:"F", desc:"Ponto de contato", pts:2},
-      {id:"G", desc:"Terminação", pts:2},
-      {id:"H", desc:"Acerta de 4 a 6 saques dentro", pts:2}
-    ]
-  }, overrides || {});
-}
+const PROVA_TREINADOR = {
+  num:2, nome:"Troca de Bolas com o Treinador", tipo:"Técnica",
+  descricao:"Avalia os critérios técnicos de FH e BH durante a troca de bolas com o treinador.",
+  min:10, total:16,
+  criterios:[
+    {id:"A", desc:"Posição tenista", pts:2},
+    {id:"B", desc:"Ficar dinâmico", pts:2},
+    {id:"C", desc:"Ponto de contato à frente do corpo no FH", pts:2},
+    {id:"D", desc:"Ponto de contato à frente do corpo no BH", pts:2},
+    {id:"E", desc:"Preparação da raquete acima da mão no FH", pts:2},
+    {id:"F", desc:"Preparação da raquete acima da mão no BH", pts:2},
+    {id:"G", desc:"Terminação no FH", pts:2},
+    {id:"H", desc:"Terminação no BH", pts:2}
+  ]
+};
 
-function p2(overrides){
-  return Object.assign({
-    num:2, nome:"Troca de Bolas com o Treinador", tipo:"Técnica",
-    descricao:"Avalia os critérios técnicos de FH e BH durante a troca de bolas com o treinador.",
-    min:10, total:16,
-    criterios:[
-      {id:"A", desc:"Posição tenista", pts:2},
-      {id:"B", desc:"Ficar dinâmico", pts:2},
-      {id:"C", desc:"Ponto de contato à frente do corpo no FH", pts:2},
-      {id:"D", desc:"Ponto de contato à frente do corpo no BH", pts:2},
-      {id:"E", desc:"Preparação da raquete acima da mão no FH", pts:2},
-      {id:"F", desc:"Preparação da raquete acima da mão no BH", pts:2},
-      {id:"G", desc:"Terminação no FH", pts:2},
-      {id:"H", desc:"Terminação no BH", pts:2}
-    ]
-  }, overrides || {});
-}
+const PROVA_COLEGUINHA = {
+  num:3, nome:"Troca de Bolas com o Coleguinha", tipo:"Técnica",
+  descricao:"Avalia os critérios técnicos de FH e BH durante a troca de bolas com o coleguinha.",
+  min:10, total:16,
+  criterios:[
+    {id:"A", desc:"Posição tenista", pts:2},
+    {id:"B", desc:"Ficar dinâmico", pts:2},
+    {id:"C", desc:"Ponto de contato à frente do corpo no FH", pts:2},
+    {id:"D", desc:"Ponto de contato à frente do corpo no BH", pts:2},
+    {id:"E", desc:"Preparação da raquete acima da mão no FH", pts:2},
+    {id:"F", desc:"Preparação da raquete acima da mão no BH", pts:2},
+    {id:"G", desc:"Terminação no FH", pts:2},
+    {id:"H", desc:"Terminação no BH", pts:2}
+  ]
+};
 
-function p3(overrides){
-  return Object.assign({
-    num:3, nome:"Troca de Bolas com o Coleguinha", tipo:"Técnica",
-    descricao:"Avalia os critérios técnicos de FH e BH durante a troca de bolas com o coleguinha.",
-    min:10, total:16,
-    criterios:[
-      {id:"A", desc:"Posição tenista", pts:2},
-      {id:"B", desc:"Ficar dinâmico", pts:2},
-      {id:"C", desc:"Ponto de contato à frente do corpo no FH", pts:2},
-      {id:"D", desc:"Ponto de contato à frente do corpo no BH", pts:2},
-      {id:"E", desc:"Preparação da raquete acima da mão no FH", pts:2},
-      {id:"F", desc:"Preparação da raquete acima da mão no BH", pts:2},
-      {id:"G", desc:"Terminação no FH", pts:2},
-      {id:"H", desc:"Terminação no BH", pts:2}
-    ]
-  }, overrides || {});
-}
-
-function p4(overrides){
-  return Object.assign({
-    num:4, nome:"Voleios — Critérios Técnicos e Táticos", tipo:"Técnica",
-    descricao:"Avalia os fundamentos técnicos e táticos dos voleios.",
-    min:4, total:8,
-    criterios:[
-      {id:"A", desc:"⚠️ A ser preenchido", pts:2},
-      {id:"B", desc:"⚠️ A ser preenchido", pts:2},
-      {id:"C", desc:"⚠️ A ser preenchido", pts:2},
-      {id:"D", desc:"⚠️ A ser preenchido", pts:2}
-    ]
-  }, overrides || {});
-}
-
-function p5(overrides){
-  return Object.assign({
-    num:5, nome:"Arbitragem", tipo:"Tático",
-    descricao:"Avalia o conhecimento das regras e a capacidade de arbitrar.",
-    min:4, total:6,
-    criterios:[
-      {id:"A", desc:"⚠️ A ser preenchido", pts:2},
-      {id:"B", desc:"⚠️ A ser preenchido", pts:2},
-      {id:"C", desc:"⚠️ A ser preenchido", pts:2}
-    ]
-  }, overrides || {});
-}
-
-// Prova 6 SEM rotinas (roxa / vermelha)
-function p6_basico(overrides){
-  return Object.assign({
-    num:6, nome:"Jogo — Análise Tática", tipo:"Jogo",
-    descricao:"Avalia o desempenho tático em situação real de jogo.",
-    min:4, total:6,
-    criterios:[
-      {id:"A", desc:"⚠️ A ser preenchido", pts:2},
-      {id:"B", desc:"⚠️ A ser preenchido", pts:2},
-      {id:"C", desc:"⚠️ A ser preenchido", pts:2}
-    ]
-  }, overrides || {});
-}
-
-// Prova 6 COM rotinas (laranja em diante)
-function p6_rotinas(overrides){
-  return Object.assign({
-    num:6, nome:"Jogo — Análise Tática e Rotinas", tipo:"Jogo",
-    descricao:"Avalia o desempenho tático e as rotinas de jogo (ir na toalha, rotina entre pontos e pós-jogo).",
-    min:6, total:12,
-    criterios:[
-      {id:"A", desc:"⚠️ A ser preenchido", pts:2},
-      {id:"B", desc:"⚠️ A ser preenchido", pts:2},
-      {id:"C", desc:"⚠️ A ser preenchido", pts:2},
-      {id:"D", desc:"Ir na toalha", pts:2},
-      {id:"E", desc:"Rotina entre pontos", pts:2},
-      {id:"F", desc:"Rotina pós-jogo", pts:2}
-    ]
-  }, overrides || {});
-}
-
-/* ── EVAL object ── */
+/* ══════════════════════════════════════════════════════════
+   AVALIAÇÕES — estrutura com 6 provas por nível
+   Provas 4 / 5 / 6 diferenciadas por nível de bola.
+   Laranja em diante: Prova 6 inclui rotinas de jogo.
+══════════════════════════════════════════════════════════ */
 const EVAL = {
+
+  /* ── BOLA ROXA ── */
   roxa: {
     label:"Bola Roxa", color:"#7c3aed", ball:"🟣",
     quadra:"Quadra reduzida · Rede baixa", bola:"Bola de espuma / Roxa",
-    provas:[ p1(), p2(), p3(), p4(), p5(), p6_basico() ]
+    provas:[
+      PROVA_SAQUE,
+      PROVA_TREINADOR,
+      PROVA_COLEGUINHA,
+      { num:4, nome:"Voleios — Critérios Técnicos", tipo:"Técnica",
+        descricao:"Avalia os primeiros contatos com o voleio: posição e golpe frente ao corpo.",
+        min:4, total:6,
+        criterios:[
+          {id:"A", desc:"Golpear a bola frente ao corpo no voleio", pts:2},
+          {id:"B", desc:"Empunhadura continental no voleio", pts:2},
+          {id:"C", desc:"Manter posição surfista ao avançar para a rede", pts:2}
+        ]},
+      { num:5, nome:"Arbitragem", tipo:"Tático",
+        descricao:"Avalia o entendimento das regras básicas e a contagem de pontos.",
+        min:4, total:6,
+        criterios:[
+          {id:"A", desc:"Saber distinguir bola dentro e fora (3 de 4 tentativas)", pts:2},
+          {id:"B", desc:"Entender a contagem de um game (love, 15, 30, 40)", pts:2},
+          {id:"C", desc:"Respeitar a organização do jogo", pts:2}
+        ]},
+      { num:6, nome:"Jogo — Análise Tática", tipo:"Jogo",
+        descricao:"Avalia o desempenho durante o jogo cooperativo e competitivo.",
+        min:4, total:6,
+        criterios:[
+          {id:"A", desc:"Conseguir jogar mão/raquete com o treinador (rally de 3)", pts:2},
+          {id:"B", desc:"Manter foco e disposição durante o jogo", pts:2},
+          {id:"C", desc:"Jogar no espaço vazio com intenção", pts:2}
+        ]}
+    ]
   },
+
+  /* ── VERMELHA-BRANCA ── */
   vermelha_branca: {
     label:"Vermelha-Branca", color:"#ff6666", ball:"🔴",
     quadra:"12,80m × 5,50m · Rede 80cm", bola:"Bola Vermelha (75% mais lenta)",
-    provas:[ p1(), p2(), p3(), p4(), p5(), p6_basico() ]
+    provas:[
+      PROVA_SAQUE,
+      PROVA_TREINADOR,
+      PROVA_COLEGUINHA,
+      { num:4, nome:"Voleios — Critérios Técnicos e Táticos", tipo:"Técnica",
+        descricao:"Avalia a empunhadura continental e os fundamentos do jogo na rede.",
+        min:5, total:8,
+        criterios:[
+          {id:"A", desc:"Empunhadura continental no voleio (3 de 4 tentativas)", pts:2},
+          {id:"B", desc:"Segurar a raquete no fim do cabo", pts:2},
+          {id:"C", desc:"Jogo na rede: golpear frente ao corpo", pts:2},
+          {id:"D", desc:"Identifica e demonstra a empunhadura continental quando solicitado", pts:2}
+        ]},
+      { num:5, nome:"Arbitragem", tipo:"Tático",
+        descricao:"Avalia o conhecimento do placar e das regras básicas em jogo.",
+        min:5, total:8,
+        criterios:[
+          {id:"A", desc:"Anunciar bolas fora e o placar durante a partida", pts:2},
+          {id:"B", desc:"Distinguir bolas fora e dentro corretamente (4 de 5)", pts:2},
+          {id:"C", desc:"Acompanhar e saber o placar durante o jogo", pts:2},
+          {id:"D", desc:"Respeitar a organização do jogo", pts:2}
+        ]},
+      { num:6, nome:"Jogo — Análise Tática", tipo:"Jogo",
+        descricao:"Avalia o desempenho tático em situação real de jogo.",
+        min:4, total:6,
+        criterios:[
+          {id:"A", desc:"Conseguir continuação dos golpes na partida", pts:2},
+          {id:"B", desc:"Jogar no espaço vazio com intenção", pts:2},
+          {id:"C", desc:"Ser dinâmico entre os golpes", pts:2}
+        ]}
+    ]
   },
+
+  /* ── VERMELHA-VERMELHA ── */
   vermelha_vermelha: {
     label:"Vermelha-Vermelha", color:"#e53e3e", ball:"🔴",
     quadra:"18m × 6,40m · Rede 80cm", bola:"Bola Vermelha (75% mais lenta)",
-    provas:[ p1(), p2(), p3(), p4(), p5(), p6_basico() ]
+    provas:[
+      PROVA_SAQUE,
+      PROVA_TREINADOR,
+      PROVA_COLEGUINHA,
+      { num:4, nome:"Voleios — Critérios Técnicos e Táticos", tipo:"Técnica",
+        descricao:"Avalia empunhadura, preparação e movimentação no jogo de rede.",
+        min:6, total:10,
+        criterios:[
+          {id:"A", desc:"Empunhadura continental no voleio (4 de 5)", pts:2},
+          {id:"B", desc:"Jogo na rede: golpear frente ao corpo", pts:2},
+          {id:"C", desc:"Realizar voleios com preparação curta", pts:2},
+          {id:"D", desc:"Movimentação: ficar dinâmico entre os pontos", pts:2},
+          {id:"E", desc:"Deslocar o adversário com o voleio", pts:2}
+        ]},
+      { num:5, nome:"Arbitragem", tipo:"Tático",
+        descricao:"Avalia o conhecimento das regras, distinção dentro/fora e tie-break.",
+        min:5, total:8,
+        criterios:[
+          {id:"A", desc:"Anunciar bolas fora e o placar corretamente", pts:2},
+          {id:"B", desc:"Distinguir bolas fora e dentro (4 de 5)", pts:2},
+          {id:"C", desc:"Conhecimento das regras do tie-break", pts:2},
+          {id:"D", desc:"Respeitar a organização do jogo", pts:2}
+        ]},
+      { num:6, nome:"Jogo — Análise Tática", tipo:"Jogo",
+        descricao:"Avalia tática e gestão do jogo em formato tie-break.",
+        min:5, total:10,
+        criterios:[
+          {id:"A", desc:"Defender-se com bola alta na cruzada", pts:2},
+          {id:"B", desc:"Jogar no espaço vazio com intenção", pts:2},
+          {id:"C", desc:"Ser dinâmico entre os golpes", pts:2},
+          {id:"D", desc:"Acompanhar e saber o placar", pts:2},
+          {id:"E", desc:"Recuperar a posição na quadra", pts:2}
+        ]}
+    ]
   },
+
+  /* ── VERMELHA-LARANJA ── */
   vermelha_laranja: {
     label:"Vermelha-Laranja", color:"#ff8533", ball:"🔴",
     quadra:"Quadra vermelha completa", bola:"Bola Vermelha (75% mais lenta)",
-    provas:[ p1(), p2(), p3(), p4(), p5(), p6_basico() ]
+    provas:[
+      PROVA_SAQUE,
+      PROVA_TREINADOR,
+      PROVA_COLEGUINHA,
+      { num:4, nome:"Voleios — Critérios Técnicos e Táticos", tipo:"Técnica",
+        descricao:"Avalia voleios espontâneos, preparação curta e deslocamento do adversário.",
+        min:6, total:10,
+        criterios:[
+          {id:"A", desc:"Empunhadura continental no voleio espontaneamente (4 de 5)", pts:2},
+          {id:"B", desc:"Jogo na rede: golpear frente ao corpo", pts:2},
+          {id:"C", desc:"Realizar voleios com preparação curta", pts:2},
+          {id:"D", desc:"Movimentação: ficar dinâmico entre os pontos", pts:2},
+          {id:"E", desc:"Deslocar o adversário com o voleio", pts:2}
+        ]},
+      { num:5, nome:"Arbitragem", tipo:"Tático",
+        descricao:"Avalia controle de pontuação e regras do tie-break em situação real.",
+        min:4, total:6,
+        criterios:[
+          {id:"A", desc:"Disputar o tie-break respeitando as regras e controlando a pontuação", pts:2},
+          {id:"B", desc:"Anunciar bolas fora e o placar corretamente", pts:2},
+          {id:"C", desc:"Distinguir bolas fora e dentro corretamente", pts:2}
+        ]},
+      { num:6, nome:"Jogo — Análise Tática", tipo:"Jogo",
+        descricao:"Avalia tática em simples e duplas — tie-break e movimentação.",
+        min:6, total:10,
+        criterios:[
+          {id:"A", desc:"Deslocar o adversário (tática)", pts:2},
+          {id:"B", desc:"Realizar voleios em situação de jogo (tática)", pts:2},
+          {id:"C", desc:"Movimentação: ficar dinâmico entre os pontos", pts:2},
+          {id:"D", desc:"Recuperar a posição na quadra", pts:2},
+          {id:"E", desc:"Jogar no espaço vazio com intenção", pts:2}
+        ]}
+    ]
   },
+
+  /* ── LARANJA-LARANJA ── */
   laranja_laranja: {
     label:"Laranja-Laranja", color:"#f5a623", ball:"🟠",
     quadra:"18m × 6,40m · Rede 91cm", bola:"Bola Laranja (50% mais lenta)",
-    provas:[ p1(), p2(), p3(), p4(), p5(), p6_rotinas() ]
+    provas:[
+      PROVA_SAQUE,
+      PROVA_TREINADOR,
+      PROVA_COLEGUINHA,
+      { num:4, nome:"Voleios e Smash — Critérios Técnicos e Táticos", tipo:"Técnica",
+        descricao:"Avalia approach + voleio em lados opostos, empunhadura, deslocamento e smash.",
+        min:8, total:14,
+        criterios:[
+          {id:"A", desc:"Empunhadura continental (FH) a eastern de backhand (BH) no voleio", pts:2},
+          {id:"B", desc:"Acertar série: approach + voleio em lados opostos (×4)", pts:2},
+          {id:"C", desc:"Preparação curta dos voleios", pts:2},
+          {id:"D", desc:"Bater na frente do corpo ao avançar durante o golpe", pts:2},
+          {id:"E", desc:"Acertar smash — 1pt cada (×4)", pts:2},
+          {id:"F", desc:"Smash: deslocamento com passos laterais ou cruzados ficando de lado", pts:2},
+          {id:"G", desc:"Posição troféu no smash", pts:2}
+        ]},
+      { num:5, nome:"Arbitragem", tipo:"Tático",
+        descricao:"Avalia contagem do placar tradicional e gestão de desacordos.",
+        min:5, total:8,
+        criterios:[
+          {id:"A", desc:"Saber e acompanhar a contagem do placar tradicional", pts:2},
+          {id:"B", desc:"Anunciar bolas fora e o placar", pts:2},
+          {id:"C", desc:"Distinguir bolas dentro e fora", pts:2},
+          {id:"D", desc:"Saber gerir desacordos com o adversário", pts:2}
+        ]},
+      { num:6, nome:"Jogo — Análise Tática e Rotinas", tipo:"Jogo",
+        descricao:"Avalia gestão tática do jogo e rotinas (ir na toalha, entre pontos e pós-jogo).",
+        min:7, total:12,
+        criterios:[
+          {id:"A", desc:"Atacar ao acelerar o jogo; defender ao diminuir o ritmo", pts:2},
+          {id:"B", desc:"Acelerar o 1º saque; comandar a partir da devolução do 2º saque", pts:2},
+          {id:"C", desc:"Conseguir participar corretamente", pts:2},
+          {id:"D", desc:"Ir na toalha", pts:2, rotina:true},
+          {id:"E", desc:"Rotina entre pontos", pts:2, rotina:true},
+          {id:"F", desc:"Rotina pós-jogo", pts:2, rotina:true}
+        ]}
+    ]
   },
+
+  /* ── LARANJA-VERDE ── */
   laranja_verde: {
     label:"Laranja-Verde", color:"#7db529", ball:"🟠",
     quadra:"Quadra laranja completa", bola:"Bola Laranja (50% mais lenta)",
-    provas:[ p1(), p2(), p3(), p4(), p5(), p6_rotinas() ]
+    provas:[
+      PROVA_SAQUE,
+      PROVA_TREINADOR,
+      PROVA_COLEGUINHA,
+      { num:4, nome:"Voleios e Smash — Critérios Técnicos e Táticos", tipo:"Técnica",
+        descricao:"Avalia approach + voleio, smash e utilização de efeitos nos golpes de rede.",
+        min:8, total:14,
+        criterios:[
+          {id:"A", desc:"Empunhadura continental (FH) a eastern de backhand (BH) no voleio", pts:2},
+          {id:"B", desc:"Acertar série: approach + voleio em lados opostos (×4)", pts:2},
+          {id:"C", desc:"Preparação curta dos voleios", pts:2},
+          {id:"D", desc:"Bater na frente do corpo ao avançar durante o golpe", pts:2},
+          {id:"E", desc:"Smash: deslocamento com passos laterais ou cruzados ficando de lado", pts:2},
+          {id:"F", desc:"Posição troféu no smash", pts:2},
+          {id:"G", desc:"Deslocar o adversário com o jogo de rede", pts:2}
+        ]},
+      { num:5, nome:"Arbitragem", tipo:"Tático",
+        descricao:"Avalia autonomia na contagem e gestão de desacordos com o adversário.",
+        min:5, total:8,
+        criterios:[
+          {id:"A", desc:"Contar os pontos de um game com autonomia", pts:2},
+          {id:"B", desc:"Saber gerir desacordos com o adversário", pts:2},
+          {id:"C", desc:"Acompanhar o placar tradicional com autonomia", pts:2},
+          {id:"D", desc:"Respeitar adversário e organização do jogo", pts:2}
+        ]},
+      { num:6, nome:"Jogo — Análise Tática e Rotinas", tipo:"Jogo",
+        descricao:"Avalia tática em simples e duplas e rotinas de jogo.",
+        min:7, total:12,
+        criterios:[
+          {id:"A", desc:"Atacar ao acelerar o jogo; defender ao desacelerar/frear", pts:2},
+          {id:"B", desc:"Utilizar efeitos nos golpes (tática)", pts:2},
+          {id:"C", desc:"Saber posicionar-se no início do ponto (simples e duplas)", pts:2},
+          {id:"D", desc:"Ir na toalha", pts:2, rotina:true},
+          {id:"E", desc:"Rotina entre pontos", pts:2, rotina:true},
+          {id:"F", desc:"Rotina pós-jogo", pts:2, rotina:true}
+        ]}
+    ]
   },
+
+  /* ── VERDE-VERDE ── */
   verde_verde: {
     label:"Verde-Verde", color:"#00c050", ball:"🟢",
     quadra:"Quadra completa · Rede 91cm", bola:"Bola Verde (25% mais lenta)",
-    provas:[ p1(), p2(), p3(), p4(), p5(), p6_rotinas() ]
+    provas:[
+      PROVA_SAQUE,
+      PROVA_TREINADOR,
+      PROVA_COLEGUINHA,
+      { num:4, nome:"Voleios e Smash — Critérios Técnicos e Táticos", tipo:"Técnica",
+        descricao:"Sequência: 1º voleio profundo + 2º voleio próximo à rede + smash. Avalia interceptação e smash.",
+        min:6, total:10,
+        criterios:[
+          {id:"A", desc:"1º voleio de construção profundo + 2º voleio próximo à rede + smash", pts:2},
+          {id:"B", desc:"Avançar para interceptar as trajetórias", pts:2},
+          {id:"C", desc:"Smash com corpo esticado e pronação na batida", pts:2},
+          {id:"D", desc:"Golpe correto — 1pt por acerto (3 séries × 3 golpes = 9)", pts:2},
+          {id:"E", desc:"Preparação curta dos voleios", pts:2}
+        ]},
+      { num:5, nome:"Arbitragem", tipo:"Tático",
+        descricao:"Avalia auto-arbitragem e postura correta em qualquer situação.",
+        min:4, total:6,
+        criterios:[
+          {id:"A", desc:"Participar corretamente (auto-arbitragem)", pts:2},
+          {id:"B", desc:"Auto-arbitragem — respeito às regras", pts:2},
+          {id:"C", desc:"Postura correta em qualquer situação", pts:2}
+        ]},
+      { num:6, nome:"Jogo — Análise Tática e Rotinas", tipo:"Jogo",
+        descricao:"Avalia tática no jogo — golpe forte, 2º saque com efeito e rotinas de jogo.",
+        min:7, total:12,
+        criterios:[
+          {id:"A", desc:"Utilizar seu golpe forte", pts:2},
+          {id:"B", desc:"Sacar com efeito no 2º saque", pts:2},
+          {id:"C", desc:"Atacar ao acelerar o jogo; defender ao frear o ritmo", pts:2},
+          {id:"D", desc:"Ir na toalha", pts:2, rotina:true},
+          {id:"E", desc:"Rotina entre pontos", pts:2, rotina:true},
+          {id:"F", desc:"Rotina pós-jogo", pts:2, rotina:true}
+        ]}
+    ]
   },
+
+  /* ── VERDE-AMARELA ── */
   verde_amarela: {
     label:"Verde-Amarela", color:"#8fbb00", ball:"🟢",
     quadra:"Quadra completa · Rede 91cm", bola:"Bola Verde (25% mais lenta)",
-    provas:[ p1(), p2(), p3(), p4(), p5(), p6_rotinas() ]
+    provas:[
+      PROVA_SAQUE,
+      PROVA_TREINADOR,
+      PROVA_COLEGUINHA,
+      { num:4, nome:"Voleios e Smash — Critérios Técnicos e Táticos", tipo:"Técnica",
+        descricao:"Sequência completa: construção + finalização + smash. Avalia interceptação nas duplas.",
+        min:6, total:10,
+        criterios:[
+          {id:"A", desc:"1º voleio de construção profundo + 2º voleio próximo à rede + smash", pts:2},
+          {id:"B", desc:"Avançar para interceptar trajetórias", pts:2},
+          {id:"C", desc:"Smash com corpo esticado e pronação na batida", pts:2},
+          {id:"D", desc:"Interceptar durante o jogo de duplas", pts:2},
+          {id:"E", desc:"Preparação curta dos voleios", pts:2}
+        ]},
+      { num:5, nome:"Arbitragem", tipo:"Tático",
+        descricao:"Avalia gestão autônoma completa das regras e postura em qualquer situação.",
+        min:4, total:6,
+        criterios:[
+          {id:"A", desc:"Ser autônomo na gestão das regras", pts:2},
+          {id:"B", desc:"Respeitar adversário e manter atitude correta em qualquer situação", pts:2},
+          {id:"C", desc:"Auto-arbitragem com maturidade", pts:2}
+        ]},
+      { num:6, nome:"Jogo — Análise Tática e Rotinas", tipo:"Jogo",
+        descricao:"Avalia golpe forte, interceptação nas duplas, uso do efeito no saque e rotinas de jogo.",
+        min:7, total:12,
+        criterios:[
+          {id:"A", desc:"Utilizar seu golpe forte (tática)", pts:2},
+          {id:"B", desc:"Interceptar durante o jogo de dupla (tática)", pts:2},
+          {id:"C", desc:"Ao sacar, utilizar efeito 'slice' ou 'top spin' no 2º saque (técnica)", pts:2},
+          {id:"D", desc:"Ir na toalha", pts:2, rotina:true},
+          {id:"E", desc:"Rotina entre pontos", pts:2, rotina:true},
+          {id:"F", desc:"Rotina pós-jogo", pts:2, rotina:true}
+        ]}
+    ]
   }
 };
 
 /* ══════════════════════════════════════════════════════════
-   REQUISITOS (sem alteração)
+   REQUISITOS (inalterado)
 ══════════════════════════════════════════════════════════ */
-const REQS = {"vermelha":{"label":"Bola Vermelha","color":"#ff6666","ball":"🔴","levels":"Vermelha-Branca · Vermelha-Vermelha · Vermelha-Laranja","tecnico":["Bater a bola frente ao corpo no FH e no BH","Estar equilibrado no FH e no BH","Combo: arremesso + 2 golpes (FH e BH)","Posição de expectativa dinâmica com 2 mãos na raquete","Preparação com raquete mais elevada que a altura da mão dominante","Empunhadura continental a eastern (2-3) no forehand","Empunhadura continental a eastern (2-1) no backhand","Empunhadura continental no voleio","Bater na frente do corpo","Posição inicial com base alinhada no saque","Segurar a raquete no fim do cabo","Ponto de contato acima da cabeça no saque","Posição troféu no saque","Sacar com equilíbrio","Executar a laçada","Recuperar a raquete com as 2 mãos entre os golpes","Empunhaduras diferentes no FH e no BH","Preparação do FH com raquete mais elevada que a mão","Preparação do BH com raquete mais elevada que a mão","Jogo na rede: golpear frente ao corpo"],"tatico":["Anunciar bolas fora e o placar","Distinguir bolas fora e dentro","Acompanhar e saber o placar","Conseguir continuação dos golpes","Posição de expectativa com mão livre no coração da raquete na devolução","Ser dinâmico entre os golpes","Deslocar o adversário","Conhecimento das regras do tie-break","Realizar voleios","Movimentação: ficar dinâmico entre os pontos","Recuperar a posição na quadra","Defender-se (bola alta na cruzada)","Jogar no espaço vazio"],"fisico":["Circuito com bola na raquete sem erros (3 cones + bambolê)","Capacidade de aceleração","Equilibrar raquete e bola","Colocar bola no bambolê com domínio (flexão e ritmo lento)","Arremesso: arremesso por cima da cabeça (meta: zona 2+)","Posição inicial de lado no arremesso","Posição troféu com braço livre no arremesso","Força explosiva do ombro dominante","Desenvolvimento: 3 corridas — meta abaixo de 9 segundos"],"mental":["Respeitar a organização do jogo","Esperar o colega estar pronto antes de arremessar","Saber onde se recuperar após o golpe"]},"laranja":{"label":"Bola Laranja","color":"#f5a623","ball":"🟠","levels":"Laranja-Laranja · Laranja-Verde","tecnico":["Série drill: cruzada + cruzada + paralela (FH e BH)","Posição de expectativa dinâmica com ombros e braços soltos","Fim da preparação acima da altura do ponto de contato","Soltar a cabeça da raquete abaixo do ponto de contato no início do swing","Movimentação equilibrada e contínua","Approach com FH cruzado ou paralelo + voleio do lado oposto","Topspin de forehand","Topspin de backhand","Empunhadura continental a eastern de BH no voleio","Preparação curta dos voleios","Smash: deslocamento com passos laterais ou cruzados ficando de lado","Posição troféu no smash","Saque com pés alinhados e subida sincronizada dos braços","Sacar com slice (escovar a bola)","Sacar com ritmo justo (lento → rápido → muito rápido)","Sacar com corpo esticado","Preparação do BH com raquete mais elevada que a mão","Jogo na rede: golpes frente ao corpo e avançando","Sacar utilizando efeito slice"],"tatico":["Contagem do placar tradicional","Atacar ao acelerar o jogo","Defender ao diminuir/frear o ritmo do jogo","Acelerar o 1º saque","Comandar o ponto a partir da devolução do 2º saque","Utilizar efeitos nos golpes","Saber posicionar-se no início do ponto no simples","Saber posicionar-se no início do ponto nas duplas","Saber gerir desacordos com o adversário","Variação de jogo"],"fisico":["Arremesso: arremesso (meta: zona 3+)","Desenvolvimento 5 corridas (3 idas e 2 voltas) — meta abaixo de 13 segundos"],"mental":["Comportamento e arbitragem: respeitar e gerir desacordos","Contar os pontos de um game com autonomia","Posicionar-se corretamente nas duplas","Ir na toalha","Rotinas positivas"]},"verde":{"label":"Bola Verde","color":"#00c050","ball":"🟢","levels":"Verde-Verde · Verde-Amarela","tecnico":["Drill com bolas profundas e distantes — rebater profundo e cruzado","Identificar bola 'fácil' e executar golpe de definição na paralela","Split step orientado para recepção","Transferir o peso no golpe","Realizar spin acelerado com FH e BH","Movimentação: frear e acelerar","1º voleio de construção profundo + 2º voleio próximo à rede + smash","Avançar para interceptar trajetórias","Smash com corpo esticado e pronação na batida","Saques com efeito slice ou spin — 3 de cada lado","Lançamento de bola adequado ao efeito","Ação do punho adequada ao efeito (slice e/ou spin)","Pernas ligeiramente flexionadas no saque","2º saque com efeito slice ou top spin"],"tatico":["Auto-arbitragem","Utilizar golpe forte","Interceptar durante o jogo de duplas","Atacar ao acelerar o jogo","Defender ao frear o ritmo","Analisar o adversário","Variações com dropshot e slice"],"fisico":["Arremesso: arremesso (meta: zona 4)","Desenvolvimento 5 corridas — meta abaixo de 11 segundos"],"mental":["Respeitar adversário e manter atitude correta em qualquer situação","Ser autônomo na gestão completa das regras","Postura correta em qualquer situação","Transferir durante os golpes com consciência","Rotinas pré-jogo","Rotinas durante o jogo","Rotinas pós-jogo"]},"amarela":{"label":"Bola Amarela","color":"#ffd700","ball":"🟡","levels":"RAW Juniors avançado · Verde-Amarela","tecnico":["Drill com bolas profundas — rebater profundo e cruzado com consistência","Identificar bola fácil e executar golpe de definição na paralela","Split step orientado e dinâmico para recepção","Transferir o peso no golpe com equilíbrio","Spin acelerado com FH e BH em situações de pressão","Movimentação: frear, acelerar e recuperar","Sequência de voleios: construção + finalização + smash","Avançar para interceptar trajetórias na rede","Smash com corpo esticado e pronação","Saque com efeito slice e spin — consistência por lado","Lançamento de bola adequado ao efeito do saque","2º saque com efeito — controle de risco","Topspin de forehand com aceleração e controle de profundidade","Topspin de backhand com rotação completa do tronco","Giro de tronco e quadril nos golpes de fundo","Base aberta no forehand com rotação completa","Base semi-aberta como posição de transição","Base fechada no backhand (posição clássica)"],"tatico":["Auto-arbitragem com maturidade","Utilizar o golpe forte como arma principal","Interceptar durante o jogo de duplas","Atacar ao acelerar o jogo","Defender ao frear o ritmo","Analisar o adversário e adaptar o jogo","Variações com dropshot e slice","Compreensão do objetivo do ponto antes de bater","Controle de bola: regularidade, altura segura, reduzir erros","Direção de jogo: cruzada, paralela e ângulos com intenção","Posicionamento: recuperação ao centro após cada golpe","Leitura de situação: bola curta/profunda, rápida/lenta","Construção do ponto: abrir a quadra e trabalhar o rival","Ataque consciente: atacar com critério e escolha de alvo","Táticas específicas: saque +1 e devolução com intenção"],"fisico":["Arremesso: arremesso — meta zona 4","Desenvolvimento 5 corridas — meta abaixo de 11 segundos","Sprint 20m — meta abaixo de 4,0 segundos","T-Test 10m — meta abaixo de 12 segundos"],"mental":["Respeitar adversário e manter atitude correta em qualquer situação","Ser autônomo na gestão completa das regras","Postura correta em qualquer situação","Transferir durante os golpes com consciência","Rotinas pré-jogo estabelecidas","Rotinas durante o jogo — entre pontos e games","Rotinas pós-jogo — análise e aprendizado","Autoconhecimento tático: pontos fortes e limitações","Controle emocional sob pressão"]}};
+const REQS = {"vermelha":{"label":"Bola Vermelha","color":"#ff6666","ball":"🔴","levels":"Vermelha-Branca · Vermelha-Vermelha · Vermelha-Laranja","tecnico":["Bater a bola frente ao corpo no FH e no BH","Estar equilibrado no FH e no BH","Combo: arremesso + 2 golpes (FH e BH)","Posição de expectativa dinâmica com 2 mãos na raquete","Preparação com raquete mais elevada que a altura da mão dominante","Empunhadura continental a eastern (2-3) no forehand","Empunhadura continental a eastern (2-1) no backhand","Empunhadura continental no voleio","Bater na frente do corpo","Posição inicial com base alinhada no saque","Segurar a raquete no fim do cabo","Ponto de contato acima da cabeça no saque","Posição troféu no saque","Sacar com equilíbrio","Executar a laçada","Recuperar a raquete com as 2 mãos entre os golpes","Empunhaduras diferentes no FH e no BH","Preparação do FH com raquete mais elevada que a mão","Preparação do BH com raquete mais elevada que a mão","Jogo na rede: golpear frente ao corpo"],"tatico":["Anunciar bolas fora e o placar","Distinguir bolas fora e dentro","Acompanhar e saber o placar","Conseguir continuação dos golpes","Posição de expectativa com mão livre no coração da raquete na devolução","Ser dinâmico entre os golpes","Deslocar o adversário","Conhecimento das regras do tie-break","Realizar voleios","Movimentação: ficar dinâmico entre os pontos","Recuperar a posição na quadra","Defender-se (bola alta na cruzada)","Jogar no espaço vazio"],"fisico":["Circuito com bola na raquete sem erros (3 cones + bambolê)","Capacidade de aceleração","Equilibrar raquete e bola","Colocar bola no bambolê com domínio (flexão e ritmo lento)","Arremesso: arremesso por cima da cabeça (meta: zona 2+)","Posição inicial de lado no arremesso","Posição troféu com braço livre no arremesso","Força explosiva do ombro dominante","Desenvolvimento: 3 corridas — meta abaixo de 9 segundos"],"mental":["Respeitar a organização do jogo","Esperar o colega estar pronto antes de arremessar","Saber onde se recuperar após o golpe"]},"laranja":{"label":"Bola Laranja","color":"#f5a623","ball":"🟠","levels":"Laranja-Laranja · Laranja-Verde","tecnico":["Série drill: cruzada + cruzada + paralela (FH e BH)","Posição de expectativa dinâmica com ombros e braços soltos","Fim da preparação acima da altura do ponto de contato","Soltar a cabeça da raquete abaixo do ponto de contato no início do swing","Movimentação equilibrada e contínua","Approach com FH cruzado ou paralelo + voleio do lado oposto","Topspin de forehand","Topspin de backhand","Empunhadura continental a eastern de BH no voleio","Preparação curta dos voleios","Smash: deslocamento com passos laterais ou cruzados ficando de lado","Posição troféu no smash","Saque com pés alinhados e subida sincronizada dos braços","Sacar com slice (escovar a bola)","Sacar com ritmo justo (lento → rápido → muito rápido)","Sacar com corpo esticado","Preparação do BH com raquete mais elevada que a mão","Jogo na rede: golpes frente ao corpo e avançando","Sacar utilizando efeito slice"],"tatico":["Contagem do placar tradicional","Atacar ao acelerar o jogo","Defender ao diminuir/frear o ritmo do jogo","Acelerar o 1º saque","Comandar o ponto a partir da devolução do 2º saque","Utilizar efeitos nos golpes","Saber posicionar-se no início do ponto no simples","Saber posicionar-se no início do ponto nas duplas","Saber gerir desacordos com o adversário","Variação de jogo"],"fisico":["Arremesso: arremesso (meta: zona 3+)","Desenvolvimento 5 corridas (3 idas e 2 voltas) — meta abaixo de 13 segundos"],"mental":["Comportamento e arbitragem: respeitar e gerir desacordos","Contar os pontos de um game com autonomia","Posicionar-se corretamente nas duplas","Ir na toalha","Rotinas positivas"]},"verde":{"label":"Bola Verde","color":"#00c050","ball":"🟢","levels":"Verde-Verde · Verde-Amarela","tecnico":["Drill com bolas profundas e distantes — rebater profundo e cruzado","Identificar bola 'fácil' e executar golpe de definição na paralela","Split step orientado para recepção","Transferir o peso no golpe","Realizar spin acelerado com FH e BH","Movimentação: frear e acelerar","1º voleio de construção profundo + 2º voleio próximo à rede + smash","Avançar para interceptar trajetórias","Smash com corpo esticado e pronação na batida","Saques com efeito slice ou spin — 3 de cada lado","Lançamento de bola adequado ao efeito","Ação do punho adequada ao efeito (slice e/ou spin)","Pernas ligeiramente flexionadas no saque","2º saque com efeito slice ou top spin"],"tatico":["Auto-arbitragem","Utilizar golpe forte","Interceptar durante o jogo de duplas","Atacar ao acelerar o jogo","Defender ao frear o ritmo","Analisar o adversário","Variações com dropshot e slice"],"fisico":["Arremesso: arremesso (meta: zona 4)","Desenvolvimento 5 corridas — meta abaixo de 11 segundos"],"mental":["Respeitar adversário e manter atitude correta em qualquer situação","Ser autônomo na gestão completa das regras","Postura correta em qualquer situação","Transferir durante os golpes com consciência","Rotinas pré-jogo","Rotinas durante o jogo","Rotinas pós-jogo"]},"amarela":{"label":"Bola Amarela","color":"#ffd700","ball":"🟡","levels":"RAW Juniors avançado · Verde-Amarela","tecnico":["Drill com bolas profundas — rebater profundo e cruzado com consistência","Identificar bola fácil e executar golpe de definição na paralela","Split step orientado e dinâmico para recepção","Transferir o peso no golpe com equilíbrio","Spin acelerado com FH e BH em situações de pressão","Movimentação: frear, acelerar e recuperar","Sequência de voleios: construção + finalização + smash","Avançar para interceptar trajetórias na rede","Smash com corpo esticado e pronação","Saque com efeito slice e spin — consistência por lado","Lançamento de bola adequado ao efeito do saque","2º saque com efeito — controle de risco","Topspin de forehand com aceleração e controle de profundidade","Topspin de backhand com rotação completa do tronco","Giro de tronco e quadril nos golpes de fundo","Base aberta no forehand com rotação completa","Base semi-aberta como posição de transição","Base fechada no backhand (posição clássica)"],"tatico":["Auto-arbitragem com maturidade","Utilizar o golpe forte como arma principal","Interceptar durante o jogo de duplas","Atacar ao acelerar o jogo","Defender ao frear o ritmo","Analisar o adversário e adaptar o jogo","Variações com dropshot e slice","Compreensão do objetivo do ponto antes de bater","Controle de bola: regularidade, altura segura, reduzir erros","Direção de jogo: cruzada, paralela e ângulos com intenção","Posicionamento: recuperação ao centro após cada golpe","Leitura de situação: bola curta/profunda, rápida/lenta","Construção do ponto: abrir a quadra e trabalhar o rival","Ataque consciente: atacar com critério e escolha de alvo","Táticas específicas: saque +1 e devolução com intenção"],"fisico":["Arremesso: arremesso — meta zona 4","Desenvolvimento 5 corridas — meta abaixo de 11 segundos","Sprint 20m — meta abaixo de 4,0 segundos","T-Test 10m — meta abaixo de 12 segundos"],"mental":["Respeitar adversário e manter atitude correta em qualquer situação","Ser autônomo na gestão completa das regras","Postura correta em qualquer situação","Transferir durante os golgens com consciência","Rotinas pré-jogo estabelecidas","Rotinas durante o jogo — entre pontos e games","Rotinas pós-jogo — análise e aprendizado","Autoconhecimento tático: pontos fortes e limitações","Controle emocional sob pressão"]}};
 
 /* ══════════════════════════════════════════════════════════
    EDIT MODE
 ══════════════════════════════════════════════════════════ */
 let editMode = false;
-
 function toggleEditMode() {
   editMode = !editMode;
   document.body.classList.toggle('edit-mode', editMode);
@@ -312,18 +520,15 @@ function toggleEditMode() {
   btn.textContent = editMode ? '✅ Editar ativado' : '✏️ Editar';
   btn.classList.toggle('active', editMode);
   document.getElementById('notice-default').style.display = editMode ? 'none' : '';
-  document.getElementById('notice-edit').style.display = editMode ? 'block' : 'none';
+  document.getElementById('notice-edit').style.display   = editMode ? 'block' : 'none';
   document.querySelectorAll('[data-edit]').forEach(el => {
     el.contentEditable = editMode ? 'true' : 'false';
   });
 }
-
 function onFieldEdit(el) {
-  const current = el.textContent.trim();
-  el.classList.toggle('changed', current !== el.dataset.original);
+  el.classList.toggle('changed', el.textContent.trim() !== el.dataset.original);
   updateChangesCount();
 }
-
 function updateChangesCount() {
   const n = document.querySelectorAll('[data-edit].changed').length;
   document.getElementById('change-count').textContent = n;
@@ -334,30 +539,19 @@ function updateChangesCount() {
    CHANGES PANEL
 ══════════════════════════════════════════════════════════ */
 function openChanges() {
-  const list = document.getElementById('changes-list');
   const changed = document.querySelectorAll('[data-edit].changed');
-  if (!changed.length) {
-    list.innerHTML = '<div class="no-changes">Nenhuma alteração realizada ainda.</div>';
-  } else {
-    list.innerHTML = Array.from(changed).map(el => `
-      <div class="change-item">
-        <div class="change-ctx">${esc(el.dataset.ctx||'Campo')}</div>
-        <div class="change-row">
-          <span class="change-label before">Antes</span>
-          <span class="change-text">${esc(el.dataset.original||'')}</span>
-        </div>
-        <div class="change-row" style="margin-top:4px">
-          <span class="change-label after">Agora</span>
-          <span class="change-text">${esc(el.textContent.trim())}</span>
-        </div>
-      </div>`).join('');
-  }
+  document.getElementById('changes-list').innerHTML = changed.length
+    ? Array.from(changed).map(el => `
+        <div class="change-item">
+          <div class="change-ctx">${esc(el.dataset.ctx||'Campo')}</div>
+          <div class="change-row"><span class="change-label before">Antes</span><span class="change-text">${esc(el.dataset.original||'')}</span></div>
+          <div class="change-row" style="margin-top:4px"><span class="change-label after">Agora</span><span class="change-text">${esc(el.textContent.trim())}</span></div>
+        </div>`).join('')
+    : '<div class="no-changes">Nenhuma alteração realizada ainda.</div>';
   document.getElementById('changes-overlay').classList.add('open');
 }
-
 function closeChanges() { document.getElementById('changes-overlay').classList.remove('open'); }
 function closeChangesOnOverlay(e) { if (e.target===document.getElementById('changes-overlay')) closeChanges(); }
-
 function copyChanges() {
   const changed = document.querySelectorAll('[data-edit].changed');
   if (!changed.length) { alert('Nenhuma alteração para copiar.'); return; }
@@ -365,11 +559,9 @@ function copyChanges() {
     Array.from(changed).map(el =>
       `${el.dataset.ctx||'Campo'}\n  Antes: ${el.dataset.original||''}\n  Agora:  ${el.textContent.trim()}`
     ).join('\n\n');
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.querySelector('.cp-copy');
-    btn.textContent = '✅ Copiado!';
-    setTimeout(() => btn.textContent = '📋 Copiar tudo', 2000);
-  }).catch(() => prompt('Copie o texto abaixo:', text));
+  navigator.clipboard.writeText(text)
+    .then(() => { const b=document.querySelector('.cp-copy'); b.textContent='✅ Copiado!'; setTimeout(()=>b.textContent='📋 Copiar tudo',2000); })
+    .catch(() => prompt('Copie o texto abaixo:', text));
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -382,19 +574,18 @@ function switchTab(id, btn) {
   btn.classList.add('active');
 }
 function toggleSection(el) { el.closest('.ball-section').classList.toggle('collapsed'); }
-
-function esc(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function editSpan(text, ctx) {
   return `<span data-edit data-original="${esc(text)}" data-ctx="${esc(ctx)}" contenteditable="false" oninput="onFieldEdit(this)">${esc(text)}</span>`;
 }
-function tipoClass(tipo) {
-  if (!tipo) return '';
-  const t = tipo.toLowerCase();
-  if (t.includes('físic')||t.includes('fisic')) return 'Físico';
-  if (t.includes('tátic')||t.includes('tatic')) return 'Tático';
-  if (t.includes('jogo')) return 'Jogo';
+function tipoClass(t) {
+  if (!t) return '';
+  const l = t.toLowerCase();
+  if (l.includes('físic')||l.includes('fisic')) return 'Físico';
+  if (l.includes('tátic')||l.includes('tatic')) return 'Tático';
+  if (l.includes('jogo')) return 'Jogo';
   return '';
 }
 
@@ -402,47 +593,39 @@ function tipoClass(tipo) {
    RENDER AVALIAÇÕES
 ══════════════════════════════════════════════════════════ */
 function renderAvaliacoes() {
-  const container = document.getElementById('tab-avaliacoes');
   const order = ['roxa','vermelha_branca','vermelha_vermelha','vermelha_laranja',
                  'laranja_laranja','laranja_verde','verde_verde','verde_amarela'];
-
-  container.innerHTML = order.map(key => {
-    const b = EVAL[key];
-    if (!b) return '';
-
-    const provCards = b.provas.map(p => {
-      const ctxBase = `${b.label} · Prova ${p.num} — ${p.nome}`;
+  document.getElementById('tab-avaliacoes').innerHTML = order.map(key => {
+    const b = EVAL[key]; if (!b) return '';
+    const cards = b.provas.map(p => {
+      const ctx = `${b.label} · Prova ${p.num}`;
       const crits = p.criterios.map(c => {
-        const isPending = c.desc.startsWith('⚠️');
-        const badge = isPending ? '<span class="placeholder-badge">preencher</span>' : '';
+        const badge = c.rotina ? '<span class="rotina-badge">rotina</span>' : '';
         return `<li class="criterio-item">
           <span class="crit-id">${c.id}</span>
           <span class="crit-pts">(${c.pts}pts)</span>
-          <span class="crit-desc">${editSpan(c.desc, `${ctxBase} · Critério ${c.id}`)}${badge}</span>
+          <span class="crit-desc">${editSpan(c.desc, `${ctx} · Critério ${c.id}`)}${badge}</span>
         </li>`;
       }).join('');
-
       return `<div class="prova-card">
         <div class="prova-header">
           <span class="prova-num">Prova ${p.num}</span>
-          <span class="prova-nome">${editSpan(p.nome, `${b.label} · Prova ${p.num} · Nome`)}</span>
+          <span class="prova-nome">${editSpan(p.nome, `${ctx} · Nome`)}</span>
           <span class="prova-tipo ${tipoClass(p.tipo)}">${esc(p.tipo)}</span>
           <span class="prova-pts">${p.total} pts | mín ${p.min}</span>
         </div>
-        <div class="prova-desc">${editSpan(p.descricao, `${b.label} · Prova ${p.num} · Descrição`)}</div>
+        <div class="prova-desc">${editSpan(p.descricao, `${ctx} · Descrição`)}</div>
         <ul class="criterios-list">${crits}</ul>
       </div>`;
     }).join('');
-
     const meta = b.quadra ? `<span class="ball-subtitle">${esc(b.quadra)} · ${esc(b.bola)}</span>` : '';
     return `<div class="ball-section">
       <div class="ball-header" onclick="toggleSection(this)">
         <span style="font-size:20px">${b.ball}</span>
-        <span class="ball-title" style="color:${b.color}">${esc(b.label)}</span>
-        ${meta}
+        <span class="ball-title" style="color:${b.color}">${esc(b.label)}</span>${meta}
         <span class="chevron">▼</span>
       </div>
-      <div class="ball-body">${provCards}</div>
+      <div class="ball-body">${cards}</div>
     </div>`;
   }).join('');
 }
@@ -451,17 +634,13 @@ function renderAvaliacoes() {
    RENDER REQUISITOS
 ══════════════════════════════════════════════════════════ */
 function renderRequisitos() {
-  const container = document.getElementById('tab-requisitos');
   const cats = [
-    {key:'tecnico',icon:'🎾',label:'TÉCNICO'},
-    {key:'tatico', icon:'♟️', label:'TÁTICO'},
-    {key:'fisico', icon:'💪',label:'FÍSICO'},
-    {key:'mental', icon:'🧠',label:'MENTAL'},
+    {key:'tecnico',icon:'🎾',label:'TÉCNICO'},{key:'tatico',icon:'♟️',label:'TÁTICO'},
+    {key:'fisico',icon:'💪',label:'FÍSICO'},{key:'mental',icon:'🧠',label:'MENTAL'}
   ];
-  container.innerHTML = Object.entries(REQS).map(([,b]) => {
-    const catBlocks = cats.map(cat => {
-      const items = b[cat.key]||[];
-      if (!items.length) return '';
+  document.getElementById('tab-requisitos').innerHTML = Object.entries(REQS).map(([,b]) => {
+    const blocks = cats.map(cat => {
+      const items = b[cat.key]||[]; if (!items.length) return '';
       const lis = items.map((item,i) =>
         `<li data-n="${i+1}">${editSpan(item,`${b.label} · ${cat.label} · Item ${i+1}`)}</li>`
       ).join('');
@@ -477,7 +656,7 @@ function renderRequisitos() {
         <span class="ball-subtitle">${esc(b.levels)}</span>
         <span class="chevron">▼</span>
       </div>
-      <div class="ball-body">${catBlocks}</div>
+      <div class="ball-body">${blocks}</div>
     </div>`;
   }).join('');
 }
