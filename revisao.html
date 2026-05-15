@@ -51,7 +51,6 @@
   .crit-id { font-weight:700; min-width:22px; color:#334155; }
   .crit-pts { font-size:11px; color:#94A3B8; white-space:nowrap; }
   .crit-desc { color:#334155; flex:1; }
-  .rotina-badge { display:inline-block; font-size:10px; font-weight:700; padding:1px 6px; border-radius:4px; background:#F0FDF4; color:#15803D; margin-left:6px; vertical-align:middle; }
   /* EDIT MODE */
   body.edit-mode [data-edit] { cursor:text; border-radius:3px; padding:1px 4px; margin:-1px -4px; }
   body.edit-mode [data-edit]:hover { background:#FFF9C4; outline:1px dashed #F59E0B; }
@@ -129,385 +128,646 @@
 
 <script>
 /* ══════════════════════════════════════════════════════════
-   HELPERS — provas comuns (1, 2, 3 iguais em todos os níveis)
-══════════════════════════════════════════════════════════ */
-const PROVA_SAQUE = {
-  num:1, nome:"Saque — Critérios Técnicos e Táticos", tipo:"Técnica",
-  descricao:"Avalia os fundamentos técnicos e táticos do saque.",
-  min:10, total:16,
-  criterios:[
-    {id:"A", desc:"Pés alinhados", pts:2},
-    {id:"B", desc:"Mão no coração da raquete", pts:2},
-    {id:"C", desc:"Corpo lateralizado", pts:2},
-    {id:"D", desc:"Posição troféu", pts:2},
-    {id:"E", desc:"Toss", pts:2},
-    {id:"F", desc:"Ponto de contato", pts:2},
-    {id:"G", desc:"Terminação", pts:2},
-    {id:"H", desc:"Acerta de 4 a 6 saques dentro", pts:2}
-  ]
-};
-
-const PROVA_TREINADOR = {
-  num:2, nome:"Troca de Bolas com o Treinador", tipo:"Técnica",
-  descricao:"Avalia os critérios técnicos de FH e BH durante a troca de bolas com o treinador.",
-  min:10, total:16,
-  criterios:[
-    {id:"A", desc:"Posição tenista", pts:2},
-    {id:"B", desc:"Ficar dinâmico", pts:2},
-    {id:"C", desc:"Ponto de contato à frente do corpo no FH", pts:2},
-    {id:"D", desc:"Ponto de contato à frente do corpo no BH", pts:2},
-    {id:"E", desc:"Preparação da raquete acima da mão no FH", pts:2},
-    {id:"F", desc:"Preparação da raquete acima da mão no BH", pts:2},
-    {id:"G", desc:"Terminação no FH", pts:2},
-    {id:"H", desc:"Terminação no BH", pts:2}
-  ]
-};
-
-const PROVA_COLEGUINHA = {
-  num:3, nome:"Troca de Bolas com o Coleguinha", tipo:"Técnica",
-  descricao:"Avalia os critérios técnicos de FH e BH durante a troca de bolas com o coleguinha.",
-  min:10, total:16,
-  criterios:[
-    {id:"A", desc:"Posição tenista", pts:2},
-    {id:"B", desc:"Ficar dinâmico", pts:2},
-    {id:"C", desc:"Ponto de contato à frente do corpo no FH", pts:2},
-    {id:"D", desc:"Ponto de contato à frente do corpo no BH", pts:2},
-    {id:"E", desc:"Preparação da raquete acima da mão no FH", pts:2},
-    {id:"F", desc:"Preparação da raquete acima da mão no BH", pts:2},
-    {id:"G", desc:"Terminação no FH", pts:2},
-    {id:"H", desc:"Terminação no BH", pts:2}
-  ]
-};
-
-/* ══════════════════════════════════════════════════════════
-   AVALIAÇÕES — estrutura com 6 provas por nível
-   Provas 4 / 5 / 6 diferenciadas por nível de bola.
-   Laranja em diante: Prova 6 inclui rotinas de jogo.
+   AVALIAÇÕES
 ══════════════════════════════════════════════════════════ */
 const EVAL = {
 
-  /* ── BOLA ROXA ── */
+  /* ── BOLA ROXA — 5 provas ── */
   roxa: {
     label:"Bola Roxa", color:"#7c3aed", ball:"🟣",
     quadra:"Quadra reduzida · Rede baixa", bola:"Bola de espuma / Roxa",
     provas:[
-      PROVA_SAQUE,
-      PROVA_TREINADOR,
-      PROVA_COLEGUINHA,
-      { num:4, nome:"Voleios — Critérios Técnicos", tipo:"Técnica",
-        descricao:"Avalia os primeiros contatos com o voleio: posição e golpe frente ao corpo.",
+      { num:1, nome:"Posição de Espera", tipo:"Técnica",
+        descricao:"Avalia a posição básica do aluno antes do golpe.",
         min:4, total:6,
         criterios:[
-          {id:"A", desc:"Golpear a bola frente ao corpo no voleio", pts:2},
-          {id:"B", desc:"Empunhadura continental no voleio", pts:2},
-          {id:"C", desc:"Manter posição surfista ao avançar para a rede", pts:2}
+          {id:"A", desc:"Pés lateralizados (surfista)", pts:2},
+          {id:"B", desc:"Posição surfista no FH com raquete acima da mão", pts:2},
+          {id:"C", desc:"Posição surfista no BH com raquete acima da mão", pts:2}
         ]},
-      { num:5, nome:"Arbitragem", tipo:"Tático",
-        descricao:"Avalia o entendimento das regras básicas e a contagem de pontos.",
+      { num:2, nome:"Arremesso", tipo:"Técnica",
+        descricao:"Avalia o arremesso por cima da cabeça e a posição troféu.",
         min:4, total:6,
         criterios:[
-          {id:"A", desc:"Saber distinguir bola dentro e fora (3 de 4 tentativas)", pts:2},
-          {id:"B", desc:"Entender a contagem de um game (love, 15, 30, 40)", pts:2},
-          {id:"C", desc:"Respeitar a organização do jogo", pts:2}
+          {id:"A", desc:"Arremessar a bola (distância)", pts:2},
+          {id:"B", desc:"Arremessar em um alvo", pts:2},
+          {id:"C", desc:"Posição troféu durante o arremesso", pts:2}
         ]},
-      { num:6, nome:"Jogo — Análise Tática", tipo:"Jogo",
-        descricao:"Avalia o desempenho durante o jogo cooperativo e competitivo.",
+      { num:3, nome:"Troca com Treinador", tipo:"Técnica",
+        descricao:"Avalia a troca de bolas cooperativa com o treinador.",
         min:4, total:6,
         criterios:[
-          {id:"A", desc:"Conseguir jogar mão/raquete com o treinador (rally de 3)", pts:2},
-          {id:"B", desc:"Manter foco e disposição durante o jogo", pts:2},
-          {id:"C", desc:"Jogar no espaço vazio com intenção", pts:2}
+          {id:"A", desc:"Trocar 6 bolas com o treinador", pts:2},
+          {id:"B", desc:"Bater frente ao corpo (frente do pé)", pts:2},
+          {id:"C", desc:"Recuperar posição tenista após o golpe", pts:2}
+        ]},
+      { num:4, nome:"Jogo Mão/Mão", tipo:"Jogo",
+        descricao:"Avalia o jogo cooperativo com o coleguinha usando mão e raquete.",
+        min:4, total:6,
+        criterios:[
+          {id:"A", desc:"Mão/mão com o coleguinha (rally de 4 bolas)", pts:2},
+          {id:"B", desc:"Mão/raquete com o coleguinha (rally de 4 bolas)", pts:2},
+          {id:"C", desc:"Manter-se ativado entre os golpes", pts:2}
+        ]},
+      { num:5, nome:"Regras Básicas", tipo:"Jogo",
+        descricao:"Avalia o entendimento das regras mais simples do tênis.",
+        min:2, total:4,
+        criterios:[
+          {id:"A", desc:"Distinguir bola dentro e fora", pts:2},
+          {id:"B", desc:"Contagem de um game (love, 15, 30, 40)", pts:2}
         ]}
     ]
   },
 
-  /* ── VERMELHA-BRANCA ── */
+  /* ── VERMELHA-BRANCA — 7 provas ── */
   vermelha_branca: {
     label:"Vermelha-Branca", color:"#ff6666", ball:"🔴",
     quadra:"12,80m × 5,50m · Rede 80cm", bola:"Bola Vermelha (75% mais lenta)",
     provas:[
-      PROVA_SAQUE,
-      PROVA_TREINADOR,
-      PROVA_COLEGUINHA,
-      { num:4, nome:"Voleios — Critérios Técnicos e Táticos", tipo:"Técnica",
-        descricao:"Avalia a empunhadura continental e os fundamentos do jogo na rede.",
+      { num:1, nome:"Troca com Professor", tipo:"Técnica",
+        descricao:"Avalia os critérios técnicos de FH e BH durante a troca de bolas com o professor.",
+        min:7, total:12,
+        criterios:[
+          {id:"A", desc:"Mantém 8 a 10 bolas dentro da quadra", pts:2},
+          {id:"B", desc:"Bater a bola frente ao corpo no FH e no BH", pts:2},
+          {id:"C", desc:"Preparação com raquete mais elevada que a mão dominante", pts:2},
+          {id:"D", desc:"Posição de expectativa dinâmica com 2 mãos na raquete", pts:2},
+          {id:"E", desc:"Estar equilibrado no FH e no BH", pts:2},
+          {id:"F", desc:"Recuperar a raquete com as 2 mãos entre os golpes", pts:2}
+        ]},
+      { num:2, nome:"Troca com Coleguinha", tipo:"Técnica",
+        descricao:"Avalia os critérios técnicos durante a troca cooperativa com o coleguinha.",
         min:5, total:8,
         criterios:[
-          {id:"A", desc:"Empunhadura continental no voleio (3 de 4 tentativas)", pts:2},
-          {id:"B", desc:"Segurar a raquete no fim do cabo", pts:2},
-          {id:"C", desc:"Jogo na rede: golpear frente ao corpo", pts:2},
-          {id:"D", desc:"Identifica e demonstra a empunhadura continental quando solicitado", pts:2}
+          {id:"A", desc:"Mantém rally de 8 bolas com o colega", pts:2},
+          {id:"B", desc:"Recuperar posição tenista dinâmico", pts:2},
+          {id:"C", desc:"Movimentar-se para todos os lados", pts:2},
+          {id:"D", desc:"Posição de expectativa com mão livre no coração da raquete", pts:2}
         ]},
-      { num:5, nome:"Arbitragem", tipo:"Tático",
-        descricao:"Avalia o conhecimento do placar e das regras básicas em jogo.",
-        min:5, total:8,
-        criterios:[
-          {id:"A", desc:"Anunciar bolas fora e o placar durante a partida", pts:2},
-          {id:"B", desc:"Distinguir bolas fora e dentro corretamente (4 de 5)", pts:2},
-          {id:"C", desc:"Acompanhar e saber o placar durante o jogo", pts:2},
-          {id:"D", desc:"Respeitar a organização do jogo", pts:2}
-        ]},
-      { num:6, nome:"Jogo — Análise Tática", tipo:"Jogo",
-        descricao:"Avalia o desempenho tático em situação real de jogo.",
+      { num:3, nome:"Empunhadura Continental", tipo:"Técnica",
+        descricao:"Avalia a identificação e uso da empunhadura continental no voleio e no saque.",
         min:4, total:6,
         criterios:[
-          {id:"A", desc:"Conseguir continuação dos golpes na partida", pts:2},
+          {id:"A", desc:"Empunhadura continental no voleio (3 de 4 tentativas)", pts:2},
+          {id:"B", desc:"Empunhadura continental no saque", pts:2},
+          {id:"C", desc:"Identifica e demonstra a empunhadura continental quando solicitado", pts:2}
+        ]},
+      { num:4, nome:"Saque", tipo:"Técnica",
+        descricao:"Avalia o equilíbrio e acerto no saque.",
+        min:7, total:12,
+        criterios:[
+          {id:"A", desc:"Posição inicial com base alinhada + mão livre com bola no coração da raquete", pts:2},
+          {id:"B", desc:"Posição troféu no saque", pts:2},
+          {id:"C", desc:"Ponto de contato acima da cabeça (13h)", pts:2},
+          {id:"D", desc:"Executar a laçada", pts:2},
+          {id:"E", desc:"Sacar com equilíbrio", pts:2},
+          {id:"F", desc:"Saca um game completo (dupla falta = perde o ponto)", pts:2}
+        ]},
+      { num:5, nome:"Arbitragem", tipo:"Jogo",
+        descricao:"Avalia o conhecimento básico de arbitragem e placar.",
+        min:4, total:6,
+        criterios:[
+          {id:"A", desc:"Anunciar o placar", pts:2},
+          {id:"B", desc:"Distinguir os lados de sacar", pts:2},
+          {id:"C", desc:"Acompanhar o placar", pts:2}
+        ]},
+      { num:6, nome:"Critérios Técnicos — Bola Vermelha", tipo:"Técnica",
+        descricao:"Checklist dos critérios técnicos oficiais Raw Tennis para a bola vermelha.",
+        min:19, total:32,
+        criterios:[
+          {id:"A", desc:"Bater a bola frente ao corpo no FH e no BH", pts:2},
+          {id:"B", desc:"Estar equilibrado no FH e no BH", pts:2},
+          {id:"C", desc:"Combo: arremesso + 2 golpes (FH e BH)", pts:2},
+          {id:"D", desc:"Posição de expectativa dinâmica com 2 mãos na raquete", pts:2},
+          {id:"E", desc:"Preparação com raquete acima da mão", pts:2},
+          {id:"F", desc:"Empunhadura eastern no forehand", pts:2},
+          {id:"G", desc:"Empunhadura continental a eastern no backhand", pts:2},
+          {id:"H", desc:"Empunhadura continental no voleio e no saque", pts:2},
+          {id:"I", desc:"No saque posição inicial pés alinhados + mão livre no coração da raquete", pts:2},
+          {id:"J", desc:"Segurar a raquete no fim do cabo", pts:2},
+          {id:"K", desc:"Ponto de contato acima da cabeça (13h)", pts:2},
+          {id:"L", desc:"Posição troféu no saque", pts:2},
+          {id:"M", desc:"Sacar com equilíbrio", pts:2},
+          {id:"N", desc:"Executar a laçada", pts:2},
+          {id:"O", desc:"Recuperar a raquete com as 2 mãos entre os golpes", pts:2},
+          {id:"P", desc:"Mudanças de Grip", pts:2}
+        ]},
+      { num:7, nome:"Critérios Táticos — Bola Vermelha", tipo:"Tático",
+        descricao:"Checklist dos critérios táticos oficiais Raw Tennis para a bola vermelha.",
+        min:11, total:18,
+        criterios:[
+          {id:"A", desc:"Ser dinâmico entre os golpes", pts:2},
           {id:"B", desc:"Jogar no espaço vazio com intenção", pts:2},
-          {id:"C", desc:"Ser dinâmico entre os golpes", pts:2}
+          {id:"C", desc:"Movimentação dinâmica", pts:2},
+          {id:"D", desc:"Recuperar a posição na quadra", pts:2},
+          {id:"E", desc:"Respeitar a organização do jogo", pts:2},
+          {id:"F", desc:"Esperar o colega estar pronto", pts:2},
+          {id:"G", desc:"Saber onde se recuperar após o golpe", pts:2},
+          {id:"H", desc:"Entender e compreender o jogo", pts:2},
+          {id:"I", desc:"Saber colocar energia nas partidas", pts:2}
         ]}
     ]
   },
 
-  /* ── VERMELHA-VERMELHA ── */
+  /* ── VERMELHA-VERMELHA — 8 provas ── */
   vermelha_vermelha: {
     label:"Vermelha-Vermelha", color:"#e53e3e", ball:"🔴",
     quadra:"18m × 6,40m · Rede 80cm", bola:"Bola Vermelha (75% mais lenta)",
     provas:[
-      PROVA_SAQUE,
-      PROVA_TREINADOR,
-      PROVA_COLEGUINHA,
-      { num:4, nome:"Voleios — Critérios Técnicos e Táticos", tipo:"Técnica",
-        descricao:"Avalia empunhadura, preparação e movimentação no jogo de rede.",
+      { num:1, nome:"Bate Bola com o Professor", tipo:"Técnica",
+        descricao:"Avalia os fundamentos técnicos de FH e BH em troca com o professor.",
+        min:8, total:14,
+        criterios:[
+          {id:"A", desc:"Mantém 10 bolas dentro da quadra", pts:2},
+          {id:"B", desc:"Bater a bola frente ao corpo no FH e no BH", pts:2},
+          {id:"C", desc:"Preparação com raquete acima da mão no FH", pts:2},
+          {id:"D", desc:"Preparação com raquete acima da mão no BH", pts:2},
+          {id:"E", desc:"Posição de expectativa dinâmica com 2 mãos na raquete", pts:2},
+          {id:"F", desc:"Empunhadura eastern no forehand", pts:2},
+          {id:"G", desc:"Recuperar a raquete com as 2 mãos entre os golpes", pts:2}
+        ]},
+      { num:2, nome:"Troca com Coleguinha", tipo:"Técnica",
+        descricao:"Troca cooperativa mais longa — avalia consistência e posição de expectativa.",
         min:6, total:10,
         criterios:[
-          {id:"A", desc:"Empunhadura continental no voleio (4 de 5)", pts:2},
-          {id:"B", desc:"Jogo na rede: golpear frente ao corpo", pts:2},
-          {id:"C", desc:"Realizar voleios com preparação curta", pts:2},
-          {id:"D", desc:"Movimentação: ficar dinâmico entre os pontos", pts:2},
-          {id:"E", desc:"Deslocar o adversário com o voleio", pts:2}
+          {id:"A", desc:"Mantém a troca de bolas com o colega", pts:2},
+          {id:"B", desc:"Ser dinâmico entre os golpes", pts:2},
+          {id:"C", desc:"Recuperar posição tenista", pts:2},
+          {id:"D", desc:"Posição de expectativa com mão livre no coração da raquete na devolução", pts:2},
+          {id:"E", desc:"Esperar o colega estar pronto", pts:2}
         ]},
-      { num:5, nome:"Arbitragem", tipo:"Tático",
-        descricao:"Avalia o conhecimento das regras, distinção dentro/fora e tie-break.",
+      { num:3, nome:"Jogo na Rede", tipo:"Técnica",
+        descricao:"Avalia voleios — 16 arremessos. Avalia empunhadura, entrada lateral e direção.",
+        min:6, total:10,
+        criterios:[
+          {id:"A", desc:"Empunhadura continental no voleio", pts:2},
+          {id:"B", desc:"Golpear frente ao corpo com entrada lateral", pts:2},
+          {id:"C", desc:"Realizar voleios com preparação curta", pts:2},
+          {id:"D", desc:"Dinâmico e fazer o split step", pts:2},
+          {id:"E", desc:"Direcionar voleios (cruzados e paralelos)", pts:2}
+        ]},
+      { num:4, nome:"Saque", tipo:"Técnica",
+        descricao:"",
+        min:7, total:12,
+        criterios:[
+          {id:"A", desc:"Posição inicial com base alinhada", pts:2},
+          {id:"B", desc:"Posição troféu no saque", pts:2},
+          {id:"C", desc:"Ponto de contato acima da cabeça", pts:2},
+          {id:"D", desc:"Executar a laçada", pts:2},
+          {id:"E", desc:"Sacar com equilíbrio", pts:2},
+          {id:"F", desc:"5 de 6 saques dentro da área de serviço", pts:2}
+        ]},
+      { num:5, nome:"Arbitragem", tipo:"Jogo",
+        descricao:"Avalia conhecimento das regras, distinção dentro/fora e tie-break.",
         min:5, total:8,
         criterios:[
           {id:"A", desc:"Anunciar bolas fora e o placar corretamente", pts:2},
           {id:"B", desc:"Distinguir bolas fora e dentro (4 de 5)", pts:2},
           {id:"C", desc:"Conhecimento das regras do tie-break", pts:2},
-          {id:"D", desc:"Respeitar a organização do jogo", pts:2}
+          {id:"D", desc:"Acompanhar e saber o placar", pts:2}
         ]},
-      { num:6, nome:"Jogo — Análise Tática", tipo:"Jogo",
+      { num:6, nome:"Partida Tie-break", tipo:"Jogo",
         descricao:"Avalia tática e gestão do jogo em formato tie-break.",
-        min:5, total:10,
+        min:5, total:8,
         criterios:[
           {id:"A", desc:"Defender-se com bola alta na cruzada", pts:2},
           {id:"B", desc:"Jogar no espaço vazio com intenção", pts:2},
           {id:"C", desc:"Ser dinâmico entre os golpes", pts:2},
-          {id:"D", desc:"Acompanhar e saber o placar", pts:2},
-          {id:"E", desc:"Recuperar a posição na quadra", pts:2}
+          {id:"D", desc:"Recuperar a posição na quadra", pts:2}
+        ]},
+      { num:7, nome:"Critérios Técnicos — Bola Vermelha", tipo:"Técnica",
+        descricao:"Checklist dos critérios técnicos oficiais Raw Tennis para a bola vermelha.",
+        min:23, total:38,
+        criterios:[
+          {id:"A", desc:"Bater a bola frente ao corpo no FH e no BH", pts:2},
+          {id:"B", desc:"Estar equilibrado no FH e no BH", pts:2},
+          {id:"C", desc:"Combo: arremesso + 2 golpes (FH e BH)", pts:2},
+          {id:"D", desc:"Posição de expectativa dinâmica com 2 mãos na raquete", pts:2},
+          {id:"E", desc:"Preparação com raquete acima da mão", pts:2},
+          {id:"F", desc:"Empunhadura eastern no forehand", pts:2},
+          {id:"G", desc:"Empunhadura continental a eastern no backhand", pts:2},
+          {id:"H", desc:"Empunhadura continental no voleio e no saque", pts:2},
+          {id:"I", desc:"No saque posição inicial pés alinhados + mão livre no coração da raquete", pts:2},
+          {id:"J", desc:"Segurar a raquete no fim do cabo", pts:2},
+          {id:"K", desc:"Ponto de contato acima da cabeça (13h)", pts:2},
+          {id:"L", desc:"Posição troféu no saque", pts:2},
+          {id:"M", desc:"Sacar com equilíbrio", pts:2},
+          {id:"N", desc:"Executar a laçada", pts:2},
+          {id:"O", desc:"Recuperar a raquete com as 2 mãos entre os golpes", pts:2},
+          {id:"P", desc:"Mudanças de Grip", pts:2},
+          {id:"Q", desc:"Preparação do FH com raquete mais elevada que a mão", pts:2},
+          {id:"R", desc:"Preparação do BH com raquete mais elevada que a mão", pts:2},
+          {id:"S", desc:"Jogo na rede: golpear frente ao corpo", pts:2}
+        ]},
+      { num:8, nome:"Critérios Táticos — Bola Vermelha", tipo:"Tático",
+        descricao:"Checklist dos critérios táticos oficiais Raw Tennis para a bola vermelha.",
+        min:15, total:24,
+        criterios:[
+          {id:"A", desc:"Conseguir continuação dos golpes", pts:2},
+          {id:"B", desc:"Posição de expectativa com mão livre no coração da raquete na devolução", pts:2},
+          {id:"C", desc:"Ser dinâmico entre os golpes", pts:2},
+          {id:"D", desc:"Deslocar o adversário", pts:2},
+          {id:"E", desc:"Realizar voleios", pts:2},
+          {id:"F", desc:"Movimentação: ficar dinâmico entre os pontos", pts:2},
+          {id:"G", desc:"Recuperar a posição na quadra", pts:2},
+          {id:"H", desc:"Defender-se (bola alta na cruzada)", pts:2},
+          {id:"I", desc:"Jogar no espaço vazio", pts:2},
+          {id:"J", desc:"Respeitar a organização do jogo", pts:2},
+          {id:"K", desc:"Esperar o colega estar pronto", pts:2},
+          {id:"L", desc:"Saber onde se recuperar após o golpe", pts:2}
         ]}
     ]
   },
 
-  /* ── VERMELHA-LARANJA ── */
+  /* ── VERMELHA-LARANJA — 2 provas ── */
   vermelha_laranja: {
     label:"Vermelha-Laranja", color:"#ff8533", ball:"🔴",
     quadra:"Quadra vermelha completa", bola:"Bola Vermelha (75% mais lenta)",
     provas:[
-      PROVA_SAQUE,
-      PROVA_TREINADOR,
-      PROVA_COLEGUINHA,
-      { num:4, nome:"Voleios — Critérios Técnicos e Táticos", tipo:"Técnica",
-        descricao:"Avalia voleios espontâneos, preparação curta e deslocamento do adversário.",
-        min:6, total:10,
-        criterios:[
-          {id:"A", desc:"Empunhadura continental no voleio espontaneamente (4 de 5)", pts:2},
-          {id:"B", desc:"Jogo na rede: golpear frente ao corpo", pts:2},
-          {id:"C", desc:"Realizar voleios com preparação curta", pts:2},
-          {id:"D", desc:"Movimentação: ficar dinâmico entre os pontos", pts:2},
-          {id:"E", desc:"Deslocar o adversário com o voleio", pts:2}
-        ]},
-      { num:5, nome:"Arbitragem", tipo:"Tático",
-        descricao:"Avalia controle de pontuação e regras do tie-break em situação real.",
-        min:4, total:6,
+      { num:1, nome:"Torneio de Simples com Tie-break", tipo:"Jogo",
+        descricao:"Tie-break de 7 pontos. Quadra 12,80×5,50m, rede 80cm. 10 minutos máximo por jogo.",
+        min:13, total:22,
         criterios:[
           {id:"A", desc:"Disputar o tie-break respeitando as regras e controlando a pontuação", pts:2},
-          {id:"B", desc:"Anunciar bolas fora e o placar corretamente", pts:2},
-          {id:"C", desc:"Distinguir bolas fora e dentro corretamente", pts:2}
+          {id:"B", desc:"Deslocar o adversário (tática)", pts:2},
+          {id:"C", desc:"Realizar voleios (tática)", pts:2},
+          {id:"D", desc:"Saque com posição do troféu (técnica)", pts:2},
+          {id:"E", desc:"Sacar com equilíbrio (técnica)", pts:2},
+          {id:"F", desc:"Recuperar a raquete com as 2 mãos entre os golpes (técnica)", pts:2},
+          {id:"G", desc:"Empunhaduras diferentes no FH e BH (técnica)", pts:2},
+          {id:"H", desc:"Preparação do FH com a raquete mais elevada que a mão (técnica)", pts:2},
+          {id:"I", desc:"Preparação do BH com a raquete mais elevada que a mão (técnica)", pts:2},
+          {id:"J", desc:"Jogo na rede: golpear frente ao corpo (técnica)", pts:2},
+          {id:"K", desc:"Movimentação: ficar dinâmico entre os pontos (técnica)", pts:2}
         ]},
-      { num:6, nome:"Jogo — Análise Tática", tipo:"Jogo",
-        descricao:"Avalia tática em simples e duplas — tie-break e movimentação.",
-        min:6, total:10,
+      { num:2, nome:"Critérios Técnicos — Bola Vermelha", tipo:"Técnica",
+        descricao:"Checklist completo dos critérios técnicos oficiais Raw Tennis para a bola vermelha.",
+        min:23, total:38,
         criterios:[
-          {id:"A", desc:"Deslocar o adversário (tática)", pts:2},
-          {id:"B", desc:"Realizar voleios em situação de jogo (tática)", pts:2},
-          {id:"C", desc:"Movimentação: ficar dinâmico entre os pontos", pts:2},
-          {id:"D", desc:"Recuperar a posição na quadra", pts:2},
-          {id:"E", desc:"Jogar no espaço vazio com intenção", pts:2}
+          {id:"A", desc:"Bater a bola frente ao corpo no FH e no BH", pts:2},
+          {id:"B", desc:"Estar equilibrado no FH e no BH", pts:2},
+          {id:"C", desc:"Combo: arremesso + 2 golpes (FH e BH)", pts:2},
+          {id:"D", desc:"Posição de expectativa dinâmica com 2 mãos na raquete", pts:2},
+          {id:"E", desc:"Preparação com raquete acima da mão", pts:2},
+          {id:"F", desc:"Empunhadura eastern no forehand", pts:2},
+          {id:"G", desc:"Empunhadura continental a eastern no backhand", pts:2},
+          {id:"H", desc:"Empunhadura continental no voleio e no saque", pts:2},
+          {id:"I", desc:"No saque posição inicial pés alinhados + mão livre no coração da raquete", pts:2},
+          {id:"J", desc:"Segurar a raquete no fim do cabo", pts:2},
+          {id:"K", desc:"Ponto de contato acima da cabeça (13h)", pts:2},
+          {id:"L", desc:"Posição troféu no saque", pts:2},
+          {id:"M", desc:"Sacar com equilíbrio", pts:2},
+          {id:"N", desc:"Executar a laçada", pts:2},
+          {id:"O", desc:"Recuperar a raquete com as 2 mãos entre os golpes", pts:2},
+          {id:"P", desc:"Mudanças de Grip", pts:2},
+          {id:"Q", desc:"Preparação do FH com raquete mais elevada que a mão", pts:2},
+          {id:"R", desc:"Preparação do BH com raquete mais elevada que a mão", pts:2},
+          {id:"S", desc:"Jogo na rede: golpear frente ao corpo", pts:2}
         ]}
     ]
   },
 
-  /* ── LARANJA-LARANJA ── */
+  /* ── LARANJA-LARANJA — 7 provas ── */
   laranja_laranja: {
     label:"Laranja-Laranja", color:"#f5a623", ball:"🟠",
-    quadra:"18m × 6,40m · Rede 91cm", bola:"Bola Laranja (50% mais lenta)",
+    quadra:"18m × 8,23m · Rede 80cm", bola:"Bola Laranja (50% mais lenta)",
     provas:[
-      PROVA_SAQUE,
-      PROVA_TREINADOR,
-      PROVA_COLEGUINHA,
-      { num:4, nome:"Voleios e Smash — Critérios Técnicos e Táticos", tipo:"Técnica",
-        descricao:"Avalia approach + voleio em lados opostos, empunhadura, deslocamento e smash.",
-        min:8, total:14,
-        criterios:[
-          {id:"A", desc:"Empunhadura continental (FH) a eastern de backhand (BH) no voleio", pts:2},
-          {id:"B", desc:"Acertar série: approach + voleio em lados opostos (×4)", pts:2},
-          {id:"C", desc:"Preparação curta dos voleios", pts:2},
-          {id:"D", desc:"Bater na frente do corpo ao avançar durante o golpe", pts:2},
-          {id:"E", desc:"Acertar smash — 1pt cada (×4)", pts:2},
-          {id:"F", desc:"Smash: deslocamento com passos laterais ou cruzados ficando de lado", pts:2},
-          {id:"G", desc:"Posição troféu no smash", pts:2}
-        ]},
-      { num:5, nome:"Arbitragem", tipo:"Tático",
-        descricao:"Avalia contagem do placar tradicional e gestão de desacordos.",
+      { num:1, nome:"Jogo na Rede — approach + voleio", tipo:"Técnica",
+        descricao:"Avalia approach + voleio em lados opostos, empunhadura e preparação.",
         min:5, total:8,
         criterios:[
-          {id:"A", desc:"Saber e acompanhar a contagem do placar tradicional", pts:2},
-          {id:"B", desc:"Anunciar bolas fora e o placar", pts:2},
-          {id:"C", desc:"Distinguir bolas dentro e fora", pts:2},
-          {id:"D", desc:"Saber gerir desacordos com o adversário", pts:2}
+          {id:"A", desc:"Acertar série: approach + voleio em lados opostos (×4)", pts:2},
+          {id:"B", desc:"Empunhadura continental (FH) a eastern de backhand (BH) no voleio", pts:2},
+          {id:"C", desc:"Preparação curta dos voleios", pts:2},
+          {id:"D", desc:"Bater na frente do corpo ao avançar durante o golpe", pts:2}
         ]},
-      { num:6, nome:"Jogo — Análise Tática e Rotinas", tipo:"Jogo",
-        descricao:"Avalia gestão tática do jogo e rotinas (ir na toalha, entre pontos e pós-jogo).",
-        min:7, total:12,
+      { num:2, nome:"Jogo na Rede — smash", tipo:"Técnica",
+        descricao:"Avalia o smash: acerto, deslocamento e posição troféu.",
+        min:4, total:6,
         criterios:[
-          {id:"A", desc:"Atacar ao acelerar o jogo; defender ao diminuir o ritmo", pts:2},
-          {id:"B", desc:"Acelerar o 1º saque; comandar a partir da devolução do 2º saque", pts:2},
-          {id:"C", desc:"Conseguir participar corretamente", pts:2},
-          {id:"D", desc:"Ir na toalha", pts:2, rotina:true},
-          {id:"E", desc:"Rotina entre pontos", pts:2, rotina:true},
-          {id:"F", desc:"Rotina pós-jogo", pts:2, rotina:true}
+          {id:"A", desc:"Acertar smash — 1pt cada (×4)", pts:2},
+          {id:"B", desc:"Deslocamento com passos laterais ou cruzados ficando de lado", pts:2},
+          {id:"C", desc:"Posição troféu no smash", pts:2}
+        ]},
+      { num:3, nome:"Saque", tipo:"Técnica",
+        descricao:"Avalia os fundamentos técnicos do saque com bola laranja.",
+        min:6, total:10,
+        criterios:[
+          {id:"A", desc:"Saques dentro ×6", pts:2},
+          {id:"B", desc:"Pés alinhados + subida sincronizada dos braços", pts:2},
+          {id:"C", desc:"Sacar com slice (escovar a bola)", pts:2},
+          {id:"D", desc:"Sacar com ritmo justo (lento → rápido → muito rápido)", pts:2},
+          {id:"E", desc:"Sacar com corpo esticado", pts:2}
+        ]},
+      { num:4, nome:"O Jogo", tipo:"Jogo",
+        descricao:"Avalia o desempenho tático e a contagem do placar tradicional em jogo.",
+        min:5, total:8,
+        criterios:[
+          {id:"A", desc:"Participar corretamente", pts:2},
+          {id:"B", desc:"Acompanhar a contagem do placar tradicional", pts:2},
+          {id:"C", desc:"Atacar ao acelerar; defender ao diminuir o ritmo", pts:2},
+          {id:"D", desc:"Acelerar o 1º saque; comandar a partir da devolução do 2º saque", pts:2}
+        ]},
+      { num:5, nome:"Arremesso", tipo:"Físico",
+        descricao:"Avalia o arremesso por cima da cabeça: distância, posição e explosão.",
+        min:5, total:8,
+        criterios:[
+          {id:"A", desc:"Pontuação do melhor arremesso (1–4 pts)", pts:2},
+          {id:"B", desc:"Posição inicial de lado", pts:2},
+          {id:"C", desc:"Posição troféu com braço livre e cotovelo", pts:2},
+          {id:"D", desc:"Força explosiva do ombro dominante", pts:2}
+        ]},
+      { num:6, nome:"Critérios Técnicos — Bola Laranja", tipo:"Técnica",
+        descricao:"Checklist dos critérios técnicos oficiais Raw Tennis para a bola laranja.",
+        min:21, total:34,
+        criterios:[
+          {id:"A", desc:"Posição de expectativa dinâmica com ombros e braços soltos", pts:2},
+          {id:"B", desc:"Terminação acima do ponto de contato", pts:2},
+          {id:"C", desc:"Raquete já entra abaixo da bola no início do swing", pts:2},
+          {id:"D", desc:"Movimentação equilibrada e contínua", pts:2},
+          {id:"E", desc:"Topspin de forehand", pts:2},
+          {id:"F", desc:"Topspin de backhand", pts:2},
+          {id:"G", desc:"Empunhadura continental a eastern de backhand no voleio", pts:2},
+          {id:"H", desc:"Preparação curta dos voleios", pts:2},
+          {id:"I", desc:"Smash: deslocamento com passos laterais ou cruzados ficando de lado", pts:2},
+          {id:"J", desc:"Posição troféu no smash", pts:2},
+          {id:"K", desc:"Saque com pés alinhados e subida sincronizada dos braços", pts:2},
+          {id:"L", desc:"Sacar com slice (escovar a bola)", pts:2},
+          {id:"M", desc:"Sacar com ritmo justo (lento → rápido → muito rápido)", pts:2},
+          {id:"N", desc:"Sacar com corpo esticado", pts:2},
+          {id:"O", desc:"Preparação do BH com raquete mais elevada que a mão", pts:2},
+          {id:"P", desc:"Jogo na rede: golpes frente ao corpo e avançando", pts:2},
+          {id:"Q", desc:"Sacar utilizando efeito slice", pts:2}
+        ]},
+      { num:7, nome:"Critérios Táticos — Bola Laranja", tipo:"Tático",
+        descricao:"Checklist dos critérios táticos oficiais Raw Tennis para a bola laranja.",
+        min:15, total:24,
+        criterios:[
+          {id:"A", desc:"Atacar ao acelerar o jogo", pts:2},
+          {id:"B", desc:"Defender ao diminuir/frear o ritmo do jogo", pts:2},
+          {id:"C", desc:"Acelerar o 1º saque", pts:2},
+          {id:"D", desc:"Comandar o ponto a partir da devolução do 2º saque", pts:2},
+          {id:"E", desc:"Utilizar efeitos nos golpes", pts:2},
+          {id:"F", desc:"Saber posicionar-se no início do ponto no simples", pts:2},
+          {id:"G", desc:"Saber posicionar-se no início do ponto nas duplas", pts:2},
+          {id:"H", desc:"Saber gerir desacordos com o adversário", pts:2},
+          {id:"I", desc:"Variação de jogo", pts:2},
+          {id:"J", desc:"Posicionar-se corretamente nas duplas", pts:2},
+          {id:"K", desc:"Ir na toalha", pts:2},
+          {id:"L", desc:"Rotinas positivas", pts:2}
         ]}
     ]
   },
 
-  /* ── LARANJA-VERDE ── */
+  /* ── LARANJA-VERDE — 3 provas ── */
   laranja_verde: {
     label:"Laranja-Verde", color:"#7db529", ball:"🟠",
     quadra:"Quadra laranja completa", bola:"Bola Laranja (50% mais lenta)",
     provas:[
-      PROVA_SAQUE,
-      PROVA_TREINADOR,
-      PROVA_COLEGUINHA,
-      { num:4, nome:"Voleios e Smash — Critérios Técnicos e Táticos", tipo:"Técnica",
-        descricao:"Avalia approach + voleio, smash e utilização de efeitos nos golpes de rede.",
-        min:8, total:14,
+      { num:1, nome:"Torneio de Simples com 'O jogo'", tipo:"Jogo",
+        descricao:"1º jogador que vence 2 games. Quadra 18×8,23m, rede 80cm. No Ad. Tie-break a 1/1. 2 jogadores + 1 árbitro (aluno).",
+        min:17, total:28,
         criterios:[
-          {id:"A", desc:"Empunhadura continental (FH) a eastern de backhand (BH) no voleio", pts:2},
-          {id:"B", desc:"Acertar série: approach + voleio em lados opostos (×4)", pts:2},
-          {id:"C", desc:"Preparação curta dos voleios", pts:2},
-          {id:"D", desc:"Bater na frente do corpo ao avançar durante o golpe", pts:2},
-          {id:"E", desc:"Smash: deslocamento com passos laterais ou cruzados ficando de lado", pts:2},
-          {id:"F", desc:"Posição troféu no smash", pts:2},
-          {id:"G", desc:"Deslocar o adversário com o jogo de rede", pts:2}
+          {id:"A", desc:"Saber gerir desacordos com o adversário (comportamento e arbitragem)", pts:2},
+          {id:"B", desc:"Contar os pontos de um game (comportamento e arbitragem)", pts:2},
+          {id:"C", desc:"Atacar ao acelerar o jogo (tática)", pts:2},
+          {id:"D", desc:"Defender ao desacelerar/frear o jogo (tática)", pts:2},
+          {id:"E", desc:"Utilizar efeitos nos golpes (tática)", pts:2},
+          {id:"F", desc:"Acelerar o 1º saque (tática)", pts:2},
+          {id:"G", desc:"Comandar o ponto a partir da devolução do 2º saque (tática)", pts:2},
+          {id:"H", desc:"Saber posicionar-se no início do ponto no simples (tática)", pts:2},
+          {id:"I", desc:"Saber posicionar-se no início do ponto nas duplas (tática)", pts:2},
+          {id:"J", desc:"Sacar utilizando efeito slice (técnica)", pts:2},
+          {id:"K", desc:"Posição de expectativa dinâmica com ombros e braços soltos (técnica)", pts:2},
+          {id:"L", desc:"Preparação do BH com a raquete mais elevada que a mão (técnica)", pts:2},
+          {id:"M", desc:"Jogo na rede: golpes frente ao corpo e avançando (técnica)", pts:2},
+          {id:"N", desc:"Movimentação: equilibrar-se e dar continuação (técnica)", pts:2}
         ]},
-      { num:5, nome:"Arbitragem", tipo:"Tático",
-        descricao:"Avalia autonomia na contagem e gestão de desacordos com o adversário.",
-        min:5, total:8,
+      { num:2, nome:"Critérios Técnicos — Bola Laranja", tipo:"Técnica",
+        descricao:"Checklist completo dos critérios técnicos oficiais Raw Tennis para a bola laranja.",
+        min:23, total:38,
         criterios:[
-          {id:"A", desc:"Contar os pontos de um game com autonomia", pts:2},
-          {id:"B", desc:"Saber gerir desacordos com o adversário", pts:2},
-          {id:"C", desc:"Acompanhar o placar tradicional com autonomia", pts:2},
-          {id:"D", desc:"Respeitar adversário e organização do jogo", pts:2}
+          {id:"A", desc:"Série drill: cruzada + cruzada + paralela (FH e BH)", pts:2},
+          {id:"B", desc:"Posição de expectativa dinâmica com ombros e braços soltos", pts:2},
+          {id:"C", desc:"Fim da preparação acima do ponto de contato", pts:2},
+          {id:"D", desc:"Soltar a cabeça da raquete abaixo do ponto de contato no início do swing", pts:2},
+          {id:"E", desc:"Movimentação equilibrada e contínua", pts:2},
+          {id:"F", desc:"Approach com FH cruzado ou paralelo + voleio do lado oposto", pts:2},
+          {id:"G", desc:"Topspin de forehand", pts:2},
+          {id:"H", desc:"Topspin de backhand", pts:2},
+          {id:"I", desc:"Empunhadura continental a eastern de backhand no voleio", pts:2},
+          {id:"J", desc:"Preparação curta dos voleios", pts:2},
+          {id:"K", desc:"Smash: deslocamento com passos laterais ou cruzados ficando de lado", pts:2},
+          {id:"L", desc:"Posição troféu no smash", pts:2},
+          {id:"M", desc:"Saque com pés alinhados e subida sincronizada dos braços", pts:2},
+          {id:"N", desc:"Sacar com slice (escovar a bola)", pts:2},
+          {id:"O", desc:"Sacar com ritmo justo (lento → rápido → muito rápido)", pts:2},
+          {id:"P", desc:"Sacar com corpo esticado", pts:2},
+          {id:"Q", desc:"Preparação do BH com raquete mais elevada que a mão", pts:2},
+          {id:"R", desc:"Jogo na rede: golpes frente ao corpo e avançando", pts:2},
+          {id:"S", desc:"Sacar utilizando efeito slice", pts:2}
         ]},
-      { num:6, nome:"Jogo — Análise Tática e Rotinas", tipo:"Jogo",
-        descricao:"Avalia tática em simples e duplas e rotinas de jogo.",
-        min:7, total:12,
+      { num:3, nome:"Critérios Táticos — Bola Laranja", tipo:"Tático",
+        descricao:"Checklist dos critérios táticos oficiais Raw Tennis para a bola laranja.",
+        min:15, total:24,
         criterios:[
-          {id:"A", desc:"Atacar ao acelerar o jogo; defender ao desacelerar/frear", pts:2},
-          {id:"B", desc:"Utilizar efeitos nos golpes (tática)", pts:2},
-          {id:"C", desc:"Saber posicionar-se no início do ponto (simples e duplas)", pts:2},
-          {id:"D", desc:"Ir na toalha", pts:2, rotina:true},
-          {id:"E", desc:"Rotina entre pontos", pts:2, rotina:true},
-          {id:"F", desc:"Rotina pós-jogo", pts:2, rotina:true}
+          {id:"A", desc:"Atacar ao acelerar o jogo", pts:2},
+          {id:"B", desc:"Defender ao diminuir/frear o ritmo do jogo", pts:2},
+          {id:"C", desc:"Acelerar o 1º saque", pts:2},
+          {id:"D", desc:"Comandar o ponto a partir da devolução do 2º saque", pts:2},
+          {id:"E", desc:"Utilizar efeitos nos golpes", pts:2},
+          {id:"F", desc:"Saber posicionar-se no início do ponto no simples", pts:2},
+          {id:"G", desc:"Saber posicionar-se no início do ponto nas duplas", pts:2},
+          {id:"H", desc:"Saber jogar com a primeira bola", pts:2},
+          {id:"I", desc:"Variação de jogo", pts:2},
+          {id:"J", desc:"Posicionar-se corretamente nas duplas", pts:2},
+          {id:"K", desc:"Ir na toalha", pts:2},
+          {id:"L", desc:"Rotinas positivas", pts:2}
         ]}
     ]
   },
 
-  /* ── VERDE-VERDE ── */
+  /* ── VERDE-VERDE — 5 provas ── */
   verde_verde: {
     label:"Verde-Verde", color:"#00c050", ball:"🟢",
     quadra:"Quadra completa · Rede 91cm", bola:"Bola Verde (25% mais lenta)",
     provas:[
-      PROVA_SAQUE,
-      PROVA_TREINADOR,
-      PROVA_COLEGUINHA,
-      { num:4, nome:"Voleios e Smash — Critérios Técnicos e Táticos", tipo:"Técnica",
-        descricao:"Sequência: 1º voleio profundo + 2º voleio próximo à rede + smash. Avalia interceptação e smash.",
-        min:6, total:10,
-        criterios:[
-          {id:"A", desc:"1º voleio de construção profundo + 2º voleio próximo à rede + smash", pts:2},
-          {id:"B", desc:"Avançar para interceptar as trajetórias", pts:2},
-          {id:"C", desc:"Smash com corpo esticado e pronação na batida", pts:2},
-          {id:"D", desc:"Golpe correto — 1pt por acerto (3 séries × 3 golpes = 9)", pts:2},
-          {id:"E", desc:"Preparação curta dos voleios", pts:2}
-        ]},
-      { num:5, nome:"Arbitragem", tipo:"Tático",
-        descricao:"Avalia auto-arbitragem e postura correta em qualquer situação.",
+      { num:1, nome:"Jogo na Rede", tipo:"Técnica",
+        descricao:"Sequência: 1º voleio profundo + 2º voleio próximo à rede + smash. Avalia acerto, interceptação e pronação.",
         min:4, total:6,
+        criterios:[
+          {id:"A", desc:"Golpe correto — 1pt por acerto (3 séries × 3 golpes = 9)", pts:2},
+          {id:"B", desc:"Avançar para interceptar as trajetórias", pts:2},
+          {id:"C", desc:"Smash com corpo esticado e pronação na batida", pts:2}
+        ]},
+      { num:2, nome:"Saque", tipo:"Técnica",
+        descricao:"Avalia o saque com efeito: execução, lançamento, ação do punho e equilíbrio.",
+        min:5, total:8,
+        criterios:[
+          {id:"A", desc:"Saques dentro + efeito ×6", pts:2},
+          {id:"B", desc:"Pernas ligeiramente flexionadas", pts:2},
+          {id:"C", desc:"Lançamento de bola adequado ao efeito", pts:2},
+          {id:"D", desc:"Ação do punho adequada ao efeito (slice e/ou spin)", pts:2}
+        ]},
+      { num:3, nome:"O Tie-break", tipo:"Jogo",
+        descricao:"Avalia auto-arbitragem, postura e tática em formato tie-break.",
+        min:6, total:10,
         criterios:[
           {id:"A", desc:"Participar corretamente (auto-arbitragem)", pts:2},
           {id:"B", desc:"Auto-arbitragem — respeito às regras", pts:2},
-          {id:"C", desc:"Postura correta em qualquer situação", pts:2}
+          {id:"C", desc:"Postura correta em qualquer situação", pts:2},
+          {id:"D", desc:"Utilizar seu golpe forte", pts:2},
+          {id:"E", desc:"Sacar com efeito no 2º saque", pts:2}
         ]},
-      { num:6, nome:"Jogo — Análise Tática e Rotinas", tipo:"Jogo",
-        descricao:"Avalia tática no jogo — golpe forte, 2º saque com efeito e rotinas de jogo.",
-        min:7, total:12,
+      { num:4, nome:"Critérios Técnicos — Bola Verde", tipo:"Técnica",
+        descricao:"Checklist dos critérios técnicos oficiais Raw Tennis para a bola verde.",
+        min:17, total:28,
         criterios:[
-          {id:"A", desc:"Utilizar seu golpe forte", pts:2},
-          {id:"B", desc:"Sacar com efeito no 2º saque", pts:2},
-          {id:"C", desc:"Atacar ao acelerar o jogo; defender ao frear o ritmo", pts:2},
-          {id:"D", desc:"Ir na toalha", pts:2, rotina:true},
-          {id:"E", desc:"Rotina entre pontos", pts:2, rotina:true},
-          {id:"F", desc:"Rotina pós-jogo", pts:2, rotina:true}
+          {id:"A", desc:"Drill com bolas profundas e distantes — rebater profundo e cruzado", pts:2},
+          {id:"B", desc:"Identificar bola 'fácil' e executar golpe de definição na paralela", pts:2},
+          {id:"C", desc:"Split step orientado para recepção", pts:2},
+          {id:"D", desc:"Transferir o peso no golpe", pts:2},
+          {id:"E", desc:"Realizar spin acelerado com FH e BH", pts:2},
+          {id:"F", desc:"Movimentação: frear e acelerar", pts:2},
+          {id:"G", desc:"1º voleio de construção profundo + 2º voleio próximo à rede + smash", pts:2},
+          {id:"H", desc:"Avançar para interceptar trajetórias", pts:2},
+          {id:"I", desc:"Smash com corpo esticado e pronação na batida", pts:2},
+          {id:"J", desc:"Saques com efeito slice ou spin — 3 de cada lado", pts:2},
+          {id:"K", desc:"Lançamento de bola adequado ao efeito", pts:2},
+          {id:"L", desc:"Ação do punho adequada ao efeito (slice e/ou spin)", pts:2},
+          {id:"M", desc:"Pernas ligeiramente flexionadas no saque", pts:2},
+          {id:"N", desc:"2º saque com efeito slice ou top spin", pts:2}
+        ]},
+      { num:5, nome:"Critérios Táticos — Bola Verde", tipo:"Tático",
+        descricao:"Checklist dos critérios táticos e mentais oficiais Raw Tennis para a bola verde.",
+        min:17, total:28,
+        criterios:[
+          {id:"A", desc:"Auto-arbitragem", pts:2},
+          {id:"B", desc:"Utilizar golpe forte", pts:2},
+          {id:"C", desc:"Interceptar durante o jogo de duplas", pts:2},
+          {id:"D", desc:"Atacar ao acelerar o jogo", pts:2},
+          {id:"E", desc:"Defender ao frear o ritmo", pts:2},
+          {id:"F", desc:"Analisar o adversário", pts:2},
+          {id:"G", desc:"Variações com dropshot e slice", pts:2},
+          {id:"H", desc:"Respeitar adversário e manter atitude correta em qualquer situação", pts:2},
+          {id:"I", desc:"Utilizar os efeitos", pts:2},
+          {id:"J", desc:"Saber jogar com a primeira bola", pts:2},
+          {id:"K", desc:"Transferir durante os golpes com consciência", pts:2},
+          {id:"L", desc:"Rotinas pré", pts:2},
+          {id:"M", desc:"Rotinas durante jogo", pts:2},
+          {id:"N", desc:"Rotinas pós jogo", pts:2}
         ]}
     ]
   },
 
-  /* ── VERDE-AMARELA ── */
+  /* ── VERDE-AMARELA — 4 provas ── */
   verde_amarela: {
     label:"Verde-Amarela", color:"#8fbb00", ball:"🟢",
     quadra:"Quadra completa · Rede 91cm", bola:"Bola Verde (25% mais lenta)",
     provas:[
-      PROVA_SAQUE,
-      PROVA_TREINADOR,
-      PROVA_COLEGUINHA,
-      { num:4, nome:"Voleios e Smash — Critérios Técnicos e Táticos", tipo:"Técnica",
-        descricao:"Sequência completa: construção + finalização + smash. Avalia interceptação nas duplas.",
-        min:6, total:10,
+      { num:1, nome:"Torneio de Simples com 'set curto'", tipo:"Jogo",
+        descricao:"1º jogador que vence 4 games. Quadra oficial. No Ad. Tie-break a 3/3. Auto-arbitragem.",
+        min:10, total:16,
         criterios:[
-          {id:"A", desc:"1º voleio de construção profundo + 2º voleio próximo à rede + smash", pts:2},
-          {id:"B", desc:"Avançar para interceptar trajetórias", pts:2},
-          {id:"C", desc:"Smash com corpo esticado e pronação na batida", pts:2},
-          {id:"D", desc:"Interceptar durante o jogo de duplas", pts:2},
-          {id:"E", desc:"Preparação curta dos voleios", pts:2}
+          {id:"A", desc:"Respeitar adversário e manter atitude correta em qualquer situação", pts:2},
+          {id:"B", desc:"Ser autônomo na gestão das regras", pts:2},
+          {id:"C", desc:"Atacar ao acelerar o jogo", pts:2},
+          {id:"D", desc:"Utilizar seu golpe forte", pts:2},
+          {id:"E", desc:"Interceptar durante o jogo de dupla", pts:2},
+          {id:"F", desc:"Ao sacar, utilizar efeito 'slice' ou 'top spin' no 2º saque", pts:2},
+          {id:"G", desc:"Transferir o peso durante os golpes", pts:2},
+          {id:"H", desc:"Movimentação: acelerar e frear", pts:2}
         ]},
-      { num:5, nome:"Arbitragem", tipo:"Tático",
-        descricao:"Avalia gestão autônoma completa das regras e postura em qualquer situação.",
-        min:4, total:6,
+      { num:2, nome:"Torneio de Duplas com 'set curto'", tipo:"Jogo",
+        descricao:"1ª equipe que vence 4 games. Quadra oficial (sem corredor). No Ad. Tie-break a 3/3. Auto-arbitragem.",
+        min:10, total:16,
         criterios:[
-          {id:"A", desc:"Ser autônomo na gestão das regras", pts:2},
-          {id:"B", desc:"Respeitar adversário e manter atitude correta em qualquer situação", pts:2},
-          {id:"C", desc:"Auto-arbitragem com maturidade", pts:2}
+          {id:"A", desc:"Respeitar adversário e manter atitude correta em qualquer situação", pts:2},
+          {id:"B", desc:"Ser autônomo na gestão das regras", pts:2},
+          {id:"C", desc:"Atacar ao acelerar o jogo", pts:2},
+          {id:"D", desc:"Utilizar seu golpe forte", pts:2},
+          {id:"E", desc:"Interceptar durante o jogo de dupla", pts:2},
+          {id:"F", desc:"Ao sacar, utilizar efeito 'slice' ou 'top spin' no 2º saque", pts:2},
+          {id:"G", desc:"Transferir o peso durante os golpes", pts:2},
+          {id:"H", desc:"Movimentação: acelerar e frear", pts:2}
         ]},
-      { num:6, nome:"Jogo — Análise Tática e Rotinas", tipo:"Jogo",
-        descricao:"Avalia golpe forte, interceptação nas duplas, uso do efeito no saque e rotinas de jogo.",
-        min:7, total:12,
+      { num:3, nome:"Critérios Técnicos — Bola Verde", tipo:"Técnica",
+        descricao:"Checklist dos critérios técnicos oficiais Raw Tennis para a bola verde.",
+        min:15, total:24,
         criterios:[
-          {id:"A", desc:"Utilizar seu golpe forte (tática)", pts:2},
-          {id:"B", desc:"Interceptar durante o jogo de dupla (tática)", pts:2},
-          {id:"C", desc:"Ao sacar, utilizar efeito 'slice' ou 'top spin' no 2º saque (técnica)", pts:2},
-          {id:"D", desc:"Ir na toalha", pts:2, rotina:true},
-          {id:"E", desc:"Rotina entre pontos", pts:2, rotina:true},
-          {id:"F", desc:"Rotina pós-jogo", pts:2, rotina:true}
+          {id:"A", desc:"Split step orientado para recepção", pts:2},
+          {id:"B", desc:"Transferir o peso no golpe", pts:2},
+          {id:"C", desc:"Realizar spin acelerado com FH e BH", pts:2},
+          {id:"D", desc:"Movimentação: frear e acelerar", pts:2},
+          {id:"E", desc:"1º voleio de construção profundo + 2º voleio próximo à rede + smash", pts:2},
+          {id:"F", desc:"Avançar para interceptar trajetórias", pts:2},
+          {id:"G", desc:"Smash com corpo esticado e pronação na batida", pts:2},
+          {id:"H", desc:"Saques com efeito slice ou spin — 3 de cada lado", pts:2},
+          {id:"I", desc:"Lançamento de bola adequado ao efeito", pts:2},
+          {id:"J", desc:"Ação do punho adequada ao efeito (slice e/ou spin)", pts:2},
+          {id:"K", desc:"Pernas ligeiramente flexionadas no saque", pts:2},
+          {id:"L", desc:"2º saque com efeito slice ou top spin", pts:2}
+        ]},
+      { num:4, nome:"Critérios Táticos — Bola Verde", tipo:"Tático",
+        descricao:"Checklist dos critérios táticos e mentais oficiais Raw Tennis para a bola verde.",
+        min:17, total:28,
+        criterios:[
+          {id:"A", desc:"1º voleio: construção do ponto; 2º voleio: definir o ponto", pts:2},
+          {id:"B", desc:"Utilizar golpe forte", pts:2},
+          {id:"C", desc:"Interceptar durante o jogo de duplas", pts:2},
+          {id:"D", desc:"Atacar ao acelerar o jogo", pts:2},
+          {id:"E", desc:"Defender ao frear o ritmo", pts:2},
+          {id:"F", desc:"Analisar o adversário", pts:2},
+          {id:"G", desc:"Variações com dropshot e slice", pts:2},
+          {id:"H", desc:"Respeitar adversário e manter atitude correta em qualquer situação", pts:2},
+          {id:"I", desc:"Ser autônomo na gestão completa das regras", pts:2},
+          {id:"J", desc:"Postura correta em qualquer situação", pts:2},
+          {id:"K", desc:"Transferir durante os golpes com consciência", pts:2},
+          {id:"L", desc:"Rotinas pré", pts:2},
+          {id:"M", desc:"Rotinas durante jogo", pts:2},
+          {id:"N", desc:"Rotinas pós jogo", pts:2}
         ]}
     ]
   }
 };
 
 /* ══════════════════════════════════════════════════════════
-   REQUISITOS (inalterado)
+   REQUISITOS
 ══════════════════════════════════════════════════════════ */
-const REQS = {"vermelha":{"label":"Bola Vermelha","color":"#ff6666","ball":"🔴","levels":"Vermelha-Branca · Vermelha-Vermelha · Vermelha-Laranja","tecnico":["Bater a bola frente ao corpo no FH e no BH","Estar equilibrado no FH e no BH","Combo: arremesso + 2 golpes (FH e BH)","Posição de expectativa dinâmica com 2 mãos na raquete","Preparação com raquete mais elevada que a altura da mão dominante","Empunhadura continental a eastern (2-3) no forehand","Empunhadura continental a eastern (2-1) no backhand","Empunhadura continental no voleio","Bater na frente do corpo","Posição inicial com base alinhada no saque","Segurar a raquete no fim do cabo","Ponto de contato acima da cabeça no saque","Posição troféu no saque","Sacar com equilíbrio","Executar a laçada","Recuperar a raquete com as 2 mãos entre os golpes","Empunhaduras diferentes no FH e no BH","Preparação do FH com raquete mais elevada que a mão","Preparação do BH com raquete mais elevada que a mão","Jogo na rede: golpear frente ao corpo"],"tatico":["Anunciar bolas fora e o placar","Distinguir bolas fora e dentro","Acompanhar e saber o placar","Conseguir continuação dos golpes","Posição de expectativa com mão livre no coração da raquete na devolução","Ser dinâmico entre os golpes","Deslocar o adversário","Conhecimento das regras do tie-break","Realizar voleios","Movimentação: ficar dinâmico entre os pontos","Recuperar a posição na quadra","Defender-se (bola alta na cruzada)","Jogar no espaço vazio"],"fisico":["Circuito com bola na raquete sem erros (3 cones + bambolê)","Capacidade de aceleração","Equilibrar raquete e bola","Colocar bola no bambolê com domínio (flexão e ritmo lento)","Arremesso: arremesso por cima da cabeça (meta: zona 2+)","Posição inicial de lado no arremesso","Posição troféu com braço livre no arremesso","Força explosiva do ombro dominante","Desenvolvimento: 3 corridas — meta abaixo de 9 segundos"],"mental":["Respeitar a organização do jogo","Esperar o colega estar pronto antes de arremessar","Saber onde se recuperar após o golpe"]},"laranja":{"label":"Bola Laranja","color":"#f5a623","ball":"🟠","levels":"Laranja-Laranja · Laranja-Verde","tecnico":["Série drill: cruzada + cruzada + paralela (FH e BH)","Posição de expectativa dinâmica com ombros e braços soltos","Fim da preparação acima da altura do ponto de contato","Soltar a cabeça da raquete abaixo do ponto de contato no início do swing","Movimentação equilibrada e contínua","Approach com FH cruzado ou paralelo + voleio do lado oposto","Topspin de forehand","Topspin de backhand","Empunhadura continental a eastern de BH no voleio","Preparação curta dos voleios","Smash: deslocamento com passos laterais ou cruzados ficando de lado","Posição troféu no smash","Saque com pés alinhados e subida sincronizada dos braços","Sacar com slice (escovar a bola)","Sacar com ritmo justo (lento → rápido → muito rápido)","Sacar com corpo esticado","Preparação do BH com raquete mais elevada que a mão","Jogo na rede: golpes frente ao corpo e avançando","Sacar utilizando efeito slice"],"tatico":["Contagem do placar tradicional","Atacar ao acelerar o jogo","Defender ao diminuir/frear o ritmo do jogo","Acelerar o 1º saque","Comandar o ponto a partir da devolução do 2º saque","Utilizar efeitos nos golpes","Saber posicionar-se no início do ponto no simples","Saber posicionar-se no início do ponto nas duplas","Saber gerir desacordos com o adversário","Variação de jogo"],"fisico":["Arremesso: arremesso (meta: zona 3+)","Desenvolvimento 5 corridas (3 idas e 2 voltas) — meta abaixo de 13 segundos"],"mental":["Comportamento e arbitragem: respeitar e gerir desacordos","Contar os pontos de um game com autonomia","Posicionar-se corretamente nas duplas","Ir na toalha","Rotinas positivas"]},"verde":{"label":"Bola Verde","color":"#00c050","ball":"🟢","levels":"Verde-Verde · Verde-Amarela","tecnico":["Drill com bolas profundas e distantes — rebater profundo e cruzado","Identificar bola 'fácil' e executar golpe de definição na paralela","Split step orientado para recepção","Transferir o peso no golpe","Realizar spin acelerado com FH e BH","Movimentação: frear e acelerar","1º voleio de construção profundo + 2º voleio próximo à rede + smash","Avançar para interceptar trajetórias","Smash com corpo esticado e pronação na batida","Saques com efeito slice ou spin — 3 de cada lado","Lançamento de bola adequado ao efeito","Ação do punho adequada ao efeito (slice e/ou spin)","Pernas ligeiramente flexionadas no saque","2º saque com efeito slice ou top spin"],"tatico":["Auto-arbitragem","Utilizar golpe forte","Interceptar durante o jogo de duplas","Atacar ao acelerar o jogo","Defender ao frear o ritmo","Analisar o adversário","Variações com dropshot e slice"],"fisico":["Arremesso: arremesso (meta: zona 4)","Desenvolvimento 5 corridas — meta abaixo de 11 segundos"],"mental":["Respeitar adversário e manter atitude correta em qualquer situação","Ser autônomo na gestão completa das regras","Postura correta em qualquer situação","Transferir durante os golpes com consciência","Rotinas pré-jogo","Rotinas durante o jogo","Rotinas pós-jogo"]},"amarela":{"label":"Bola Amarela","color":"#ffd700","ball":"🟡","levels":"RAW Juniors avançado · Verde-Amarela","tecnico":["Drill com bolas profundas — rebater profundo e cruzado com consistência","Identificar bola fácil e executar golpe de definição na paralela","Split step orientado e dinâmico para recepção","Transferir o peso no golpe com equilíbrio","Spin acelerado com FH e BH em situações de pressão","Movimentação: frear, acelerar e recuperar","Sequência de voleios: construção + finalização + smash","Avançar para interceptar trajetórias na rede","Smash com corpo esticado e pronação","Saque com efeito slice e spin — consistência por lado","Lançamento de bola adequado ao efeito do saque","2º saque com efeito — controle de risco","Topspin de forehand com aceleração e controle de profundidade","Topspin de backhand com rotação completa do tronco","Giro de tronco e quadril nos golpes de fundo","Base aberta no forehand com rotação completa","Base semi-aberta como posição de transição","Base fechada no backhand (posição clássica)"],"tatico":["Auto-arbitragem com maturidade","Utilizar o golpe forte como arma principal","Interceptar durante o jogo de duplas","Atacar ao acelerar o jogo","Defender ao frear o ritmo","Analisar o adversário e adaptar o jogo","Variações com dropshot e slice","Compreensão do objetivo do ponto antes de bater","Controle de bola: regularidade, altura segura, reduzir erros","Direção de jogo: cruzada, paralela e ângulos com intenção","Posicionamento: recuperação ao centro após cada golpe","Leitura de situação: bola curta/profunda, rápida/lenta","Construção do ponto: abrir a quadra e trabalhar o rival","Ataque consciente: atacar com critério e escolha de alvo","Táticas específicas: saque +1 e devolução com intenção"],"fisico":["Arremesso: arremesso — meta zona 4","Desenvolvimento 5 corridas — meta abaixo de 11 segundos","Sprint 20m — meta abaixo de 4,0 segundos","T-Test 10m — meta abaixo de 12 segundos"],"mental":["Respeitar adversário e manter atitude correta em qualquer situação","Ser autônomo na gestão completa das regras","Postura correta em qualquer situação","Transferir durante os golgens com consciência","Rotinas pré-jogo estabelecidas","Rotinas durante o jogo — entre pontos e games","Rotinas pós-jogo — análise e aprendizado","Autoconhecimento tático: pontos fortes e limitações","Controle emocional sob pressão"]}};
+const REQS = {
+  "vermelha":{
+    "label":"Bola Vermelha","color":"#ff6666","ball":"🔴",
+    "levels":"Vermelha-Branca · Vermelha-Vermelha · Vermelha-Laranja",
+    "tecnico":["Bater a bola frente ao corpo no FH e no BH","Estar equilibrado no FH e no BH","Combo: arremesso + 2 golpes (FH e BH)","Posição de expectativa dinâmica com 2 mãos na raquete","Preparação com raquete mais elevada que a altura da mão dominante","Empunhadura continental a eastern (2-3) no forehand","Empunhadura continental a eastern (2-1) no backhand","Empunhadura continental no voleio","Bater na frente do corpo","Posição inicial com base alinhada no saque","Segurar a raquete no fim do cabo","Ponto de contato acima da cabeça no saque","Posição troféu no saque","Sacar com equilíbrio","Executar a laçada","Recuperar a raquete com as 2 mãos entre os golpes","Empunhaduras diferentes no FH e no BH","Preparação do FH com raquete mais elevada que a mão","Preparação do BH com raquete mais elevada que a mão","Jogo na rede: golpear frente ao corpo"],
+    "tatico":["Anunciar bolas fora e o placar","Distinguir bolas fora e dentro","Acompanhar e saber o placar","Conseguir continuação dos golpes","Posição de expectativa com mão livre no coração da raquete na devolução","Ser dinâmico entre os golpes","Deslocar o adversário","Conhecimento das regras do tie-break","Realizar voleios","Movimentação: ficar dinâmico entre os pontos","Recuperar a posição na quadra","Defender-se (bola alta na cruzada)","Jogar no espaço vazio"],
+    "fisico":["Circuito com bola na raquete sem erros (3 cones + bambolê)","Capacidade de aceleração","Equilibrar raquete e bola","Colocar bola no bambolê com domínio (flexão e ritmo lento)","Arremesso: arremesso por cima da cabeça (meta: zona 2+)","Posição inicial de lado no arremesso","Posição troféu com braço livre no arremesso","Força explosiva do ombro dominante","Desenvolvimento: 3 corridas — meta abaixo de 9 segundos"],
+    "mental":["Respeitar a organização do jogo","Esperar o colega estar pronto antes de arremessar","Saber onde se recuperar após o golpe"]
+  },
+  "laranja":{
+    "label":"Bola Laranja","color":"#f5a623","ball":"🟠",
+    "levels":"Laranja-Laranja · Laranja-Verde",
+    "tecnico":["Posição de expectativa dinâmica com ombros e braços soltos","Fim da preparação acima do ponto de contato","Soltar a cabeça da raquete abaixo do ponto de contato no início do swing","Movimentação equilibrada e contínua","Approach com FH cruzado ou paralelo + voleio do lado oposto","Topspin de forehand","Topspin de backhand","Empunhadura continental a eastern de BH no voleio","Preparação curta dos voleios","Smash: deslocamento com passos laterais ou cruzados ficando de lado","Posição troféu no smash","Saque com pés alinhados e subida sincronizada dos braços","Sacar com slice (escovar a bola)","Sacar com ritmo justo (lento → rápido → muito rápido)","Sacar com corpo esticado","Preparação do BH com raquete mais elevada que a mão","Jogo na rede: golpes frente ao corpo e avançando","Sacar utilizando efeito slice"],
+    "tatico":["Atacar ao acelerar o jogo","Defender ao diminuir/frear o ritmo do jogo","Acelerar o 1º saque","Comandar o ponto a partir da devolução do 2º saque","Utilizar efeitos nos golpes","Saber posicionar-se no início do ponto no simples","Saber posicionar-se no início do ponto nas duplas","Saber gerir desacordos com o adversário","Variação de jogo"],
+    "fisico":["Arremesso: arremesso (meta: zona 3+)","Desenvolvimento 5 corridas (3 idas e 2 voltas) — meta abaixo de 13 segundos"],
+    "mental":["Posicionar-se corretamente nas duplas","Ir na toalha","Rotinas positivas"]
+  },
+  "verde":{
+    "label":"Bola Verde","color":"#00c050","ball":"🟢",
+    "levels":"Verde-Verde · Verde-Amarela",
+    "tecnico":["Drill com bolas profundas e distantes — rebater profundo e cruzado","Identificar bola 'fácil' e executar golpe de definição na paralela","Split step orientado para recepção","Transferir o peso no golpe","Realizar spin acelerado com FH e BH","Movimentação: frear e acelerar","1º voleio de construção profundo + 2º voleio próximo à rede + smash","Avançar para interceptar trajetórias","Smash com corpo esticado e pronação na batida","Saques com efeito slice ou spin — 3 de cada lado","Lançamento de bola adequado ao efeito","Ação do punho adequada ao efeito (slice e/ou spin)","Pernas ligeiramente flexionadas no saque","2º saque com efeito slice ou top spin"],
+    "tatico":["Auto-arbitragem","Utilizar golpe forte","Interceptar durante o jogo de duplas","Atacar ao acelerar o jogo","Defender ao frear o ritmo","Analisar o adversário","Variações com dropshot e slice"],
+    "fisico":["Arremesso: arremesso (meta: zona 4)","Desenvolvimento 5 corridas — meta abaixo de 11 segundos"],
+    "mental":["Respeitar adversário e manter atitude correta em qualquer situação","Ser autônomo na gestão completa das regras","Postura correta em qualquer situação","Transferir durante os golpes com consciência","Rotinas pré-jogo","Rotinas durante o jogo","Rotinas pós-jogo"]
+  },
+  "amarela":{
+    "label":"Bola Amarela","color":"#ffd700","ball":"🟡",
+    "levels":"RAW Juniors avançado · Verde-Amarela",
+    "tecnico":["Drill com bolas profundas — rebater profundo e cruzado com consistência","Identificar bola fácil e executar golpe de definição na paralela","Split step orientado e dinâmico para recepção","Transferir o peso no golpe com equilíbrio","Spin acelerado com FH e BH em situações de pressão","Movimentação: frear, acelerar e recuperar","Sequência de voleios: construção + finalização + smash","Avançar para interceptar trajetórias na rede","Smash com corpo esticado e pronação","Saque com efeito slice e spin — consistência por lado","Lançamento de bola adequado ao efeito do saque","2º saque com efeito — controle de risco","Topspin de forehand com aceleração e controle de profundidade","Topspin de backhand com rotação completa do tronco","Giro de tronco e quadril nos golpes de fundo","Base aberta no forehand com rotação completa","Base semi-aberta como posição de transição","Base fechada no backhand (posição clássica)"],
+    "tatico":["Auto-arbitragem com maturidade","Utilizar o golpe forte como arma principal","Interceptar durante o jogo de duplas","Atacar ao acelerar o jogo","Defender ao frear o ritmo","Analisar o adversário e adaptar o jogo","Variações com dropshot e slice","Compreensão do objetivo do ponto antes de bater","Controle de bola: regularidade, altura segura, reduzir erros","Direção de jogo: cruzada, paralela e ângulos com intenção","Posicionamento: recuperação ao centro após cada golpe","Leitura de situação: bola curta/profunda, rápida/lenta","Construção do ponto: abrir a quadra e trabalhar o rival","Ataque consciente: atacar com critério e escolha de alvo","Táticas específicas: saque +1 e devolução com intenção"],
+    "fisico":["Arremesso: arremesso — meta zona 4","Desenvolvimento 5 corridas — meta abaixo de 11 segundos","Sprint 20m — meta abaixo de 4,0 segundos","T-Test 10m — meta abaixo de 12 segundos"],
+    "mental":["Respeitar adversário e manter atitude correta em qualquer situação","Ser autônomo na gestão completa das regras","Postura correta em qualquer situação","Transferir durante os golpes com consciência","Rotinas pré-jogo estabelecidas","Rotinas durante o jogo — entre pontos e games","Rotinas pós-jogo — análise e aprendizado","Autoconhecimento tático: pontos fortes e limitações","Controle emocional sob pressão"]
+  }
+};
 
 /* ══════════════════════════════════════════════════════════
    EDIT MODE
@@ -600,13 +860,15 @@ function renderAvaliacoes() {
     const cards = b.provas.map(p => {
       const ctx = `${b.label} · Prova ${p.num}`;
       const crits = p.criterios.map(c => {
-        const badge = c.rotina ? '<span class="rotina-badge">rotina</span>' : '';
         return `<li class="criterio-item">
           <span class="crit-id">${c.id}</span>
           <span class="crit-pts">(${c.pts}pts)</span>
-          <span class="crit-desc">${editSpan(c.desc, `${ctx} · Critério ${c.id}`)}${badge}</span>
+          <span class="crit-desc">${editSpan(c.desc, `${ctx} · Critério ${c.id}`)}</span>
         </li>`;
       }).join('');
+      const descHtml = p.descricao
+        ? `<div class="prova-desc">${editSpan(p.descricao, `${ctx} · Descrição`)}</div>`
+        : '';
       return `<div class="prova-card">
         <div class="prova-header">
           <span class="prova-num">Prova ${p.num}</span>
@@ -614,7 +876,7 @@ function renderAvaliacoes() {
           <span class="prova-tipo ${tipoClass(p.tipo)}">${esc(p.tipo)}</span>
           <span class="prova-pts">${p.total} pts | mín ${p.min}</span>
         </div>
-        <div class="prova-desc">${editSpan(p.descricao, `${ctx} · Descrição`)}</div>
+        ${descHtml}
         <ul class="criterios-list">${crits}</ul>
       </div>`;
     }).join('');
