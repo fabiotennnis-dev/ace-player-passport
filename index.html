@@ -25,11 +25,13 @@ body{background:var(--bg);font-family:-apple-system,'SF Pro Text','DM Sans',sans
 
 /* NAV */
 .nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav);background:rgba(255,255,255,.96);backdrop-filter:blur(20px);border-top:1px solid var(--bo);display:flex;align-items:center;justify-content:space-around;z-index:100;padding-bottom:env(safe-area-inset-bottom,0)}
-.ni{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:8px 18px;border:none;background:transparent;border-radius:12px;transition:background .15s}
+.ni{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:8px 8px;border:none;background:transparent;border-radius:12px;transition:background .15s}
 .ni:active{background:var(--bg3)}
 .ni-i{font-size:22px}.ni-l{font-size:10px;font-weight:600;color:var(--t3);letter-spacing:.01em}
 .ni.on .ni-l{color:var(--g)}.ni.on .ni-i{filter:drop-shadow(0 0 4px rgba(0,135,90,.3))}
 .ni-d{width:4px;height:4px;border-radius:50%;background:var(--g);opacity:0;margin-top:1px}.ni.on .ni-d{opacity:1}
+.ptab{flex:1;padding:8px 4px;border:1.5px solid var(--b2);border-radius:var(--rs);background:transparent;font-size:12px;font-weight:600;color:var(--t2);cursor:pointer}
+.ptab.on{background:var(--g);border-color:var(--g);color:#fff}
 
 /* TOP BAR */
 .tb{display:flex;align-items:center;justify-content:space-between;padding:14px 20px 12px;position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(16px);z-index:50;border-bottom:1px solid var(--bo)}
@@ -2135,12 +2137,30 @@ async function gerarPassportPDF(alunoId) {
 <div id="coach-list-ac" style="margin-bottom:16px"><div class="row" style="flex-direction:column;align-items:stretch;gap:0"><div style="display:flex;align-items:center;gap:12px" onclick="viewCoachProfile(&#39;ANTONIO&#39;)"><div class="rav" style="background:var(--g)">A</div><div class="ri" style="flex:1"><div class="rn">ANTONIO</div><div class="rm">Coach</div><div style="font-size:11px;color:var(--t3);margin-top:2px">0 turmas · 0 alunos</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0"><polyline points="9 18 15 12 9 6"></polyline></svg></div><div style="display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bo)"><button onclick="viewCoachProfile(&#39;ANTONIO&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--bg3);border:1px solid var(--bo);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer">👥 Ver alunos</button><button onclick="deleteCoach(&#39;96253a3e-9caa-4d29-b59a-36c017d70503&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--rl);border:1px solid var(--r);color:var(--r);font-size:12px;font-weight:600;cursor:pointer">🗑️ Remover</button></div></div><div class="row" style="flex-direction:column;align-items:stretch;gap:0"><div style="display:flex;align-items:center;gap:12px" onclick="viewCoachProfile(&#39;Dimas Nunes&#39;)"><div class="rav" style="background:var(--g)">DN</div><div class="ri" style="flex:1"><div class="rn">Dimas Nunes</div><div class="rm">Coordenador</div><div style="font-size:11px;color:var(--t3);margin-top:2px">0 turmas · 0 alunos</div><div style="font-size:10px;color:var(--b);font-weight:600;margin-top:2px">📋 Contato visível para responsáveis</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0"><polyline points="9 18 15 12 9 6"></polyline></svg></div><div style="display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bo)"><button onclick="viewCoachProfile(&#39;Dimas Nunes&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--bg3);border:1px solid var(--bo);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer">👥 Ver alunos</button><button onclick="deleteCoach(&#39;52f1ce35-ee53-4350-911a-277e3241a9d7&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--rl);border:1px solid var(--r);color:var(--r);font-size:12px;font-weight:600;cursor:pointer">🗑️ Remover</button></div></div><div class="row" style="flex-direction:column;align-items:stretch;gap:0"><div style="display:flex;align-items:center;gap:12px" onclick="viewCoachProfile(&#39;DJAIR&#39;)"><div class="rav" style="background:var(--g)">D</div><div class="ri" style="flex:1"><div class="rn">DJAIR</div><div class="rm">Coach</div><div style="font-size:11px;color:var(--t3);margin-top:2px">1 turma · 0 alunos</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0"><polyline points="9 18 15 12 9 6"></polyline></svg></div><div style="display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bo)"><button onclick="viewCoachProfile(&#39;DJAIR&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--bg3);border:1px solid var(--bo);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer">👥 Ver alunos</button><button onclick="deleteCoach(&#39;49301703-5d51-46e4-ac36-4fbfc1e3dada&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--rl);border:1px solid var(--r);color:var(--r);font-size:12px;font-weight:600;cursor:pointer">🗑️ Remover</button></div></div><div class="row" style="flex-direction:column;align-items:stretch;gap:0"><div style="display:flex;align-items:center;gap:12px" onclick="viewCoachProfile(&#39;DOUGLAS&#39;)"><div class="rav" style="background:var(--g)">D</div><div class="ri" style="flex:1"><div class="rn">DOUGLAS</div><div class="rm">Coach</div><div style="font-size:11px;color:var(--t3);margin-top:2px">1 turma · 0 alunos</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0"><polyline points="9 18 15 12 9 6"></polyline></svg></div><div style="display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bo)"><button onclick="viewCoachProfile(&#39;DOUGLAS&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--bg3);border:1px solid var(--bo);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer">👥 Ver alunos</button><button onclick="deleteCoach(&#39;74ac6566-277e-40ec-8d8d-86ed812eaa51&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--rl);border:1px solid var(--r);color:var(--r);font-size:12px;font-weight:600;cursor:pointer">🗑️ Remover</button></div></div><div class="row" style="flex-direction:column;align-items:stretch;gap:0"><div style="display:flex;align-items:center;gap:12px" onclick="viewCoachProfile(&#39;EDISON RAW&#39;)"><div class="rav" style="background:var(--g)">ER</div><div class="ri" style="flex:1"><div class="rn">EDISON RAW</div><div class="rm">Diretor</div><div style="font-size:11px;color:var(--t3);margin-top:2px">0 turmas · 0 alunos</div><div style="font-size:10px;color:var(--b);font-weight:600;margin-top:2px">📋 Contato visível para responsáveis</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0"><polyline points="9 18 15 12 9 6"></polyline></svg></div><div style="display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bo)"><button onclick="viewCoachProfile(&#39;EDISON RAW&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--bg3);border:1px solid var(--bo);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer">👥 Ver alunos</button><button onclick="deleteCoach(&#39;42cf9ec7-7674-4e92-bd1c-df570822a505&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--rl);border:1px solid var(--r);color:var(--r);font-size:12px;font-weight:600;cursor:pointer">🗑️ Remover</button></div></div><div class="row" style="flex-direction:column;align-items:stretch;gap:0"><div style="display:flex;align-items:center;gap:12px" onclick="viewCoachProfile(&#39;EDUARDO NOVAIS&#39;)"><div class="rav" style="background:var(--g)">EN</div><div class="ri" style="flex:1"><div class="rn">EDUARDO NOVAIS</div><div class="rm">Assistente</div><div style="font-size:11px;color:var(--t3);margin-top:2px">0 turmas · 0 alunos</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0"><polyline points="9 18 15 12 9 6"></polyline></svg></div><div style="display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bo)"><button onclick="viewCoachProfile(&#39;EDUARDO NOVAIS&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--bg3);border:1px solid var(--bo);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer">👥 Ver alunos</button><button onclick="deleteCoach(&#39;5d344661-8923-49dd-a5d4-21f6f282e960&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--rl);border:1px solid var(--r);color:var(--r);font-size:12px;font-weight:600;cursor:pointer">🗑️ Remover</button></div></div><div class="row" style="flex-direction:column;align-items:stretch;gap:0"><div style="display:flex;align-items:center;gap:12px" onclick="viewCoachProfile(&#39;EDUARDO ROSA&#39;)"><div class="rav" style="background:var(--g)">ER</div><div class="ri" style="flex:1"><div class="rn">EDUARDO ROSA</div><div class="rm">Coach</div><div style="font-size:11px;color:var(--t3);margin-top:2px">0 turmas · 0 alunos</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0"><polyline points="9 18 15 12 9 6"></polyline></svg></div><div style="display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bo)"><button onclick="viewCoachProfile(&#39;EDUARDO ROSA&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--bg3);border:1px solid var(--bo);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer">👥 Ver alunos</button><button onclick="deleteCoach(&#39;0bbc96ba-e1f9-49ae-9bb5-8bb078e9a9d7&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--rl);border:1px solid var(--r);color:var(--r);font-size:12px;font-weight:600;cursor:pointer">🗑️ Remover</button></div></div><div class="row" style="flex-direction:column;align-items:stretch;gap:0"><div style="display:flex;align-items:center;gap:12px" onclick="viewCoachProfile(&#39;fABIO ROCHA&#39;)"><div class="rav" style="background:var(--g)">FR</div><div class="ri" style="flex:1"><div class="rn">fABIO ROCHA</div><div class="rm">Head Coach</div><div style="font-size:11px;color:var(--t3);margin-top:2px">0 turmas · 0 alunos</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0"><polyline points="9 18 15 12 9 6"></polyline></svg></div><div style="display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bo)"><button onclick="viewCoachProfile(&#39;fABIO ROCHA&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--bg3);border:1px solid var(--bo);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer">👥 Ver alunos</button><button onclick="deleteCoach(&#39;09816060-ac39-4ece-8afd-4f51a0afbde3&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--rl);border:1px solid var(--r);color:var(--r);font-size:12px;font-weight:600;cursor:pointer">🗑️ Remover</button></div></div><div class="row" style="flex-direction:column;align-items:stretch;gap:0"><div style="display:flex;align-items:center;gap:12px" onclick="viewCoachProfile(&#39;GLAUBERT&#39;)"><div class="rav" style="background:var(--g)">G</div><div class="ri" style="flex:1"><div class="rn">GLAUBERT</div><div class="rm">Coach</div><div style="font-size:11px;color:var(--t3);margin-top:2px">2 turmas · 0 alunos</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0"><polyline points="9 18 15 12 9 6"></polyline></svg></div><div style="display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bo)"><button onclick="viewCoachProfile(&#39;GLAUBERT&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--bg3);border:1px solid var(--bo);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer">👥 Ver alunos</button><button onclick="deleteCoach(&#39;727c8672-6a4e-4895-9990-a7e6998e45a8&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--rl);border:1px solid var(--r);color:var(--r);font-size:12px;font-weight:600;cursor:pointer">🗑️ Remover</button></div></div><div class="row" style="flex-direction:column;align-items:stretch;gap:0"><div style="display:flex;align-items:center;gap:12px" onclick="viewCoachProfile(&#39;INGRID DAYANA&#39;)"><div class="rav" style="background:var(--g)">ID</div><div class="ri" style="flex:1"><div class="rn">INGRID DAYANA</div><div class="rm">Assistente</div><div style="font-size:11px;color:var(--t3);margin-top:2px">0 turmas · 1 aluno</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0"><polyline points="9 18 15 12 9 6"></polyline></svg></div><div style="display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bo)"><button onclick="viewCoachProfile(&#39;INGRID DAYANA&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--bg3);border:1px solid var(--bo);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer">👥 Ver alunos</button><button onclick="deleteCoach(&#39;5b1a1471-76d1-44ad-b193-8a1ab3c0b11b&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--rl);border:1px solid var(--r);color:var(--r);font-size:12px;font-weight:600;cursor:pointer">🗑️ Remover</button></div></div><div class="row" style="flex-direction:column;align-items:stretch;gap:0"><div style="display:flex;align-items:center;gap:12px" onclick="viewCoachProfile(&#39;JOANHATAN&#39;)"><div class="rav" style="background:var(--g)">J</div><div class="ri" style="flex:1"><div class="rn">JOANHATAN</div><div class="rm">Coach</div><div style="font-size:11px;color:var(--t3);margin-top:2px">0 turmas · 0 alunos</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0"><polyline points="9 18 15 12 9 6"></polyline></svg></div><div style="display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bo)"><button onclick="viewCoachProfile(&#39;JOANHATAN&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--bg3);border:1px solid var(--bo);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer">👥 Ver alunos</button><button onclick="deleteCoach(&#39;1fef16bd-341f-4b5c-92ce-c0ab45d9779d&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--rl);border:1px solid var(--r);color:var(--r);font-size:12px;font-weight:600;cursor:pointer">🗑️ Remover</button></div></div><div class="row" style="flex-direction:column;align-items:stretch;gap:0"><div style="display:flex;align-items:center;gap:12px" onclick="viewCoachProfile(&#39;MICHELE&#39;)"><div class="rav" style="background:var(--g)">M</div><div class="ri" style="flex:1"><div class="rn">MICHELE</div><div class="rm">Assistente</div><div style="font-size:11px;color:var(--t3);margin-top:2px">1 turma · 0 alunos</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0"><polyline points="9 18 15 12 9 6"></polyline></svg></div><div style="display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bo)"><button onclick="viewCoachProfile(&#39;MICHELE&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--bg3);border:1px solid var(--bo);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer">👥 Ver alunos</button><button onclick="deleteCoach(&#39;530f2696-fe68-4e47-a327-93a5e22ee5b4&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--rl);border:1px solid var(--r);color:var(--r);font-size:12px;font-weight:600;cursor:pointer">🗑️ Remover</button></div></div><div class="row" style="flex-direction:column;align-items:stretch;gap:0"><div style="display:flex;align-items:center;gap:12px" onclick="viewCoachProfile(&#39;RAYANE&#39;)"><div class="rav" style="background:var(--g)">R</div><div class="ri" style="flex:1"><div class="rn">RAYANE</div><div class="rm">Gestor</div><div style="font-size:11px;color:var(--t3);margin-top:2px">0 turmas · 0 alunos</div><div style="font-size:10px;color:var(--b);font-weight:600;margin-top:2px">📋 Contato visível para responsáveis</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0"><polyline points="9 18 15 12 9 6"></polyline></svg></div><div style="display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bo)"><button onclick="viewCoachProfile(&#39;RAYANE&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--bg3);border:1px solid var(--bo);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer">👥 Ver alunos</button><button onclick="deleteCoach(&#39;c99a2127-835b-4e54-ab63-64c5bae887d7&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--rl);border:1px solid var(--r);color:var(--r);font-size:12px;font-weight:600;cursor:pointer">🗑️ Remover</button></div></div><div class="row" style="flex-direction:column;align-items:stretch;gap:0"><div style="display:flex;align-items:center;gap:12px" onclick="viewCoachProfile(&#39;ROBSON ROCHA&#39;)"><div class="rav" style="background:var(--g)">RR</div><div class="ri" style="flex:1"><div class="rn">ROBSON ROCHA</div><div class="rm">Coordenador</div><div style="font-size:11px;color:var(--t3);margin-top:2px">0 turmas · 2 alunos</div><div style="font-size:10px;color:var(--b);font-weight:600;margin-top:2px">📋 Contato visível para responsáveis</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0"><polyline points="9 18 15 12 9 6"></polyline></svg></div><div style="display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bo)"><button onclick="viewCoachProfile(&#39;ROBSON ROCHA&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--bg3);border:1px solid var(--bo);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer">👥 Ver alunos</button><button onclick="deleteCoach(&#39;d54f296b-b18f-4b57-96ec-293432b81a5a&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--rl);border:1px solid var(--r);color:var(--r);font-size:12px;font-weight:600;cursor:pointer">🗑️ Remover</button></div></div><div class="row" style="flex-direction:column;align-items:stretch;gap:0"><div style="display:flex;align-items:center;gap:12px" onclick="viewCoachProfile(&#39;VICTOR&#39;)"><div class="rav" style="background:var(--g)">V</div><div class="ri" style="flex:1"><div class="rn">VICTOR</div><div class="rm">Assistente</div><div style="font-size:11px;color:var(--t3);margin-top:2px">2 turmas · 0 alunos</div></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0"><polyline points="9 18 15 12 9 6"></polyline></svg></div><div style="display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bo)"><button onclick="viewCoachProfile(&#39;VICTOR&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--bg3);border:1px solid var(--bo);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer">👥 Ver alunos</button><button onclick="deleteCoach(&#39;a4eb65b0-c2e4-47e8-8ca2-eadbae86a52a&#39;)" style="flex:1;padding:7px;border-radius:10px;background:var(--rl);border:1px solid var(--r);color:var(--r);font-size:12px;font-weight:600;cursor:pointer">🗑️ Remover</button></div></div></div>
 </div></div>
 
+<div class="scr" id="s-presenca">
+  <div class="tb"><span class="logo">ACE ◆</span><span class="ttl">Presença</span><div class="tav"></div></div>
+  <div class="pad">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+      <button onclick="presChangeDia(-1)" style="width:36px;height:36px;border-radius:10px;border:1.5px solid var(--b2);background:var(--card);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0">‹</button>
+      <div style="flex:1;text-align:center;font-size:13px;font-weight:700;color:var(--t)" id="pres-date-label"></div>
+      <button onclick="presChangeDia(1)" style="width:36px;height:36px;border-radius:10px;border:1.5px solid var(--b2);background:var(--card);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0">›</button>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:16px">
+      <button id="ptab-hoje" onclick="presTab('hoje')" class="ptab on">Hoje</button>
+      <button id="ptab-coach" onclick="presTab('coach')" class="ptab">Por Coach</button>
+      <button id="ptab-relatorio" onclick="presTab('relatorio')" class="ptab">Relatório</button>
+    </div>
+    <div id="pres-content"></div>
+  </div>
+</div>
+
 <!-- NAV -->
 <nav class="nav">
 <button class="ni" id="n-alunos" onclick="goS(&#39;alunos&#39;)"><div class="ni-i">🎾</div><div class="ni-l">Alunos</div><div class="ni-d"></div></button>
 <button class="ni" id="n-coach" onclick="goS(&#39;coach&#39;)"><div class="ni-i">📋</div><div class="ni-l">Coach</div><div class="ni-d"></div></button>
 <button class="ni" id="n-eval" onclick="goS(&#39;eval&#39;)"><div class="ni-i">✏️</div><div class="ni-l">Avaliar</div><div class="ni-d"></div></button>
 <button class="ni on" id="n-academy" onclick="goS(&#39;academy&#39;)"><div class="ni-i">🏟️</div><div class="ni-l">Academy</div><div class="ni-d"></div></button>
+<button class="ni" id="n-presenca" onclick="goS('presenca');rPres()"><div class="ni-i">📅</div><div class="ni-l">Presença</div><div class="ni-d"></div></button>
 </nav>
 
 <!-- ACTION SHEET -->
@@ -3594,6 +3614,167 @@ async function deleteTurma(turmaId) {
 }
 
 
+
+
+// ═══════════════════════════════════════════════════
+// PRESENÇA
+// ═══════════════════════════════════════════════════
+let presDate = new Date();
+let presFilter = 'hoje';
+let presTurmaId = null;
+let presCoachFilter = '';
+let presMarkings = {};
+
+function presDateStr(d){const z=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`;}
+function presDayOfWeek(d){return ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][d.getDay()];}
+function presDateLabel(d){
+  const days=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  const months=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  const today=new Date();
+  const isToday=presDateStr(d)===presDateStr(today);
+  return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]}${isToday?' · Hoje':''}`;
+}
+
+function presChangeDia(delta){
+  presDate=new Date(presDate.getTime()+delta*86400000);
+  presTurmaId=null;presMarkings={};rPres();
+}
+
+function presTab(tab){presFilter=tab;presTurmaId=null;presMarkings={};rPres();}
+
+async function rPres(){
+  const dayAbbr=presDayOfWeek(presDate);
+  const dateStr=presDateStr(presDate);
+  const lbl=document.getElementById('pres-date-label');
+  if(lbl)lbl.textContent=presDateLabel(presDate);
+  ['hoje','coach','relatorio'].forEach(t=>{
+    const btn=document.getElementById('ptab-'+t);
+    if(btn)btn.classList.toggle('on',presFilter===t);
+  });
+  const content=document.getElementById('pres-content');
+  if(!content)return;
+  if(presFilter==='hoje'){
+    if(presTurmaId)await renderPresAlunos(dateStr);
+    else renderPresTurmas(dayAbbr,dateStr);
+  }else if(presFilter==='coach'){
+    renderPresCoach(dayAbbr,dateStr);
+  }else{
+    await renderPresRelatorio();
+  }
+}
+
+function renderPresTurmas(dayAbbr,dateStr){
+  const turmasHoje=tms.filter(t=>{
+    const dias=Array.isArray(t.dias)?t.dias:[];
+    return dias.includes(dayAbbr);
+  });
+  const content=document.getElementById('pres-content');
+  if(!turmasHoje.length){
+    content.innerHTML=`<div style="text-align:center;padding:50px 0;color:var(--t3)"><div style="font-size:36px;margin-bottom:12px">📅</div><div style="font-size:14px;font-weight:500">Nenhuma turma em ${dayAbbr}</div></div>`;
+    return;
+  }
+  content.innerHTML=`<div class="lbl">Turmas · ${dayAbbr}</div>`+turmasHoje.map(t=>{
+    const al=sts.filter(s=>String(s.turma)===String(t.id));
+    return `<div class="row" style="cursor:pointer" onclick="presOpenTurma('${t.id}')"><div style="width:44px;height:44px;border-radius:12px;background:${t.cor}25;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">📋</div><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15px">${t.label}</div><div style="color:var(--t3);font-size:12px;margin-top:2px">${t.horario||'—'} · ${t.coach||'—'} · ${al.length} aluno${al.length!==1?'s':''}</div></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg></div>`;
+  }).join('');
+}
+
+async function presOpenTurma(turmaId){
+  presTurmaId=turmaId;presMarkings={};
+  const dateStr=presDateStr(presDate);
+  const content=document.getElementById('pres-content');
+  content.innerHTML=`<div style="text-align:center;padding:40px 0"><div class="spin"></div></div>`;
+  try{
+    const {data}=await getDb().from('presencas').select('student_id,presente').eq('turma_id',turmaId).eq('data',dateStr).eq('academia_id',currentAcademia.id);
+    if(data)data.forEach(r=>{presMarkings[r.student_id]=r.presente;});
+  }catch(e){console.error('presLoad:',e);}
+  await renderPresAlunos(dateStr);
+}
+
+async function renderPresAlunos(dateStr){
+  const t=tms.find(x=>String(x.id)===String(presTurmaId));
+  if(!t)return;
+  const alunos=sts.filter(s=>String(s.turma)===String(presTurmaId));
+  const totalP=Object.values(presMarkings).filter(v=>v===true).length;
+  const totalM=Object.values(presMarkings).filter(v=>v!==undefined).length;
+  const content=document.getElementById('pres-content');
+  content.innerHTML=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button onclick="presTurmaId=null;presMarkings={};rPres()" style="background:var(--bg3);border:none;border-radius:10px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:600;color:var(--t);white-space:nowrap">← Voltar</button><div style="flex:1;min-width:0"><div style="font-weight:800;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.label}</div><div style="font-size:11px;color:var(--t3)">${t.horario||'—'} · ${t.coach||'—'}</div></div><div style="text-align:right;flex-shrink:0"><div id="pres-count" style="font-size:20px;font-weight:800;color:var(--g)">${totalP}</div><div id="pres-sub" style="font-size:10px;color:var(--t3)">${totalM}/${alunos.length}</div></div></div>`+
+  (!alunos.length?`<div style="text-align:center;padding:40px 0;color:var(--t3);font-size:14px">Nenhum aluno nesta turma</div>`:
+  alunos.map(a=>{
+    const p=D.pulseiras.find(pb=>pb.id===a.pulseira)||D.pulseiras[4];
+    const st=presMarkings[a.id];
+    const marked=st!==undefined;const presente=st===true;
+    return `<div class="row" id="prow-${a.id}" style="align-items:center"><div style="width:40px;height:40px;border-radius:50%;background:${a.cor};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0">${ini(a.nome)}</div><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px">${a.nome.split(' ').slice(0,2).join(' ')}</div><div style="font-size:11px;color:var(--t3)">${p.ball} ${p.label}</div></div><div style="display:flex;gap:6px;flex-shrink:0"><button onclick="presMarcar('${a.id}','${presTurmaId}','${dateStr}','${t.horario||''}','${(t.coach||'').replace(/'/g,&quot;\\'&quot;)}',true)" style="width:40px;height:40px;border-radius:50%;border:2px solid ${marked&&presente?'var(--g)':'var(--b2)'};background:${marked&&presente?'var(--g)':'transparent'};cursor:pointer;font-size:17px;transition:all .15s" id="pbtn-p-${a.id}">✅</button><button onclick="presMarcar('${a.id}','${presTurmaId}','${dateStr}','${t.horario||''}','${(t.coach||'').replace(/'/g,&quot;\\'&quot;)}',false)" style="width:40px;height:40px;border-radius:50%;border:2px solid ${marked&&!presente?'#ef4444':'var(--b2)'};background:${marked&&!presente?'#ef4444':'transparent'};cursor:pointer;font-size:17px;transition:all .15s" id="pbtn-a-${a.id}">❌</button></div></div>`;
+  }).join(''));
+}
+
+async function presMarcar(studentId,turmaId,data,horario,coach,presente){
+  presMarkings[studentId]=presente;
+  const bp=document.getElementById('pbtn-p-'+studentId);
+  const ba=document.getElementById('pbtn-a-'+studentId);
+  if(bp){bp.style.background=presente?'var(--g)':'transparent';bp.style.borderColor=presente?'var(--g)':'var(--b2)';}
+  if(ba){ba.style.background=!presente?'#ef4444':'transparent';ba.style.borderColor=!presente?'#ef4444':'var(--b2)';}
+  const alunos=sts.filter(s=>String(s.turma)===String(turmaId));
+  const totalP=Object.values(presMarkings).filter(v=>v===true).length;
+  const totalM=Object.values(presMarkings).filter(v=>v!==undefined).length;
+  const ce=document.getElementById('pres-count');if(ce)ce.textContent=totalP;
+  const se=document.getElementById('pres-sub');if(se)se.textContent=`${totalM}/${alunos.length}`;
+  try{
+    await getDb().from('presencas').upsert({academia_id:currentAcademia.id,student_id:studentId,turma_id:turmaId,coach:coach,data:data,horario:horario,presente:presente},{onConflict:'student_id,turma_id,data'});
+  }catch(e){console.error('presMarcar:',e);toast('Erro ao salvar ⚠️');}
+}
+
+function renderPresCoach(dayAbbr,dateStr){
+  const coaches=[...new Set(tms.map(t=>t.coach).filter(Boolean))].sort();
+  const content=document.getElementById('pres-content');
+  content.innerHTML=`<div class="lbl">Selecionar Coach</div><div style="display:flex;flex-direction:column;gap:8px">${coaches.map(c=>`<button onclick="presCoachSelect('${c.replace(/'/g,&quot;\\'&quot;)}','${dayAbbr}','${dateStr}')" style="width:100%;padding:14px 16px;border-radius:var(--rs);border:1.5px solid ${presCoachFilter===c?'var(--g)':'var(--b2)'};background:${presCoachFilter===c?'var(--g)':'var(--card)'};color:${presCoachFilter===c?'#fff':'var(--t)'};cursor:pointer;text-align:left;font-weight:600;font-size:14px;box-shadow:var(--shadow)">👤 ${c}</button>`).join('')}</div>${presCoachFilter?renderPresCoachTurmas(dayAbbr):''}`;
+}
+
+function presCoachSelect(coach,dayAbbr,dateStr){
+  presCoachFilter=presCoachFilter===coach?'':coach;
+  renderPresCoach(dayAbbr,dateStr);
+}
+
+function renderPresCoachTurmas(dayAbbr){
+  const turmas=tms.filter(t=>t.coach===presCoachFilter&&Array.isArray(t.dias)&&t.dias.includes(dayAbbr));
+  if(!turmas.length)return `<div style="text-align:center;padding:30px 0;color:var(--t3);font-size:13px;margin-top:16px">Nenhuma turma de ${presCoachFilter} em ${dayAbbr}</div>`;
+  return `<div class="lbl" style="margin-top:16px">Turmas de ${presCoachFilter} · ${dayAbbr}</div>`+turmas.map(t=>{
+    const al=sts.filter(s=>String(s.turma)===String(t.id));
+    return `<div class="row" style="cursor:pointer" onclick="presFilter='hoje';presTurmaId=null;document.getElementById('ptab-hoje').classList.add('on');document.getElementById('ptab-coach').classList.remove('on');presOpenTurma('${t.id}')"><div style="width:44px;height:44px;border-radius:12px;background:${t.cor}25;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">📋</div><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:15px">${t.label}</div><div style="color:var(--t3);font-size:12px;margin-top:2px">${t.horario||'—'} · ${al.length} aluno${al.length!==1?'s':''}</div></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg></div>`;
+  }).join('');
+}
+
+async function renderPresRelatorio(){
+  const content=document.getElementById('pres-content');
+  content.innerHTML=`<div style="text-align:center;padding:40px 0"><div class="spin"></div></div>`;
+  const hoje=new Date();
+  const mesStart=new Date(hoje.getFullYear(),hoje.getMonth(),1);
+  const mesEnd=new Date(hoje.getFullYear(),hoje.getMonth()+1,0);
+  const mesLabel=mesStart.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+  try{
+    const {data}=await getDb().from('presencas').select('student_id,presente,data').eq('academia_id',currentAcademia.id).gte('data',presDateStr(mesStart)).lte('data',presDateStr(mesEnd));
+    if(!data||!data.length){
+      content.innerHTML=`<div style="text-align:center;padding:50px 0;color:var(--t3)"><div style="font-size:36px;margin-bottom:12px">📊</div><div style="font-size:14px;font-weight:500;text-transform:capitalize">Nenhuma presença em ${mesLabel}</div></div>`;
+      return;
+    }
+    const stats={};
+    data.forEach(r=>{
+      if(!stats[r.student_id])stats[r.student_id]={total:0,presentes:0};
+      stats[r.student_id].total++;
+      if(r.presente)stats[r.student_id].presentes++;
+    });
+    const rows=sts.filter(s=>stats[s.id]).sort((a,b)=>(stats[b.id].presentes/stats[b.id].total)-(stats[a.id].presentes/stats[a.id].total));
+    content.innerHTML=`<div class="lbl" style="text-transform:capitalize">${mesLabel}</div>`+rows.map(a=>{
+      const s=stats[a.id];
+      const pct=Math.round((s.presentes/s.total)*100);
+      const color=pct>=80?'var(--g)':pct>=60?'var(--a)':'#ef4444';
+      return `<div class="row" style="align-items:center"><div style="width:40px;height:40px;border-radius:50%;background:${a.cor};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0">${ini(a.nome)}</div><div style="flex:1;min-width:0;padding-right:8px"><div style="font-weight:700;font-size:14px">${a.nome.split(' ').slice(0,2).join(' ')}</div><div style="margin-top:6px;height:5px;border-radius:3px;background:var(--b2);overflow:hidden"><div style="height:100%;width:${pct}%;background:${color};border-radius:3px;transition:width .4s"></div></div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:16px;font-weight:800;color:${color}">${pct}%</div><div style="font-size:10px;color:var(--t3)">${s.presentes}/${s.total}</div></div></div>`;
+    }).join('');
+  }catch(e){
+    content.innerHTML=`<div style="text-align:center;padding:40px 0;color:var(--t3);font-size:14px">Erro ao carregar</div>`;
+    console.error('relatorio:',e);
+  }
+}
 </script>
 <div class="ms" id="m-coach"><div class="mh"><button class="mb" onclick="clsM(&quot;m-coach&quot;)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg></button><span style="font-size:16px;font-weight:700;color:var(--t);flex:1;text-align:center" id="coach-modal-title">DOUGLAS</span><div style="width:34px"></div></div><div class="mb2" id="coach-modal-body" style="overflow-y:auto">
         <button onclick="viewCoachProfile(&#39;Douglas&#39;)" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--g);font-size:13px;font-weight:700;cursor:pointer;padding:16px 16px 8px">
