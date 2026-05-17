@@ -308,6 +308,33 @@ body { font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(-
 .print-btn:hover { border-color:var(--border2); color:var(--t1); }
 
 @media(max-width:860px){.sb{display:none}.stats{grid-template-columns:repeat(3,1fr)}}
+
+.meso-card{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:20px;overflow:hidden}
+.meso-hdr{padding:14px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;border-bottom:1px solid var(--border)}
+.meso-hdr-num{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);letter-spacing:2px;flex-shrink:0}
+.meso-hdr-info{flex:1}
+.meso-hdr-label{font-size:13px;font-weight:700;color:var(--t1)}
+.meso-hdr-sub{font-size:11px;color:var(--t3);margin-top:2px}
+.meso-hdr-event{font-size:11px;font-weight:700;color:var(--gold);background:var(--gold-glow);padding:3px 10px;border-radius:20px;flex-shrink:0}
+.meso-body{padding:0 18px 14px}
+.ciclo-block{margin-top:14px}
+.ciclo-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--t3);text-transform:uppercase;padding:6px 0 8px;display:flex;align-items:center;gap:8px}
+.ciclo-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
+.aula-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;margin-bottom:3px;cursor:pointer;transition:background .15s;border:1px solid transparent}
+.aula-row:hover{background:var(--bg3);border-color:var(--border)}
+.aula-row.done{opacity:.45}
+.aula-row.current{background:rgba(212,168,67,.06);border-color:rgba(212,168,67,.25)}
+.aula-date{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3);width:52px;flex-shrink:0}
+.aula-ref{font-size:10px;font-weight:700;color:var(--gold);width:36px;flex-shrink:0}
+.fmt-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;flex-shrink:0;letter-spacing:.04em;text-transform:uppercase}
+.fmt-fechado{background:rgba(46,134,193,.15);color:#5DADE2;border:1px solid rgba(46,134,193,.3)}
+.fmt-aberto{background:rgba(30,132,73,.15);color:#58D68D;border:1px solid rgba(30,132,73,.3)}
+.fmt-semi{background:rgba(211,84,0,.15);color:#F0B27A;border:1px solid rgba(211,84,0,.3)}
+.fmt-pre{background:rgba(212,168,67,.15);color:var(--gold);border:1px solid rgba(212,168,67,.3)}
+.aula-tema{font-size:12px;color:var(--t2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.evento-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;margin-top:8px;background:rgba(212,168,67,.06);border:1px solid rgba(212,168,67,.25)}
+.macro-hdr{font-size:11px;font-weight:700;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;padding:4px 0 16px;display:flex;align-items:center;gap:10px}
+.macro-hdr::after{content:'';flex:1;height:1px;background:var(--border2)}
 </style>
 </head>
 <body>
@@ -391,20 +418,20 @@ body { font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(-
     <div class="setup-title">⚙️ Configurar Período</div>
     <div class="setup-row">
       <div class="fld">
-        <div class="fld-lbl">Início do Ciclo 1</div>
+        <div class="fld-lbl">Início do 1º Mesociclo</div>
         <input class="fld-inp" id="ci-data" type="date">
       </div>
       <div class="fld">
         <div class="fld-lbl">Pulseira</div>
         <select class="fld-inp" id="ci-puls">
-          <option value="Roxa">RX — Roxa</option>
-          <option value="Vermelho-Vermelho">VM-VM</option>
-          <option value="Vermelho-Tangerina">VM-TG</option>
-          <option value="Vermelho-Branco">VM-BR</option>
-          <option value="Laranja-Laranja">LR-LR</option>
-          <option value="Laranja-Limão">LR-LM</option>
-          <option value="Verde-Amarelo">VD-AM</option>
-          <option value="Verde-Verde">VD-VD</option>
+          <option value="Roxa">🟣 Roxa</option>
+          <option value="Vermelho-Vermelho">🔴 VM-VM</option>
+          <option value="Vermelho-Tangerina">🔴 VM-TG</option>
+          <option value="Vermelho-Branco">🔴 VM-BR</option>
+          <option value="Laranja-Laranja">🟠 LR-LR</option>
+          <option value="Laranja-Limão">🟠 LR-LM</option>
+          <option value="Verde-Amarelo">🟢 VD-AM</option>
+          <option value="Verde-Verde">🟢 VD-VD</option>
         </select>
       </div>
       <div class="fld">
@@ -417,12 +444,20 @@ body { font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(-
         </select>
       </div>
       <div class="fld">
-        <div class="fld-lbl">Duração da Aula</div>
+        <div class="fld-lbl">Duração</div>
         <select class="fld-inp" id="ci-dur">
           <option value="60">60 min</option>
           <option value="75">75 min</option>
           <option value="90">90 min</option>
           <option value="45">45 min</option>
+        </select>
+      </div>
+      <div class="fld">
+        <div class="fld-lbl">Mesociclos</div>
+        <select class="fld-inp" id="ci-mesos">
+          <option value="5">5 mesociclos</option>
+          <option value="6" selected>6 mesociclos</option>
+          <option value="7">7 mesociclos</option>
         </select>
       </div>
       <button class="gen-btn" onclick="buildCal()">GERAR CALENDÁRIO</button>
@@ -432,20 +467,19 @@ body { font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(-
   <!-- STATS -->
   <div class="stats">
     <div class="stat"><div class="stat-l">Pulseira</div><div class="stat-v" id="st-puls">—</div></div>
-    <div class="stat"><div class="stat-l">Ciclos</div><div class="stat-v">3</div></div>
+    <div class="stat"><div class="stat-l">Mesociclos</div><div class="stat-v" id="st-mesos">—</div></div>
+    <div class="stat"><div class="stat-l">Semanas/Meso</div><div class="stat-v" id="st-semanas">—</div></div>
     <div class="stat"><div class="stat-l">Total Aulas</div><div class="stat-v" id="st-aulas">—</div></div>
-    <div class="stat"><div class="stat-l">Semanas</div><div class="stat-v">12</div></div>
     <div class="stat"><div class="stat-l">Na Sessão</div><div class="stat-v" id="st-sessao">0</div></div>
   </div>
 
   <!-- LEGEND -->
   <div class="legend">
-    <span style="font-size:10px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.08em">Semanas:</span>
-    <div class="leg"><div class="leg-dot" style="background:var(--s1)"></div>S1 Introdução</div>
-    <div class="leg"><div class="leg-dot" style="background:var(--s2)"></div>S2 Construção</div>
-    <div class="leg"><div class="leg-dot" style="background:var(--s3)"></div>S3 Aplicação</div>
-    <div class="leg"><div class="leg-dot" style="background:var(--s4)"></div>S4 Avaliação</div>
-    <div class="leg"><div class="leg-dot" style="background:var(--gold)"></div>Avaliação Semestral</div>
+    <span style="font-size:10px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.08em">Formato:</span>
+    <div class="leg"><div class="leg-dot" style="background:#5DADE2"></div>Fechado (S1)</div>
+    <div class="leg"><div class="leg-dot" style="background:#F0B27A"></div>Semi-aberto (S2)</div>
+    <div class="leg"><div class="leg-dot" style="background:#58D68D"></div>Aberto (S3)</div>
+    <div class="leg"><div class="leg-dot" style="background:var(--gold)"></div>Pré-Evento / Evento (C3)</div>
   </div>
 
   <!-- ========= CALENDÁRIO ========= -->
@@ -1510,91 +1544,136 @@ function setTab(el, tab) {
 ════════════════════════════════════════════════════════ */
 function buildCal() {
   const dateVal = document.getElementById('ci-data').value;
-  const puls = document.getElementById('ci-puls').value;
+  const puls    = document.getElementById('ci-puls').value;
   const diasStr = document.getElementById('ci-dias').value;
-  const dur = document.getElementById('ci-dur').value;
+  const dur     = document.getElementById('ci-dur').value;
+  const numMesos = parseInt(document.getElementById('ci-mesos').value) || 6;
   if (!dateVal) { alert('Selecione a data de início.'); return; }
 
   const startDate = new Date(dateVal + 'T12:00:00');
-  const diasNums = diasStr.split('').map(Number); // 1=Seg...7=Dom
-  const dayMap = {1:1,2:2,3:3,4:4,5:5,6:6,7:0};
+  const diasNums  = diasStr.split('').map(Number);
+  const dayMap    = {1:1,2:2,3:3,4:4,5:5,6:6,7:0};
+  const cor = CORES[puls] || '#888';
+  const sig = SIGLAS[puls] || puls;
 
-  const aulasP = AULAS.filter(a => a.p === puls).sort((a,b) => {
+  // Sort aulas C1→C2→C3 by index
+  const aulasBase = AULAS.filter(a => a.p === puls).sort((a,b) => {
     const ci = {C1:0,C2:1,C3:2};
     const ai = parseInt(a.a.split('.')[1]);
     const bi = parseInt(b.a.split('.')[1]);
     return (ci[a.c]-ci[b.c])*100 + (ai-bi);
   });
-  aulasNivel = aulasP; // expose for marcarConcluida
 
-  // Gerar datas de treino
-  let trainDates = [];
-  let d = new Date(startDate);
-  while (trainDates.length < aulasP.length + 5) {
-    if (diasNums.some(dn => dayMap[dn] === d.getDay())) trainDates.push(new Date(d));
-    d.setDate(d.getDate()+1);
-    if (trainDates.length > 200) break;
+  // Pré-evento só no C3 (remover de C1 e C2)
+  const aulasP = aulasBase.filter(a => !(a.tema && a.tema.includes('Pré-evento') && a.c !== 'C3'));
+  aulasNivel = aulasP;
+
+  // Format badge
+  function fmtBadge(s, c) {
+    if (s === 'S1') return '<span class="fmt-badge fmt-fechado">Fechado</span>';
+    if (s === 'S2') return '<span class="fmt-badge fmt-semi">Semi-aberto</span>';
+    if (s === 'S3') return '<span class="fmt-badge fmt-aberto">Aberto</span>';
+    if (s === 'S4' && c === 'C3') return '<span class="fmt-badge fmt-pre">Pré-Evento</span>';
+    return '<span class="fmt-badge fmt-pre">Avaliação</span>';
   }
 
-  // Mapear aulas → datas
-  const events = {};
-  aulasP.forEach((a, i) => {
-    if (i < trainDates.length) {
-      const key = trainDates[i].toISOString().split('T')[0];
-      if (!events[key]) events[key] = [];
-      events[key].push({ ...a, date: trainDates[i], idx: i });
+  // Generate N training dates from a start point
+  function getDates(from, count) {
+    const dates = [];
+    let d = new Date(from);
+    while (dates.length < count + 5) {
+      if (diasNums.some(dn => dayMap[dn] === d.getDay())) dates.push(new Date(d));
+      d.setDate(d.getDate() + 1);
+      if (d.getTime() - from.getTime() > 365 * 5 * 86400000) break;
     }
-  });
+    return dates;
+  }
 
-  const endDate = trainDates[Math.min(aulasP.length-1, trainDates.length-1)] || startDate;
-  const cor = CORES[puls] || '#888';
-  const sig = SIGLAS[puls] || puls;
+  const progIdx  = curTurmaId ? (calProgressData[curTurmaId] ?? 0) : -1;
+  const CICLO_NOMES = {C1:'C1 · Introdução', C2:'C2 · Construção', C3:'C3 · Aplicação'};
+  const fmtDate  = d => d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+  const fmtMonth = d => d.toLocaleDateString('pt-BR',{month:'short',year:'numeric'});
 
-  document.getElementById('st-puls').textContent = sig;
-  document.getElementById('st-aulas').textContent = aulasP.length;
+  let globalIdx = 0;
+  let curDate   = new Date(startDate);
+  let html = '';
 
-  let html = `<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:10px 16px;background:var(--card);border:1px solid var(--border);border-radius:8px">
-    <div style="width:12px;height:12px;border-radius:50%;background:${cor};flex-shrink:0"></div>
-    <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px">${puls}</div>
-    <div style="font-size:11px;color:var(--t2)">Início: ${startDate.toLocaleDateString('pt-BR')} · Fim: ${endDate.toLocaleDateString('pt-BR')} · ${aulasP.length} aulas · ${dur} min cada</div>
-  </div>`;
+  // Macrociclo header
+  const macroEnd = new Date(startDate);
+  macroEnd.setMonth(macroEnd.getMonth() + Math.ceil(numMesos * aulasP.length / diasNums.length / 4));
+  html += '<div class="macro-hdr">Macrociclo 1 · ' + fmtMonth(startDate) + ' — ' + fmtMonth(macroEnd) + '</div>';
 
-  // Meses
-  let curMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
-  const lastMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
-  const todayStr = new Date().toISOString().split('T')[0];
+  for (let m = 1; m <= numMesos; m++) {
+    const dates = getDates(curDate, aulasP.length);
+    const mesoStart = dates[0];
+    const mesoEnd   = dates[Math.min(aulasP.length - 1, dates.length - 1)];
+    const semCount  = Math.ceil(aulasP.length / diasNums.length);
+    const isOpen    = m === 1; // first mesociclo open by default
 
-  while (curMonth <= lastMonth) {
-    const y = curMonth.getFullYear(), m = curMonth.getMonth();
-    const firstDay = new Date(y,m,1).getDay();
-    const daysInMonth = new Date(y,m+1,0).getDate();
+    // Group by ciclo
+    const byCiclo = {C1:[], C2:[], C3:[]};
+    aulasP.forEach((a, i) => {
+      if (dates[i]) byCiclo[a.c].push({...a, date: dates[i], gIdx: globalIdx + i});
+    });
 
-    html += `<div class="cal-month"><div class="cal-m-title">${MESES_BR[m]} ${y}</div><div class="cal-grid">`;
-    DIAS_BR.forEach(d => html += `<div class="cal-dow">${d}</div>`);
-    for (let i=0; i<firstDay; i++) html += `<div class="cal-day empty"></div>`;
+    html += '<div class="meso-card">';
+    html += '<div class="meso-hdr" onclick="var b=this.nextElementSibling;b.style.display=b.style.display===\'none\'?\'block\':\'none\'">';
+    html += '<div class="meso-hdr-num">M' + m + '</div>';
+    html += '<div class="meso-hdr-info">';
+    html += '<div class="meso-hdr-label">Mesociclo ' + m + (m > 1 ? ' · ↑ complexidade crescente' : ' · Início') + '</div>';
+    html += '<div class="meso-hdr-sub">' + (mesoStart ? fmtMonth(mesoStart) : '') + ' → ' + (mesoEnd ? fmtMonth(mesoEnd) : '') + ' · ' + aulasP.length + ' aulas · ~' + semCount + ' semanas</div>';
+    html += '</div>';
+    html += '<div class="meso-hdr-event">🏆 Evento</div>';
+    html += '</div>'; // meso-hdr
 
-    for (let day=1; day<=daysInMonth; day++) {
-      const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-      const evs = events[ds] || [];
-      const hasEv = evs.length > 0;
-      const isToday = ds === todayStr;
-      const progIdx = curTurmaId ? (calProgressData[curTurmaId] ?? 0) : -1;
-      const isDone    = hasEv && progIdx > 0 && evs[0].idx < progIdx;
-      const isCurrent = hasEv && progIdx >= 0 && evs[0].idx === progIdx;
-      html += `<div class="cal-day${hasEv?' has-ev':''}${isToday?' today':''}${isDone?' cal-done':''}${isCurrent?' cal-current':''}" ${hasEv ? `onclick="openDayModal('${ds}',${JSON.stringify(evs).replace(/"/g,'&quot;')},'${puls}','${dur}')"` : ''}>`;
-      html += `<div class="cal-day-n">${day}</div>`;
-      evs.forEach(ev => {
-        const semCls = {S1:'ev-s1',S2:'ev-s2',S3:'ev-s3',S4:'ev-s4'}[ev.s] || 'ev-s1';
-        const isAv = ev.tema.includes('Avaliação');
-        html += `<div class="cal-ev ${isAv ? 'ev-av' : semCls}" title="${ev.obj}">${ev.a} ${ev.tema.substring(0,22)}…</div>`;
+    html += '<div class="meso-body"' + (isOpen ? '' : ' style="display:none"') + '>';
+
+    ['C1','C2','C3'].forEach(function(c) {
+      var aulas = byCiclo[c];
+      if (!aulas.length) return;
+      html += '<div class="ciclo-block">';
+      html += '<div class="ciclo-lbl">' + CICLO_NOMES[c] + '</div>';
+      aulas.forEach(function(ev) {
+        var isDone = ev.gIdx < progIdx;
+        var isCur  = ev.gIdx === progIdx;
+        var evEnc  = encodeURIComponent(JSON.stringify([ev]));
+        html += '<div class="aula-row' + (isDone ? ' done' : '') + (isCur ? ' current' : '') + '"';
+        var ds = ev.date.toISOString().split('T')[0];
+        var evJ = JSON.stringify([ev]).replace(/"/g,'&quot;');
+        html += ' onclick="openDayModal(&quot;' + ds + '&quot;,' + evJ + ",&quot;" + puls + "&quot;,&quot;" + dur + '&quot;)">';
+        html += '<span class="aula-date">' + fmtDate(ev.date) + '</span>';
+        html += '<span class="aula-ref">' + ev.a + '</span>';
+        html += fmtBadge(ev.s, ev.c);
+        html += '<span class="aula-tema">' + ev.tema + '</span>';
+        html += '</div>';
       });
-      html += '</div>';
+      if (c === 'C3') {
+        var lastDate = aulas[aulas.length - 1] ? aulas[aulas.length - 1].date : null;
+        var evDate   = lastDate ? new Date(lastDate.getTime() + 7 * 86400000) : null;
+        html += '<div class="evento-row">';
+        html += '<span style="font-size:18px">🏆</span>';
+        html += '<div><div style="font-size:12px;font-weight:700;color:var(--gold)">EVENTO / TORNEIO — Final do Mesociclo ' + m + '</div>';
+        html += '<div style="font-size:11px;color:var(--t3);margin-top:1px">' + (evDate ? 'Semana de ' + fmtDate(evDate) : '') + ' · Critérios de avaliação + torneio interno</div></div>';
+        html += '</div>';
+      }
+      html += '</div>'; // ciclo-block
+    });
+
+    html += '</div>'; // meso-body
+    html += '</div>'; // meso-card
+
+    // Advance start date for next mesociclo
+    if (dates[aulasP.length - 1]) {
+      curDate = new Date(dates[aulasP.length - 1].getTime() + 86400000);
     }
-    const rem = (firstDay + daysInMonth) % 7;
-    if (rem > 0) for (let i=0; i<7-rem; i++) html += `<div class="cal-day empty"></div>`;
-    html += '</div></div>';
-    curMonth.setMonth(curMonth.getMonth()+1);
+    globalIdx += aulasP.length;
   }
+
+  // Update stats
+  document.getElementById('st-puls').textContent = sig;
+  document.getElementById('st-mesos').textContent = numMesos;
+  document.getElementById('st-semanas').textContent = '~' + Math.ceil(aulasP.length / diasNums.length) + ' sem';
+  document.getElementById('st-aulas').textContent = aulasP.length * numMesos;
 
   document.getElementById('cal-output').innerHTML = html;
 }
@@ -1611,7 +1690,7 @@ function openDayModal(dateStr, evs, puls, dur) {
   document.getElementById('m-title').textContent = fmt.charAt(0).toUpperCase() + fmt.slice(1);
   document.getElementById('m-sub').textContent = `${puls} · ${evs.length} aula(s) · ${dur} min · Clique nos exercícios para adicionar à sua sessão`;
 
-  const SEM_NOMES = {S1:'S1 — Introdução',S2:'S2 — Construção',S3:'S3 — Aplicação',S4:'S4 — Avaliação'};
+  const SEM_NOMES = {S1:'S1 — Fechado',S2:'S2 — Semi-aberto / Aberto',S3:'S3 — Aplicação',S4:'S4 — Pré-Evento'};
   const SEM_CORS = {S1:'#2E86C1',S2:'#D35400',S3:'#1E8449',S4:'#7D3C98'};
   const CICLO_METAS = {
     'Roxa_C1':'Trocar bolas em parceria — gol a gol, 1 arremesso + 3 devoluções rolando',
@@ -2171,6 +2250,16 @@ function closeModalDirect() { document.getElementById('modal-bg').classList.remo
 
 // Init busca
 renderBusca();
+
+// Pre-fill date with today
+(function(){
+  var inp = document.getElementById('ci-data');
+  if (inp && !inp.value) {
+    var t = new Date();
+    var z = function(n){return String(n).padStart(2,'0');};
+    inp.value = t.getFullYear()+'-'+z(t.getMonth()+1)+'-'+z(t.getDate());
+  }
+})();
 </script>
 </body>
 </html>
