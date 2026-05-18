@@ -426,12 +426,12 @@ body { font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(-
         <select class="fld-inp" id="ci-puls">
           <option value="Roxa">🟣 Roxa</option>
           <option value="Vermelho-Vermelho">🔴 VM-VM</option>
-          <option value="Vermelho-Tangerina">🔴 VM-TG</option>
-          <option value="Vermelho-Branco">🔴 VM-BR</option>
+          <option value="Vermelho-Tangerina">🔴 VM-TG (base VM-VM)</option>
+          <option value="Vermelho-Branco">🔴 VM-BR (base VM-VM)</option>
           <option value="Laranja-Laranja">🟠 LR-LR</option>
-          <option value="Laranja-Limão">🟠 LR-LM</option>
+          <option value="Laranja-Limão">🟠 LR-LM (base LR-LR)</option>
           <option value="Verde-Amarelo">🟢 VD-AM</option>
-          <option value="Verde-Verde">🟢 VD-VD</option>
+          <option value="Verde-Verde">🟢 VD-VD (base VD-AM)</option>
         </select>
       </div>
       <div class="fld">
@@ -1556,8 +1556,18 @@ function buildCal() {
   const cor = CORES[puls] || '#888';
   const sig = SIGLAS[puls] || puls;
 
+  // Fallback: pulseiras sem conteúdo próprio usam a mais próxima
+  const PULS_FALLBACK = {
+    'Vermelho-Tangerina': 'Vermelho-Vermelho',
+    'Vermelho-Branco':    'Vermelho-Vermelho',
+    'Laranja-Limão':      'Laranja-Laranja',
+    'Verde-Verde':        'Verde-Amarelo'
+  };
+  const pulsQuery = PULS_FALLBACK[puls] || puls;
+  const pulsFallback = PULS_FALLBACK[puls] ? ' (base: ' + pulsQuery + ')' : '';
+
   // Sort aulas C1→C2→C3 by index
-  const aulasBase = AULAS.filter(a => a.p === puls).sort((a,b) => {
+  const aulasBase = AULAS.filter(a => a.p === pulsQuery).sort((a,b) => {
     const ci = {C1:0,C2:1,C3:2};
     const ai = parseInt(a.a.split('.')[1]);
     const bi = parseInt(b.a.split('.')[1]);
@@ -1670,7 +1680,7 @@ function buildCal() {
   }
 
   // Update stats
-  document.getElementById('st-puls').textContent = sig;
+  document.getElementById('st-puls').textContent = sig + pulsFallback;
   document.getElementById('st-mesos').textContent = numMesos;
   document.getElementById('st-semanas').textContent = '~' + Math.ceil(aulasP.length / diasNums.length) + ' sem';
   document.getElementById('st-aulas').textContent = aulasP.length * numMesos;
