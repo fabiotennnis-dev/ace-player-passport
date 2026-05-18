@@ -25,7 +25,7 @@
   --t3:        #3A5272;
   --rx:   #7B68EE; --vmvm:#E84545; --vmtg:#F07030;
   --vmbr:#A0AEC0; --lrlr:#F5A623; --lrlm:#C8E000;
-  --vdam:#5CB85C; --vdvd:#2E7D32;
+  --vdam:#5CB85C; --vdvd:#2E7D32; --am:#F5C518;
   --s1:#2E86C1; --s2:#D35400; --s3:#1E8449; --s4:#7D3C98;
   --drill-c:#1A4A6E; --drill-l:#E8F4FD;
   --jogo-c:#1A5E35; --jogo-l:#E8F8EE;
@@ -386,6 +386,9 @@ body { font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(-
   <div class="sb-item" data-p="Verde-Verde" onclick="setSbPuls(this,'Verde-Verde')">
     <span class="sb-dot" style="background:var(--vdvd)"></span>VD-VD
   </div>
+  <div class="sb-item" data-p="Amarela" onclick="setSbPuls(this,'Amarela')">
+    <span class="sb-dot" style="background:var(--am)"></span>AM — Amarela
+  </div>
   <div class="sb-divider"></div>
   <div class="sb-sec">Minhas Turmas</div>
   <div id="sb-turmas" style="padding:0 8px 4px">
@@ -425,13 +428,14 @@ body { font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(-
         <div class="fld-lbl">Pulseira</div>
         <select class="fld-inp" id="ci-puls">
           <option value="Roxa">🟣 Roxa</option>
+          <option value="Vermelho-Branco">🔴 VM-BR</option>
           <option value="Vermelho-Vermelho">🔴 VM-VM</option>
-          <option value="Vermelho-Tangerina">🔴 VM-TG (base VM-VM)</option>
-          <option value="Vermelho-Branco">🔴 VM-BR (base VM-VM)</option>
+          <option value="Vermelho-Tangerina">🔴 VM-TG</option>
           <option value="Laranja-Laranja">🟠 LR-LR</option>
-          <option value="Laranja-Limão">🟠 LR-LM (base LR-LR)</option>
+          <option value="Laranja-Limão">🟠 LR-LM</option>
+          <option value="Verde-Verde">🟢 VD-VD</option>
           <option value="Verde-Amarelo">🟢 VD-AM</option>
-          <option value="Verde-Verde">🟢 VD-VD (base VD-AM)</option>
+          <option value="Amarela">🟡 Amarela</option>
         </select>
       </div>
       <div class="fld">
@@ -555,6 +559,7 @@ body { font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(-
             <span class="tag tag-puls" data-v="Laranja-Limão" data-cor="#C8E000" onclick="toggleTag(this,'puls')">LR-LM</span>
             <span class="tag tag-puls" data-v="Verde-Amarelo" data-cor="#5CB85C" onclick="toggleTag(this,'puls')">VD-AM</span>
             <span class="tag tag-puls" data-v="Verde-Verde" data-cor="#2E7D32" onclick="toggleTag(this,'puls')">VD-VD</span>
+            <span class="tag tag-puls" data-v="Amarela" data-cor="#F5C518" onclick="toggleTag(this,'puls')">AM</span>
           </div>
         </div>
 
@@ -663,12 +668,12 @@ body { font-family:'Space Grotesk',sans-serif; background:var(--bg); color:var(-
 const CORES = {
   Roxa:'#7B68EE','Vermelho-Vermelho':'#E84545','Vermelho-Tangerina':'#F07030',
   'Vermelho-Branco':'#A0AEC0','Laranja-Laranja':'#F5A623','Laranja-Limão':'#C8E000',
-  'Verde-Amarelo':'#5CB85C','Verde-Verde':'#2E7D32',
+  'Verde-Amarelo':'#5CB85C','Verde-Verde':'#2E7D32','Amarela':'#F5C518',
 };
 const SIGLAS = {
   Roxa:'RX','Vermelho-Vermelho':'VM-VM','Vermelho-Tangerina':'VM-TG',
   'Vermelho-Branco':'VM-BR','Laranja-Laranja':'LR-LR','Laranja-Limão':'LR-LM',
-  'Verde-Amarelo':'VD-AM','Verde-Verde':'VD-VD',
+  'Verde-Amarelo':'VD-AM','Verde-Verde':'VD-VD','Amarela':'AM',
 };
 const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const DIAS_SEMANA = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
@@ -805,6 +810,171 @@ const AULAS = [
   {p:'Verde-Amarelo',c:'C3',a:'C3.8',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Set 6 games · autonomia · árbitro rotativo · ética',foco:'Olho'},
   {p:'Verde-Amarelo',c:'C3',a:'C3.9',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Set 6 games · noAD · gestão trocas lado · foco',foco:'Olho'},
   {p:'Verde-Amarelo',c:'C3',a:'C3.10',s:'S4',cat:'Jogo',tema:'Avaliação Semestral',obj:'Torneio set 6 games · rede · inside out · avaliação somativa',foco:'Olho'},
+  // ── VERMELHO-BRANCO ──
+  {p:'Vermelho-Branco',c:'C1',a:'C1.1',s:'S1',cat:'FDQ',tema:'FDQ: primeiro quique',obj:'Distinguir bola de espuma da borracha — ritmo do quique',foco:'Olho'},
+  {p:'Vermelho-Branco',c:'C1',a:'C1.2',s:'S1',cat:'FDQ',tema:'FDQ: primeiro quique',obj:'Posição "0" dinâmica + esperar o quique antes de bater',foco:'Pé'},
+  {p:'Vermelho-Branco',c:'C1',a:'C1.3',s:'S1',cat:'FDQ',tema:'FDQ: primeiro quique',obj:'Empunhadura FH (almofadinha) + ponto de contato lateral',foco:'Mão'},
+  {p:'Vermelho-Branco',c:'C1',a:'C1.4',s:'S2',cat:'FDQ',tema:'FDQ: primeiro quique',obj:'Empunhadura FH/BH + base semi-aberta no golpe',foco:'Mão'},
+  {p:'Vermelho-Branco',c:'C1',a:'C1.5',s:'S2',cat:'FDQ',tema:'FDQ: 1+2 FH',obj:'TIC-TAC: leitura do quique alto/baixo + posição de espera',foco:'Olho'},
+  {p:'Vermelho-Branco',c:'C1',a:'C1.6',s:'S2',cat:'FDQ',tema:'FDQ: 1+2 FH',obj:'TIC-TAC consolidado + dominar 1º quique antes de bater',foco:'Olho'},
+  {p:'Vermelho-Branco',c:'C1',a:'C1.7',s:'S3',cat:'FDQ',tema:'FDQ: 1+2 FH',obj:'Giro ombros FH + mão livre no coração + base equilibrada',foco:'Mão'},
+  {p:'Vermelho-Branco',c:'C1',a:'C1.8',s:'S3',cat:'FDQ',tema:'FDQ: 1+2 FH',obj:'Giro ombros BH + mão livre + equilíbrio após o golpe',foco:'Mão'},
+  {p:'Vermelho-Branco',c:'C1',a:'C1.9',s:'S3',cat:'FDQ',tema:'FDQ: 1+2 FH',obj:'Percepção de zona + trocar FH/BH com mobilidade simples',foco:'Olho'},
+  {p:'Vermelho-Branco',c:'C1',a:'C1.10',s:'S4',cat:'Tático',tema:'Pré-evento',obj:'Reconhecer bola favorável/desfavorável + anunciar placar',foco:'Olho'},
+  {p:'Vermelho-Branco',c:'C1',a:'C1.11',s:'S4',cat:'Jogo',tema:'Pré-evento',obj:'Jogo 1+2 FH com quique · contagem simples 1/2',foco:'Olho'},
+  {p:'Vermelho-Branco',c:'C1',a:'C1.12',s:'S4',cat:'Jogo',tema:'Avaliação Formativa C1',obj:'Avaliação: 1+2 FH · quique · empunhadura · arbitragem',foco:'Olho'},
+  {p:'Vermelho-Branco',c:'C2',a:'C2.1',s:'S1',cat:'Rede',tema:'Rede: interceptar',obj:'Posição "0" avançada + sair para interceptar voleio',foco:'Pé'},
+  {p:'Vermelho-Branco',c:'C2',a:'C2.2',s:'S1',cat:'Rede',tema:'Rede: interceptar',obj:'Interceptar + mão livre no coração (voleio BH básico)',foco:'Mão'},
+  {p:'Vermelho-Branco',c:'C2',a:'C2.3',s:'S1',cat:'Rede',tema:'Jogo na rede: 1+1',obj:'Empunhadura FH/BH no voleio + preparação curta (escudo)',foco:'Mão'},
+  {p:'Vermelho-Branco',c:'C2',a:'C2.4',s:'S2',cat:'Rede',tema:'Jogo na rede: 1+1',obj:'Preparação curta voleio + giro ombros no smash',foco:'Mão'},
+  {p:'Vermelho-Branco',c:'C2',a:'C2.5',s:'S2',cat:'Rede',tema:'Jogo na rede: 1+1',obj:'Percepção lateral FH/BH na rede + troféu no smash',foco:'Olho'},
+  {p:'Vermelho-Branco',c:'C2',a:'C2.6',s:'S2',cat:'Rede',tema:'Jogo na rede: 1+1',obj:'Smash: apontar bola com mão livre + equilíbrio no golpe',foco:'Olho'},
+  {p:'Vermelho-Branco',c:'C2',a:'C2.7',s:'S3',cat:'Rede',tema:'Voleio: construção',obj:'Voleio BH/FH + smash com troféu + decisão ataque/defesa',foco:'Mão'},
+  {p:'Vermelho-Branco',c:'C2',a:'C2.8',s:'S3',cat:'Tático',tema:'Pré-evento',obj:'Quando subir para a rede · contar 1+2+ponto',foco:'Olho'},
+  {p:'Vermelho-Branco',c:'C2',a:'C2.9',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Jogo reinado na rede · decisão tática · contagem',foco:'Olho'},
+  {p:'Vermelho-Branco',c:'C2',a:'C2.10',s:'S4',cat:'Jogo',tema:'Avaliação Formativa C2',obj:'Avaliação: voleio · smash · troféu · posição de rede',foco:'Olho'},
+  {p:'Vermelho-Branco',c:'C3',a:'C3.1',s:'S1',cat:'Saque',tema:'Saque: base e troféu',obj:'Base semi-aberta + subida sincronizada dos braços (troféu)',foco:'Pé'},
+  {p:'Vermelho-Branco',c:'C3',a:'C3.2',s:'S1',cat:'Saque',tema:'Saque: base e troféu',obj:'Troféu consolidado + toss para a frente e acima da cabeça',foco:'Olho'},
+  {p:'Vermelho-Branco',c:'C3',a:'C3.3',s:'S1',cat:'Saque',tema:'Saque: base e troféu',obj:'Empunhadura continental + toss estável · 110° joelhos flexionados',foco:'Mão'},
+  {p:'Vermelho-Branco',c:'C3',a:'C3.4',s:'S2',cat:'Saque',tema:'Saque: contato e swing',obj:'Ponto de contato acima da cabeça + balanço do braço',foco:'Mão'},
+  {p:'Vermelho-Branco',c:'C3',a:'C3.5',s:'S2',cat:'Saque',tema:'Saque: contato e swing',obj:'Swing completo + impulso das pernas no saque',foco:'Pé'},
+  {p:'Vermelho-Branco',c:'C3',a:'C3.6',s:'S2',cat:'Saque',tema:'Saque: contato e swing',obj:'Toss + contato + pronação suave da mão no final',foco:'Mão'},
+  {p:'Vermelho-Branco',c:'C3',a:'C3.7',s:'S3',cat:'Saque',tema:'Pré-evento',obj:'Sacar para a quadra de serviço com consistência',foco:'Olho'},
+  {p:'Vermelho-Branco',c:'C3',a:'C3.8',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Jogo com saque real · contagem tie-break · FH/BH',foco:'Olho'},
+  {p:'Vermelho-Branco',c:'C3',a:'C3.9',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Tie-break autônomo: sacador, contagem, laterais',foco:'Olho'},
+  {p:'Vermelho-Branco',c:'C3',a:'C3.10',s:'S4',cat:'Jogo',tema:'Avaliação Semestral',obj:'Torneio tie-break · saque real · arbitragem · avaliação somativa',foco:'Olho'},
+  // ── VERMELHO-TANGERINA ──
+  {p:'Vermelho-Tangerina',c:'C1',a:'C1.1',s:'S1',cat:'FDQ',tema:'FDQ: spin inicial',obj:'Eastern FH consolidado + escovar a bola para spin',foco:'Mão'},
+  {p:'Vermelho-Tangerina',c:'C1',a:'C1.2',s:'S1',cat:'FDQ',tema:'FDQ: spin inicial',obj:'Escovar FH/BH + trajetórias diferentes (plana × com spin)',foco:'Mão'},
+  {p:'Vermelho-Tangerina',c:'C1',a:'C1.3',s:'S1',cat:'FDQ',tema:'FDQ: spin inicial',obj:'Percepção de profundidade + zonas abertas da quadra',foco:'Olho'},
+  {p:'Vermelho-Tangerina',c:'C1',a:'C1.4',s:'S2',cat:'FDQ',tema:'FDQ: construção',obj:'Eastern BH + escovar BH para controle · equilíbrio base',foco:'Mão'},
+  {p:'Vermelho-Tangerina',c:'C1',a:'C1.5',s:'S2',cat:'FDQ',tema:'FDQ: construção',obj:'FH/BH com spin + passos laterais amplos (triângulo)',foco:'Pé'},
+  {p:'Vermelho-Tangerina',c:'C1',a:'C1.6',s:'S2',cat:'FDQ',tema:'FDQ: construção',obj:'Triângulo FH/BH + profundidade + zona de pressão',foco:'Pé'},
+  {p:'Vermelho-Tangerina',c:'C1',a:'C1.7',s:'S3',cat:'FDQ',tema:'FDQ: construção',obj:'Spin FH + mover adversário · cruzado e paralelo',foco:'Olho'},
+  {p:'Vermelho-Tangerina',c:'C1',a:'C1.8',s:'S3',cat:'FDQ',tema:'FDQ: construção',obj:'Construção do ponto: cruzado de BH + FH agressivo',foco:'Olho'},
+  {p:'Vermelho-Tangerina',c:'C1',a:'C1.9',s:'S3',cat:'FDQ',tema:'FDQ: construção',obj:'3 T + amplitude na preparação + terminação controlada',foco:'Mão'},
+  {p:'Vermelho-Tangerina',c:'C1',a:'C1.10',s:'S4',cat:'Tático',tema:'Pré-evento',obj:'3 situações táticas FDQ + ponto fraco adversário',foco:'Olho'},
+  {p:'Vermelho-Tangerina',c:'C1',a:'C1.11',s:'S4',cat:'Jogo',tema:'Pré-evento',obj:'Tie-break · spin · cruzado/paralelo · autonomia',foco:'Olho'},
+  {p:'Vermelho-Tangerina',c:'C1',a:'C1.12',s:'S4',cat:'Jogo',tema:'Avaliação Formativa C1',obj:'Avaliação: spin · triângulo · construção do ponto · tie-break',foco:'Olho'},
+  {p:'Vermelho-Tangerina',c:'C2',a:'C2.1',s:'S1',cat:'Rede',tema:'Voleio: construção/finalização',obj:'1º voleio construção + 2º voleio finalização · split step rede',foco:'Pé'},
+  {p:'Vermelho-Tangerina',c:'C2',a:'C2.2',s:'S1',cat:'Rede',tema:'Voleio: construção/finalização',obj:'Split step rede + giro de tronco FH/BH no voleio',foco:'Pé'},
+  {p:'Vermelho-Tangerina',c:'C2',a:'C2.3',s:'S1',cat:'Rede',tema:'Voleio: construção/finalização',obj:'Voleio baixo construção + smash com amplitude',foco:'Mão'},
+  {p:'Vermelho-Tangerina',c:'C2',a:'C2.4',s:'S2',cat:'Saque',tema:'1º e 2º saque',obj:'1º saque flat com confiança · 2º saque mais lento mas dentro',foco:'Olho'},
+  {p:'Vermelho-Tangerina',c:'C2',a:'C2.5',s:'S2',cat:'Saque',tema:'1º e 2º saque',obj:'Diferença tática 1S/2S + contagem de ponto/game',foco:'Olho'},
+  {p:'Vermelho-Tangerina',c:'C2',a:'C2.6',s:'S2',cat:'Tático',tema:'Devolução',obj:'Devolução do saque: split step + bola curta × profunda',foco:'Pé'},
+  {p:'Vermelho-Tangerina',c:'C2',a:'C2.7',s:'S3',cat:'Rede',tema:'Subida à rede',obj:'Subir após bola curta + 1º voleio + finalização',foco:'Pé'},
+  {p:'Vermelho-Tangerina',c:'C2',a:'C2.8',s:'S3',cat:'Tático',tema:'Pré-evento',obj:'Subir à rede · 1S/2S · devolução · set noAD',foco:'Olho'},
+  {p:'Vermelho-Tangerina',c:'C2',a:'C2.9',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Set 4 games · subida à rede · saque com intenção',foco:'Olho'},
+  {p:'Vermelho-Tangerina',c:'C2',a:'C2.10',s:'S4',cat:'Jogo',tema:'Avaliação Formativa C2',obj:'Avaliação: 1S/2S · devolução · voleio · subida à rede',foco:'Olho'},
+  {p:'Vermelho-Tangerina',c:'C3',a:'C3.1',s:'S1',cat:'Saque',tema:'Saque slice',obj:'Contato lateral na bola (posição 1–2h no relógio) para slice',foco:'Mão'},
+  {p:'Vermelho-Tangerina',c:'C3',a:'C3.2',s:'S1',cat:'Saque',tema:'Saque slice',obj:'Slice: ângulo de contato + abertura de quadra',foco:'Mão'},
+  {p:'Vermelho-Tangerina',c:'C3',a:'C3.3',s:'S1',cat:'Saque',tema:'Saque slice',obj:'Slice × flat: comparar efeito + zona de queda na quadra',foco:'Olho'},
+  {p:'Vermelho-Tangerina',c:'C3',a:'C3.4',s:'S2',cat:'Saque',tema:'Saque tático',obj:'1S slice para abrir + 2S flat controlado para dentro',foco:'Olho'},
+  {p:'Vermelho-Tangerina',c:'C3',a:'C3.5',s:'S2',cat:'FDQ',tema:'FDQ: situação favorável',obj:'Ponto aberto após saque: atacar inside out ou paralelo',foco:'Olho'},
+  {p:'Vermelho-Tangerina',c:'C3',a:'C3.6',s:'S2',cat:'FDQ',tema:'FDQ: situação favorável',obj:'Inside out FH + recuperação centro + ação spin',foco:'Pé'},
+  {p:'Vermelho-Tangerina',c:'C3',a:'C3.7',s:'S3',cat:'Tático',tema:'Pré-evento',obj:'3 padrões: saque+1 · neutro · saque+subida à rede',foco:'Olho'},
+  {p:'Vermelho-Tangerina',c:'C3',a:'C3.8',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Set 4 games · saque slice · inside out · autonomia',foco:'Olho'},
+  {p:'Vermelho-Tangerina',c:'C3',a:'C3.9',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Set 6 games noAD · árbitro rotativo · gestão emocional',foco:'Olho'},
+  {p:'Vermelho-Tangerina',c:'C3',a:'C3.10',s:'S4',cat:'Jogo',tema:'Avaliação Semestral',obj:'Torneio set 4g · saque slice · FDQ avançado · avaliação somativa',foco:'Olho'},
+  // ── LARANJA-LIMÃO ──
+  {p:'Laranja-Limão',c:'C1',a:'C1.1',s:'S1',cat:'FDQ',tema:'FDQ: situação defensiva',obj:'Recuperar bola curta: sprint + lob cruzado alto',foco:'Pé'},
+  {p:'Laranja-Limão',c:'C1',a:'C1.2',s:'S1',cat:'FDQ',tema:'FDQ: situação defensiva',obj:'Lob defensivo de FH/BH + reposicionamento rápido',foco:'Pé'},
+  {p:'Laranja-Limão',c:'C1',a:'C1.3',s:'S1',cat:'Tático',tema:'FDQ: situação defensiva',obj:'Reconhecer situação defensiva e mudar trajetória',foco:'Olho'},
+  {p:'Laranja-Limão',c:'C1',a:'C1.4',s:'S2',cat:'FDQ',tema:'FDQ: ângulos',obj:'Abertura de quadra: bola cruzada muito aberta (ângulo)',foco:'Olho'},
+  {p:'Laranja-Limão',c:'C1',a:'C1.5',s:'S2',cat:'FDQ',tema:'FDQ: ângulos',obj:'Ângulo FH + recuperar + paralela FH (padrão 2 golpes)',foco:'Pé'},
+  {p:'Laranja-Limão',c:'C1',a:'C1.6',s:'S2',cat:'FDQ',tema:'FDQ: ângulos',obj:'Ângulo BH + spin para profundidade + passos cruzados',foco:'Pé'},
+  {p:'Laranja-Limão',c:'C1',a:'C1.7',s:'S3',cat:'FDQ',tema:'FDQ: ângulos',obj:'Ação mão-antebraço para aumentar spin FH (aceleração)',foco:'Mão'},
+  {p:'Laranja-Limão',c:'C1',a:'C1.8',s:'S3',cat:'FDQ',tema:'FDQ: ângulos',obj:'Spin BH + terminação alta + efeito de profundidade',foco:'Mão'},
+  {p:'Laranja-Limão',c:'C1',a:'C1.9',s:'S3',cat:'FDQ',tema:'FDQ: construção',obj:'3 situações: ângulo × profundidade × ponto fraco',foco:'Olho'},
+  {p:'Laranja-Limão',c:'C1',a:'C1.10',s:'S4',cat:'Tático',tema:'Pré-evento',obj:'Decisão tática: ângulo ou profundidade em cada situação',foco:'Olho'},
+  {p:'Laranja-Limão',c:'C1',a:'C1.11',s:'S4',cat:'Jogo',tema:'Pré-evento',obj:'Set 4 games · ângulos · lob defensivo · gestão de ponto',foco:'Olho'},
+  {p:'Laranja-Limão',c:'C1',a:'C1.12',s:'S4',cat:'Jogo',tema:'Avaliação Formativa C1',obj:'Avaliação: ângulo · lob · spin · set 4 games',foco:'Olho'},
+  {p:'Laranja-Limão',c:'C2',a:'C2.1',s:'S1',cat:'FDQ',tema:'Aproximação à rede',obj:'Bola de aproximação: profunda central + avançar para rede',foco:'Pé'},
+  {p:'Laranja-Limão',c:'C2',a:'C2.2',s:'S1',cat:'FDQ',tema:'Aproximação à rede',obj:'Aproximação + split step rede + 1º voleio de construção',foco:'Pé'},
+  {p:'Laranja-Limão',c:'C2',a:'C2.3',s:'S1',cat:'Rede',tema:'Aproximação à rede',obj:'Approach BH slice + voleio FH finalização',foco:'Mão'},
+  {p:'Laranja-Limão',c:'C2',a:'C2.4',s:'S2',cat:'Saque',tema:'Saque: direção',obj:'Saque para o corpo adversário + variação T/centro/amplo',foco:'Olho'},
+  {p:'Laranja-Limão',c:'C2',a:'C2.5',s:'S2',cat:'Saque',tema:'Saque: direção',obj:'Direção do saque: T vs amplo · profundidade e efeito',foco:'Olho'},
+  {p:'Laranja-Limão',c:'C2',a:'C2.6',s:'S2',cat:'Tático',tema:'Devolução',obj:'Devolução: bola no corpo vs T · neutralizar ou atacar',foco:'Olho'},
+  {p:'Laranja-Limão',c:'C2',a:'C2.7',s:'S3',cat:'Rede',tema:'Aproximação à rede',obj:'Combinação completa: approach + voleio + smash',foco:'Mão'},
+  {p:'Laranja-Limão',c:'C2',a:'C2.8',s:'S3',cat:'Tático',tema:'Pré-evento',obj:'Saque + approach + voleio · 3 padrões táticos',foco:'Olho'},
+  {p:'Laranja-Limão',c:'C2',a:'C2.9',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Set 4 games · approach · saque direção · rede',foco:'Olho'},
+  {p:'Laranja-Limão',c:'C2',a:'C2.10',s:'S4',cat:'Jogo',tema:'Avaliação Formativa C2',obj:'Avaliação: approach · voleio · direção saque · set games',foco:'Olho'},
+  {p:'Laranja-Limão',c:'C3',a:'C3.1',s:'S1',cat:'Saque',tema:'Saque kick',obj:'Kick: escovada de baixo para cima (7h→1h no relógio)',foco:'Mão'},
+  {p:'Laranja-Limão',c:'C3',a:'C3.2',s:'S1',cat:'Saque',tema:'Saque kick',obj:'Kick: inclinação do eixo da bola 10–20° + quique alto',foco:'Mão'},
+  {p:'Laranja-Limão',c:'C3',a:'C3.3',s:'S1',cat:'Saque',tema:'Saque kick',obj:'Kick × slice: comparar trajetória e efeito de quique',foco:'Olho'},
+  {p:'Laranja-Limão',c:'C3',a:'C3.4',s:'S2',cat:'Saque',tema:'Saque kick',obj:'2º saque com kick: quique alto dificultando a devolução',foco:'Olho'},
+  {p:'Laranja-Limão',c:'C3',a:'C3.5',s:'S2',cat:'FDQ',tema:'FDQ: situação favorável',obj:'Saque+1 após kick alto: atacar FH agressivo (inside out)',foco:'Olho'},
+  {p:'Laranja-Limão',c:'C3',a:'C3.6',s:'S2',cat:'FDQ',tema:'FDQ: situação favorável',obj:'Ângulo + profundidade + finalização na rede',foco:'Pé'},
+  {p:'Laranja-Limão',c:'C3',a:'C3.7',s:'S3',cat:'Tático',tema:'Pré-evento',obj:'3 padrões: kick+1 · saque direção · approach+voleio',foco:'Olho'},
+  {p:'Laranja-Limão',c:'C3',a:'C3.8',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Set 6 games · kick 2S · ângulo · aproximação',foco:'Olho'},
+  {p:'Laranja-Limão',c:'C3',a:'C3.9',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Set 6 games noAD · árbitro rotativo · foco competitivo',foco:'Olho'},
+  {p:'Laranja-Limão',c:'C3',a:'C3.10',s:'S4',cat:'Jogo',tema:'Avaliação Semestral',obj:'Torneio set 6g · kick · approach · ângulo · avaliação somativa',foco:'Olho'},
+  // ── VERDE-VERDE ──
+  {p:'Verde-Verde',c:'C1',a:'C1.1',s:'S1',cat:'FDQ',tema:'FDQ: padrões táticos',obj:'"HOP" a cada preparação adversária + recepção dinâmica',foco:'Pé'},
+  {p:'Verde-Verde',c:'C1',a:'C1.2',s:'S1',cat:'FDQ',tema:'FDQ: padrões táticos',obj:'HOP + D2 split step + 1ª bola com intenção',foco:'Pé'},
+  {p:'Verde-Verde',c:'C1',a:'C1.3',s:'S1',cat:'Tático',tema:'FDQ: padrões táticos',obj:'Reconhecer situação: neutro · favorável · desfavorável',foco:'Olho'},
+  {p:'Verde-Verde',c:'C1',a:'C1.4',s:'S2',cat:'FDQ',tema:'FDQ: spin avançado',obj:'Ação mão-antebraço FH: escovada acelerada para topspin',foco:'Mão'},
+  {p:'Verde-Verde',c:'C1',a:'C1.5',s:'S2',cat:'FDQ',tema:'FDQ: spin avançado',obj:'Topspin FH agressivo + passos cruzados para inside out',foco:'Pé'},
+  {p:'Verde-Verde',c:'C1',a:'C1.6',s:'S2',cat:'FDQ',tema:'FDQ: spin avançado',obj:'Topspin BH: eixo da bola + terminação contralateral alta',foco:'Mão'},
+  {p:'Verde-Verde',c:'C1',a:'C1.7',s:'S3',cat:'FDQ',tema:'FDQ: spin avançado',obj:'Ritmo de movimentação: ancorar e empurrar no golpe',foco:'Pé'},
+  {p:'Verde-Verde',c:'C1',a:'C1.8',s:'S3',cat:'FDQ',tema:'FDQ: spin avançado',obj:'Soltar após preparação + terminação oposta com amplitude',foco:'Mão'},
+  {p:'Verde-Verde',c:'C1',a:'C1.9',s:'S3',cat:'Tático',tema:'FDQ: construção',obj:'3 situações táticas: neutro · favorável · ponto fraco',foco:'Olho'},
+  {p:'Verde-Verde',c:'C1',a:'C1.10',s:'S4',cat:'Tático',tema:'Pré-evento',obj:'3 situações TA FDQ + 3 situações TA saque com intenção',foco:'Olho'},
+  {p:'Verde-Verde',c:'C1',a:'C1.11',s:'S4',cat:'Jogo',tema:'Pré-evento',obj:'Set 4 games · HOP · spin · padrões táticos · autonomia',foco:'Olho'},
+  {p:'Verde-Verde',c:'C1',a:'C1.12',s:'S4',cat:'Jogo',tema:'Avaliação Formativa C1',obj:'Avaliação: HOP · spin · padrões táticos · set 4 games',foco:'Olho'},
+  {p:'Verde-Verde',c:'C2',a:'C2.1',s:'S1',cat:'FDQ',tema:'FDQ: situação favorável',obj:'Perna na batida: ancorar-transferir BH/FH + split D2',foco:'Pé'},
+  {p:'Verde-Verde',c:'C2',a:'C2.2',s:'S1',cat:'FDQ',tema:'FDQ: situação favorável',obj:'Ancorar-transferir + inside out FH (½ quadra BH)',foco:'Pé'},
+  {p:'Verde-Verde',c:'C2',a:'C2.3',s:'S1',cat:'Tático',tema:'FDQ: situação favorável',obj:'Inside out: deslocamento lateral + recuperação central',foco:'Olho'},
+  {p:'Verde-Verde',c:'C2',a:'C2.4',s:'S2',cat:'Duplas',tema:'Duplas: posicionamento',obj:'Posição de base em duplas: I-formation e Australian',foco:'Pé'},
+  {p:'Verde-Verde',c:'C2',a:'C2.5',s:'S2',cat:'Duplas',tema:'Duplas: posicionamento',obj:'Comunicação em duplas: "minha/sua" + cobertura cruzada',foco:'Olho'},
+  {p:'Verde-Verde',c:'C2',a:'C2.6',s:'S2',cat:'Duplas',tema:'Duplas: rede',obj:'Poaching: decidir interceptar + sinal com raquete atrás',foco:'Pé'},
+  {p:'Verde-Verde',c:'C2',a:'C2.7',s:'S3',cat:'FDQ',tema:'FDQ: situação favorável',obj:'FH agressivo: ponto de contato à frente + aceleração da mão',foco:'Mão'},
+  {p:'Verde-Verde',c:'C2',a:'C2.8',s:'S3',cat:'Tático',tema:'Pré-evento',obj:'Inside out · D2 · duplas poaching · set 4 noAD',foco:'Olho'},
+  {p:'Verde-Verde',c:'C2',a:'C2.9',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Set 4 games noAD · inside out · duplas',foco:'Olho'},
+  {p:'Verde-Verde',c:'C2',a:'C2.10',s:'S4',cat:'Jogo',tema:'Avaliação Formativa C2',obj:'Avaliação: inside out · duplas · FH agressivo · noAD',foco:'Olho'},
+  {p:'Verde-Verde',c:'C3',a:'C3.1',s:'S1',cat:'Rede',tema:'Jogo de rede 1º/2º voleio',obj:'1º voleio construção e 2º voleio finalização · split rede',foco:'Olho'},
+  {p:'Verde-Verde',c:'C3',a:'C3.2',s:'S1',cat:'Rede',tema:'Jogo de rede 1º/2º voleio',obj:'V1/V2 + giro tronco + posições de recuperação pós-voleio',foco:'Pé'},
+  {p:'Verde-Verde',c:'C3',a:'C3.3',s:'S1',cat:'Rede',tema:'Jogo de rede 1º/2º voleio',obj:'Voleio com split + giro tronco + pé exterior (passo de saída)',foco:'Pé'},
+  {p:'Verde-Verde',c:'C3',a:'C3.4',s:'S2',cat:'Rede',tema:'Jogo de rede 1º/2º voleio',obj:'Split + giro tronco + voleio baixo de construção',foco:'Mão'},
+  {p:'Verde-Verde',c:'C3',a:'C3.5',s:'S2',cat:'Rede',tema:'Jogo de rede',obj:'Voleio baixo + devolução profunda — recuperação rápida',foco:'Mão'},
+  {p:'Verde-Verde',c:'C3',a:'C3.6',s:'S2',cat:'Saque',tema:'Saque kick avançado',obj:'Kick 2S: quique alto para o corpo adversário · pressão na devolução',foco:'Olho'},
+  {p:'Verde-Verde',c:'C3',a:'C3.7',s:'S3',cat:'Tático',tema:'Pré-evento',obj:'Quando e como subir: ponto fraco · abrir/paralela · D2',foco:'Olho'},
+  {p:'Verde-Verde',c:'C3',a:'C3.8',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Set 6 games · autonomia · árbitro rotativo · ética',foco:'Olho'},
+  {p:'Verde-Verde',c:'C3',a:'C3.9',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Set 6 games noAD · gestão de trocas de lado · foco',foco:'Olho'},
+  {p:'Verde-Verde',c:'C3',a:'C3.10',s:'S4',cat:'Jogo',tema:'Avaliação Semestral',obj:'Torneio set 6g · rede · inside out · kick · avaliação somativa',foco:'Olho'},
+  // ── AMARELA ──
+  {p:'Amarela',c:'C1',a:'C1.1',s:'S1',cat:'FDQ',tema:'FDQ: cadeia cinética',obj:'Cadeia cinética no topspin: quadril → tronco → braço → raquete',foco:'Mão'},
+  {p:'Amarela',c:'C1',a:'C1.2',s:'S1',cat:'FDQ',tema:'FDQ: cadeia cinética',obj:'Cadeia cinética FH: inclinação do tronco + aceleração final',foco:'Mão'},
+  {p:'Amarela',c:'C1',a:'C1.3',s:'S1',cat:'Tático',tema:'FDQ: análise tática',obj:'Analisar ponto fraco do adversário + explorar em jogo real',foco:'Olho'},
+  {p:'Amarela',c:'C1',a:'C1.4',s:'S2',cat:'FDQ',tema:'FDQ: variação de ritmo',obj:'Variação de ritmo: drive pesado × drop shot × lob ofensivo',foco:'Olho'},
+  {p:'Amarela',c:'C1',a:'C1.5',s:'S2',cat:'FDQ',tema:'FDQ: variação de ritmo',obj:'Drop shot FH/BH: preparação idêntica ao drive (disfarce)',foco:'Mão'},
+  {p:'Amarela',c:'C1',a:'C1.6',s:'S2',cat:'FDQ',tema:'FDQ: variação de ritmo',obj:'Lob ofensivo de FH/BH: carregado para cima com topspin',foco:'Mão'},
+  {p:'Amarela',c:'C1',a:'C1.7',s:'S3',cat:'FDQ',tema:'FDQ: variação de ritmo',obj:'Drive pesado → drop shot → subida à rede (3 golpes)',foco:'Pé'},
+  {p:'Amarela',c:'C1',a:'C1.8',s:'S3',cat:'FDQ',tema:'FDQ: variação de ritmo',obj:'Posicionamento dinâmico dentro do ponto (X avançado)',foco:'Pé'},
+  {p:'Amarela',c:'C1',a:'C1.9',s:'S3',cat:'Tático',tema:'FDQ: análise tática',obj:'Construção: 3 padrões — neutro · favorável · finalizador',foco:'Olho'},
+  {p:'Amarela',c:'C1',a:'C1.10',s:'S4',cat:'Tático',tema:'Pré-evento',obj:'3 padrões táticos FDQ + variação de ritmo + análise do ponto',foco:'Olho'},
+  {p:'Amarela',c:'C1',a:'C1.11',s:'S4',cat:'Jogo',tema:'Pré-evento',obj:'Set 6 games · cadeia cinética · variação de ritmo · autonomia',foco:'Olho'},
+  {p:'Amarela',c:'C1',a:'C1.12',s:'S4',cat:'Jogo',tema:'Avaliação Formativa C1',obj:'Avaliação: variação de ritmo · drop shot · padrões · set games',foco:'Olho'},
+  {p:'Amarela',c:'C2',a:'C2.1',s:'S1',cat:'Saque',tema:'Saque: mistura de efeitos',obj:'Flat × slice × kick: ler adversário e escolher a variação',foco:'Olho'},
+  {p:'Amarela',c:'C2',a:'C2.2',s:'S1',cat:'Saque',tema:'Saque: mistura de efeitos',obj:'1S flat potente + 2S kick para o corpo · pressão máxima',foco:'Olho'},
+  {p:'Amarela',c:'C2',a:'C2.3',s:'S1',cat:'Devolução',tema:'Devolução avançada',obj:'Antecipar direção do saque: ler ombro e toss do sacador',foco:'Olho'},
+  {p:'Amarela',c:'C2',a:'C2.4',s:'S2',cat:'Duplas',tema:'Duplas avançado',obj:'Poaching: timing + sinal com raquete + cobertura do parceiro',foco:'Pé'},
+  {p:'Amarela',c:'C2',a:'C2.5',s:'S2',cat:'Duplas',tema:'Duplas avançado',obj:'I-formation: posições, comunicação e execução em jogo',foco:'Pé'},
+  {p:'Amarela',c:'C2',a:'C2.6',s:'S2',cat:'Duplas',tema:'Duplas avançado',obj:'Australian formation: cruzar após saque + fechamento de rede',foco:'Pé'},
+  {p:'Amarela',c:'C2',a:'C2.7',s:'S3',cat:'FDQ',tema:'FDQ: jogo tático completo',obj:'Saque+1+2: 3 golpes com intenção por ponto',foco:'Olho'},
+  {p:'Amarela',c:'C2',a:'C2.8',s:'S3',cat:'Tático',tema:'Pré-evento',obj:'Saque variado · devolução · duplas · set 6 games',foco:'Olho'},
+  {p:'Amarela',c:'C2',a:'C2.9',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Set 6 games · saque com efeitos · duplas · gestão emocional',foco:'Olho'},
+  {p:'Amarela',c:'C2',a:'C2.10',s:'S4',cat:'Jogo',tema:'Avaliação Formativa C2',obj:'Avaliação: saque variado · devolução · duplas · set games',foco:'Olho'},
+  {p:'Amarela',c:'C3',a:'C3.1',s:'S1',cat:'Tático',tema:'Preparação competitiva',obj:'Rotina mental pré-ponto: respiração · foco · intenção tática',foco:'Olho'},
+  {p:'Amarela',c:'C3',a:'C3.2',s:'S1',cat:'Tático',tema:'Preparação competitiva',obj:'Rotina entre pontos: walk · bounce · posição de arranque',foco:'Pé'},
+  {p:'Amarela',c:'C3',a:'C3.3',s:'S1',cat:'Tático',tema:'Preparação competitiva',obj:'Leitura do placar: gestão de momentos críticos (30-40, break)',foco:'Olho'},
+  {p:'Amarela',c:'C3',a:'C3.4',s:'S2',cat:'Saque',tema:'Saque sob pressão',obj:'Saque em situações de pressão: break point · 6-5 · tie-break',foco:'Olho'},
+  {p:'Amarela',c:'C3',a:'C3.5',s:'S2',cat:'Saque',tema:'Saque sob pressão',obj:'Rotina de saque: bouncing · lançamento · foco no alvo',foco:'Mão'},
+  {p:'Amarela',c:'C3',a:'C3.6',s:'S2',cat:'Tático',tema:'Preparação competitiva',obj:'Análise de adversário: ponto fraco · preferência · padrões',foco:'Olho'},
+  {p:'Amarela',c:'C3',a:'C3.7',s:'S3',cat:'Tático',tema:'Pré-evento',obj:'Simulação de match play: 3 sets · tie-break · árbitro real',foco:'Olho'},
+  {p:'Amarela',c:'C3',a:'C3.8',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Match play completo · rotinas · gestão emocional · foco',foco:'Olho'},
+  {p:'Amarela',c:'C3',a:'C3.9',s:'S3',cat:'Jogo',tema:'Pré-evento',obj:'Torneio treino interno: sets completos · arbitragem autônoma',foco:'Olho'},
+  {p:'Amarela',c:'C3',a:'C3.10',s:'S4',cat:'Jogo',tema:'Avaliação Semestral',obj:'Torneio semestral · sets completos · rotina · avaliação somativa',foco:'Olho'},
 ];
 
 /* ════════════════════════════════════════════════════════
@@ -1556,15 +1726,8 @@ function buildCal() {
   const cor = CORES[puls] || '#888';
   const sig = SIGLAS[puls] || puls;
 
-  // Fallback: pulseiras sem conteúdo próprio usam a mais próxima
-  const PULS_FALLBACK = {
-    'Vermelho-Tangerina': 'Vermelho-Vermelho',
-    'Vermelho-Branco':    'Vermelho-Vermelho',
-    'Laranja-Limão':      'Laranja-Laranja',
-    'Verde-Verde':        'Verde-Amarelo'
-  };
-  const pulsQuery = PULS_FALLBACK[puls] || puls;
-  const pulsFallback = PULS_FALLBACK[puls] ? ' (base: ' + pulsQuery + ')' : '';
+  const pulsQuery = puls;
+  const pulsFallback = '';
 
   // Sort aulas C1→C2→C3 by index
   const aulasBase = AULAS.filter(a => a.p === pulsQuery).sort((a,b) => {
