@@ -3402,27 +3402,16 @@ function viewCoachProfile(coachNome) {
       }).join('') : '<div style="color:var(--t3);font-size:13px;padding:8px 0">Nenhuma turma vinculada.</div>'}
 
       <div class="lbl" style="margin-top:8px">Alunos</div>
-      ${coachAlunos.length ? coachAlunos.map(a => {
-        const p = gP(a.pulseira);
-        const t = gT(a.turma);
-        return `<div class="row" data-aluno-id="${a.id}" style="cursor:pointer">
-          <div class="rav" style="background:${a.cor}">${ini(a.nome)}<div class="rb2">${p.ball}</div></div>
-          <div class="ri">
-            <div class="rn">${a.nome}</div>
-            <div class="rm">${t?t.label:''}${a.horario?' · '+a.horario:''}</div>
-          </div>
-        </div>`;
-      }).join('') : '<div style="color:var(--t3);font-size:13px;padding:8px 0">Nenhum aluno vinculado.</div>'}
+      ${coachAlunos.length ? coachAlunos.map(a => sRow(a)).join('') : '<div style="color:var(--t3);font-size:13px;padding:8px 0">Nenhum aluno vinculado.</div>'}
     </div>
   `;
 
-  // Add click handlers via event delegation
+  // Turma cards: click to expand alunos da turma
   body.querySelectorAll('[data-turma-id]').forEach(el => {
     el.addEventListener('click', () => {
       const id = el.dataset.turmaId;
       const t = tms.find(x => String(x.id) === String(id));
       if (!t) return;
-      // Show alunos da turma dentro do mesmo modal
       const als = sts.filter(s => String(s.turma) === String(id));
       const p = gP(t.pulseira);
       const dias = Array.isArray(t.dias) ? t.dias.join(' · ') : (t.dias||'—');
@@ -3441,33 +3430,9 @@ function viewCoachProfile(coachNome) {
         </div>
         <div style="padding:16px">
           <div class="lbl">Alunos da turma</div>
-          ${als.length ? als.map(a => {
-            const pa = gP(a.pulseira);
-            return '<div class="row" data-aluno-id="' + a.id + '" style="cursor:pointer">' +
-              '<div class="rav" style="background:' + a.cor + '">' + ini(a.nome) + '<div class="rb2">' + pa.ball + '</div></div>' +
-              '<div class="ri"><div class="rn">' + a.nome + '</div>' +
-              '<div class="rm">' + (a.horario||'') + '</div></div>' +
-            '</div>';
-          }).join('') : '<div style="color:var(--t3);font-size:13px;padding:8px 0">Nenhum aluno nesta turma.</div>'}
+          ${als.length ? als.map(a => sRow(a)).join('') : '<div style="color:var(--t3);font-size:13px;padding:8px 0">Nenhum aluno nesta turma.</div>'}
         </div>
       `;
-      // Add click on alunos
-      body.querySelectorAll('[data-aluno-id]').forEach(ae => {
-        ae.addEventListener('click', () => {
-          const aid = ae.dataset.alunoId;
-          sid = aid;
-          clsM('m-coach');
-          setTimeout(() => openAS(aid), 100);
-        });
-      });
-    });
-  });
-  body.querySelectorAll('[data-aluno-id]').forEach(el => {
-    el.addEventListener('click', () => {
-      const id = el.dataset.alunoId;
-      sid = id;
-      clsM('m-coach');
-      setTimeout(() => openAS(id), 100);
     });
   });
 
