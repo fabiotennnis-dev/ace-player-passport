@@ -4104,17 +4104,19 @@ async function doPortalRegister() {
       options: { data: { role: 'parent', student_id: portalRegisterStudent.id, academia_id: portalRegisterStudent.academia_id } }
     });
     if (error) { err.textContent = error.message; btn.textContent = 'Criar acesso'; btn.disabled = false; return; }
+    if (!data.user) { err.textContent = 'Verifique seu e-mail para confirmar o cadastro.'; btn.textContent = 'Criar acesso'; btn.disabled = false; return; }
     // Save portal_account record
-    await getDb().from('portal_accounts').insert({
+    const { error: paErr } = await getDb().from('portal_accounts').insert({
       student_id: portalRegisterStudent.id, academia_id: portalRegisterStudent.academia_id,
       auth_user_id: data.user.id, email, role: 'parent'
     });
+    if (paErr) { err.textContent = 'Conta criada! Faça login para continuar.'; btn.textContent = 'Criar acesso'; btn.disabled = false; return; }
     currentUser = data.user;
     await loadPortalAccount();
     document.getElementById('portal-register-screen').style.display = 'none';
     showPortalApp();
     toast('Bem-vindo! Acesso criado com sucesso 🎾');
-  } catch(e) { err.textContent = 'Erro ao criar acesso'; btn.textContent = 'Criar acesso'; btn.disabled = false; }
+  } catch(e) { err.textContent = e.message || 'Erro ao criar acesso'; btn.textContent = 'Criar acesso'; btn.disabled = false; }
 }
 
 // ── Portal App (view pais/alunos) ──
