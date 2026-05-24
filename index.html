@@ -4073,17 +4073,18 @@ async function validatePortalCode(raw) {
   if (code.length < 7) { status.textContent = ''; info.style.display = 'none'; portalRegisterStudent = null; return; }
   status.textContent = 'Verificando...';
   try {
-    const { data, error } = await getDb().from('alunos').select('id,nome,pulseira,coach_nome,academia_id').eq('access_code', code).eq('ativo', true).single();
-    if (error || !data) {
+    const { data, error } = await getDb().rpc('lookup_portal_code', { p_code: code });
+    const row = data && data[0];
+    if (error || !row) {
       status.innerHTML = '<span style="color:var(--r)">Código inválido</span>';
       info.style.display = 'none'; portalRegisterStudent = null;
     } else {
-      const pb = (typeof gP === 'function') ? gP(data.pulseira) : { ball:'🎾', label: data.pulseira };
+      const pb = (typeof gP === 'function') ? gP(row.pulseira) : { ball:'🎾', label: row.pulseira };
       status.innerHTML = '<span style="color:var(--g)">✓ Código válido</span>';
-      document.getElementById('pr-student-name').textContent = data.nome;
-      document.getElementById('pr-student-detail').textContent = (pb.ball||'') + ' ' + (pb.label||'') + ' · Coach ' + (data.coach_nome||'');
+      document.getElementById('pr-student-name').textContent = row.student_name;
+      document.getElementById('pr-student-detail').textContent = (pb.ball||'') + ' ' + (pb.label||'') + ' · Coach ' + (row.coach_nome||'');
       info.style.display = 'block';
-      portalRegisterStudent = data;
+      portalRegisterStudent = { id: row.student_id, nome: row.student_name, pulseira: row.pulseira, coach_nome: row.coach_nome, academia_id: row.academia_id };
     }
   } catch(e) { status.innerHTML = '<span style="color:var(--r)">Erro na verificação</span>'; }
 }
