@@ -225,17 +225,37 @@ function getDb() {
 
 let currentUser = null;
 let currentAcademia = null;
+let currentPortalAccount = null; // set when logged in as parent/student
+
+// ── ACCESS CODE GENERATOR ──
+function genAccessCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let c = 'PP-';
+  for (let i = 0; i < 4; i++) c += chars[Math.floor(Math.random() * chars.length)];
+  return c;
+}
 
 // ── INIT ──
 async function initApp() {
   const db = getDb();
   if (!db) { showLogin(); return; }
+
+  // Check for ?code= param — portal registration flow
+  const urlCode = new URLSearchParams(window.location.search).get('code');
+  if (urlCode) { showPortalRegister(urlCode); return; }
+
   try {
     const { data: { session } } = await db.auth.getSession();
     if (session && session.user) {
       currentUser = session.user;
-      await loadAcademia();
-      showApp();
+      const role = currentUser.user_metadata?.role;
+      if (role === 'parent' || role === 'student') {
+        await loadPortalAccount();
+        showPortalApp();
+      } else {
+        await loadAcademia();
+        showApp();
+      }
     } else {
       showLogin();
     }
@@ -314,8 +334,14 @@ async function doLogin() {
       btn.disabled = false;
     } else {
       currentUser = data.user;
-      await loadAcademia();
-      showApp();
+      const role = currentUser.user_metadata?.role;
+      if (role === 'parent' || role === 'student') {
+        await loadPortalAccount();
+        showPortalApp();
+      } else {
+        await loadAcademia();
+        showApp();
+      }
     }
   } catch(e) {
     err.textContent = 'Erro de conexão. Tente novamente.';
@@ -355,7 +381,8 @@ async function saveAlunoSupabase(aluno) {
         consentimento_em:  new Date().toISOString(),
         consentimento_ip:  '127.0.0.1',
         consentimento_ver: '1.0',
-        ativo:             true
+        ativo:             true,
+        access_code:       genAccessCode()
       })
       .select().single();
     if (error) { console.error('Erro ao salvar aluno:', error); toast('Erro ao salvar: ' + (error.message||error.code||'verifique conexão')); return false; }
@@ -409,10 +436,17 @@ async function loadAlunos() {
         xp:          r.xp_total   || 0,
         apto:        r.apto       || false,
         fundamentos: r.fundamentos || {tecnico:0,tatico:0,fisico:0,mental:0},
-        historico:   r.historico  || []
+        historico:    r.historico   || [],
+        access_code:  r.access_code || '',
+        portal_active: false  // filled below
       });
     });
     console.log('Alunos carregados:', sts.length);
+    // Load portal activation status
+    try {
+      const { data: pa } = await getDb().from('portal_accounts').select('student_id').eq('academia_id', currentAcademia.id);
+      if (pa) { const act = new Set(pa.map(x => x.student_id)); sts.forEach(s => { s.portal_active = act.has(s.id); }); }
+    } catch(e2) { /* non-critical */ }
   } catch(e) {
     console.error('loadAlunos exception:', e);
   }
@@ -1734,6 +1768,9 @@ async function doLogout() {
   try { await getDb().auth.signOut(); } catch(e) {}
   currentUser = null;
   currentAcademia = null;
+  currentPortalAccount = null;
+  const pa = document.getElementById('portal-app');
+  if (pa) pa.style.display = 'none';
   showLogin();
 }
 
@@ -1990,8 +2027,11 @@ async function gerarPassportPDF(alunoId) {
       <div id="login-err" style="font-size:13px;color:var(--r);font-weight:500;margin-bottom:12px;min-height:18px">Erro de conexão. Tente novamente.</div>
       <button id="login-btn" onclick="doLogin()" style="width:100%;padding:14px;border-radius:12px;background:var(--g);border:none;color:#fff;font-family:&#39;Syne&#39;,sans-serif;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(0,135,90,.3)">Entrar</button>
     </div>
-    <div style="text-align:center;margin-top:20px;font-size:12px;color:var(--t3)">ACE Player Passport · v1.0</div>
-    <div style="text-align:center;margin-top:14px;font-size:13px;color:var(--t2)">
+    <div style="text-align:center;margin-top:16px">
+      <a href="#" onclick="showPortalRegister('');return false;" style="font-size:14px;color:var(--g);font-weight:700;text-decoration:none">Sou responsável ou aluno → Criar acesso</a>
+    </div>
+    <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--t3)">ACE Player Passport · v1.0</div>
+    <div style="text-align:center;margin-top:10px;font-size:13px;color:var(--t2)">
       Sua academia ainda não tem acesso?
       <a href="cadastro.html" style="color:var(--g);font-weight:700;text-decoration:none;margin-left:4px">Cadastre-se →</a>
     </div>
@@ -2010,7 +2050,7 @@ async function gerarPassportPDF(alunoId) {
 
 <!-- ALUNOS -->
 <div class="scr" id="s-alunos">
-<div class="tb"><span class="logo">ACE ◆</span><span class="ttl">Alunos</span><div class="tav" onclick="doLogout()" title="Sair" style="cursor:pointer">FA</div></div>
+<div class="tb"><span class="logo">ACE ◆</span><span class="ttl">Alunos</span><div style="display:flex;gap:8px;align-items:center"><button onclick="openCodigosModal()" style="padding:6px 12px;border-radius:20px;border:1px solid var(--bo);background:var(--bg3);font-size:12px;font-weight:600;color:var(--t2);cursor:pointer">🔑 Códigos</button><div class="tav" onclick="doLogout()" title="Sair" style="cursor:pointer">FA</div></div></div>
 <div class="pad">
 <div class="sw"><div class="si"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--t3)"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg><input type="text" placeholder="Buscar aluno..." oninput="doS(this.value)" id="ms"></div><button class="fbt" id="fbt" onclick="togFP()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="8" y1="12" x2="16" y2="12"></line><line x1="11" y1="18" x2="13" y2="18"></line></svg>Filtrar</button></div>
 <div class="fpn" id="fpn"><div class="fl">Cor da bola</div><div class="fr" id="fp"><button class="fc " onclick="sf(&#39;p&#39;,&#39;roxa&#39;)">🟣 Roxa</button><button class="fc " onclick="sf(&#39;p&#39;,&#39;verm_branca&#39;)">🔴 Verm-Branca</button><button class="fc " onclick="sf(&#39;p&#39;,&#39;verm_verm&#39;)">🔴🔴 Verm-Verm</button><button class="fc " onclick="sf(&#39;p&#39;,&#39;verm_laranja&#39;)">🔴🟠 Verm-Laranja</button><button class="fc " onclick="sf(&#39;p&#39;,&#39;laranja&#39;)">🟠 Laranja</button><button class="fc " onclick="sf(&#39;p&#39;,&#39;laranja_verde&#39;)">🟠🟢 Laranja-Verde</button><button class="fc " onclick="sf(&#39;p&#39;,&#39;verde&#39;)">🟢 Verde</button><button class="fc " onclick="sf(&#39;p&#39;,&#39;verde_amarela&#39;)">🟢🟡 Verde-Amarela</button><button class="fc " onclick="sf(&#39;p&#39;,&#39;amarela&#39;)">🟡 Amarela</button></div><div class="fl" style="margin-top:9px">Turma</div><div class="fr" id="ft"><button class="fc " onclick="sf(&#39;t&#39;,&#39;f34d7990-e5c4-4fd9-a677-59cfd65f9141&#39;)">Amarela Q10 Joanathan</button><button class="fc " onclick="sf(&#39;t&#39;,&#39;5686085b-2587-4474-be7a-fd36b6d632cd&#39;)">Amarela Q11 Djair</button><button class="fc " onclick="sf(&#39;t&#39;,&#39;08ad0339-fb01-403a-b07b-4589bfffad13&#39;)">Amarela Q11 Joanathan</button><button class="fc " onclick="sf(&#39;t&#39;,&#39;c86e0d80-522f-4529-a1b6-22c6012cca84&#39;)">Amarela Q9 Glaubert</button><button class="fc " onclick="sf(&#39;t&#39;,&#39;d46bbe0a-d95f-4b06-a894-159ddc8fbf58&#39;)">Laranja Q6 Dimas</button><button class="fc " onclick="sf(&#39;t&#39;,&#39;3a3d9745-9543-471b-a89d-352bfbf42b63&#39;)">Laranja Q6 Eduardo N</button><button class="fc " onclick="sf(&#39;t&#39;,&#39;44ef383c-507a-40dd-a2e5-bb7c436cbec5&#39;)">Laranja Q6 Glaubert</button><button class="fc " onclick="sf(&#39;t&#39;,&#39;97c0efab-3bad-44fb-9ff5-d2562d9320ec&#39;)">Laranja Q6 Joanathan</button><button class="fc " onclick="sf(&#39;t&#39;,&#39;d498d568-b3be-49b2-a236-b97cae2f4f6e&#39;)">Laranja Q6 Victor</button><button class="fc " onclick="sf(&#39;t&#39;,&#39;48e4ffef-8291-460a-86e7-f954b1b5704e&#39;)">Roxa Q5 Eduardo N</button><button class="fc " onclick="sf(&#39;t&#39;,&#39;1340e990-c9fa-448e-a396-a2e778f7c287&#39;)">Roxa Q5 Michele</button><button class="fc " onclick="sf(&#39;t&#39;,&#39;28099091-8176-41f9-af30-7f4892eb99cf&#39;)">Verde Q11 Fábio Rocha</button><button class="fc " onclick="sf(&#39;t&#39;,&#39;ec5c625e-8043-4378-bd55-cd37bad8f157&#39;)">Verde Q7 Douglas</button><button class="fc " onclick="sf(&#39;t&#39;,&#39;3b9f0c95-88d5-412a-8d6c-dfbb1d642fe4&#39;)">Verde Q8 Antônio</button><button class="fc " onclick="sf(&#39;t&#39;,&#39;a42f2ba2-c6aa-4d58-b861-5f5ebe06e2f1&#39;)">Verde-Amarela Q10 Eduardo</button><button class="fc " onclick="sf(&#39;t&#39;,&#39;ca2de269-cb67-4388-8aa4-ddb93d6d889d&#39;)">Verde-Amarela Q9 Robson</button><button class="fc " onclick="sf(&#39;t&#39;,&#39;7669ece5-7d5a-470b-87c9-fca6575cd005&#39;)">Verm-Verm Q5 Ingridi</button><button class="fc " onclick="sf(&#39;t&#39;,&#39;ac613d1d-bc43-4d9f-90ce-48e114abb23f&#39;)">Verm-Verm Q5 Victor</button></div><div class="fl" style="margin-top:9px">Coach</div><div class="fr" id="fc"><button class="fc " onclick="sf(&#39;c&#39;,&#39;ANTONIO&#39;)">ANTONIO</button><button class="fc " onclick="sf(&#39;c&#39;,&#39;Dimas Nunes&#39;)">Dimas Nunes</button><button class="fc " onclick="sf(&#39;c&#39;,&#39;DJAIR&#39;)">DJAIR</button><button class="fc " onclick="sf(&#39;c&#39;,&#39;DOUGLAS&#39;)">DOUGLAS</button><button class="fc " onclick="sf(&#39;c&#39;,&#39;EDISON RAW&#39;)">EDISON RAW</button><button class="fc " onclick="sf(&#39;c&#39;,&#39;EDUARDO NOVAIS&#39;)">EDUARDO NOVAIS</button><button class="fc " onclick="sf(&#39;c&#39;,&#39;EDUARDO ROSA&#39;)">EDUARDO ROSA</button><button class="fc " onclick="sf(&#39;c&#39;,&#39;fABIO ROCHA&#39;)">fABIO ROCHA</button><button class="fc " onclick="sf(&#39;c&#39;,&#39;GLAUBERT&#39;)">GLAUBERT</button><button class="fc " onclick="sf(&#39;c&#39;,&#39;INGRID DAYANA&#39;)">INGRID DAYANA</button><button class="fc " onclick="sf(&#39;c&#39;,&#39;JOANHATAN&#39;)">JOANHATAN</button><button class="fc " onclick="sf(&#39;c&#39;,&#39;MICHELE&#39;)">MICHELE</button><button class="fc " onclick="sf(&#39;c&#39;,&#39;RAYANE&#39;)">RAYANE</button><button class="fc " onclick="sf(&#39;c&#39;,&#39;ROBSON ROCHA&#39;)">ROBSON ROCHA</button><button class="fc " onclick="sf(&#39;c&#39;,&#39;VICTOR&#39;)">VICTOR</button></div><div class="fl" style="margin-top:9px">Horário</div><div class="fr" id="fh"><button class="fc " onclick="sf(&#39;h&#39;,&#39;07:00 – 19:00&#39;)">07:00 – 19:00</button></div><span style="font-size:12px;color:var(--t3);cursor:pointer;text-decoration:underline;margin-top:10px;display:inline-block;font-weight:500" onclick="clrF()">Limpar filtros</span></div>
@@ -2385,7 +2425,21 @@ ${s.apto ? `
 <button onclick="clsM('m-profile');opFis()" class="bs" style="margin-bottom:8px">⚡ Testes Físicos</button>
 <button onclick="reqAlunoId=sid;clsM('m-profile');openReq(sid)" class="bs" style="margin-bottom:8px">📊 Marcar Requisitos</button>
 <button onclick="openEditAluno(sid)" class="bs" style="margin-bottom:8px">✏️ Editar dados do aluno</button>
-<button onclick="deleteAluno(sid)" style="width:100%;padding:12px;border-radius:var(--rs);border:1px solid var(--r);background:var(--rl);color:var(--r);font-size:13px;font-weight:600;cursor:pointer">🗑️ Remover aluno</button>`;opnM('m-profile');}
+<button onclick="deleteAluno(sid)" style="width:100%;padding:12px;border-radius:var(--rs);border:1px solid var(--r);background:var(--rl);color:var(--r);font-size:13px;font-weight:600;cursor:pointer">🗑️ Remover aluno</button>
+<div style="margin-top:14px;padding:16px;background:var(--bg3);border:1px solid var(--bo);border-radius:var(--rr)">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <span class="lbl" style="margin:0">🔑 Acesso responsável</span>
+    <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:${s.portal_active?'var(--gl)':'var(--rl)'};color:${s.portal_active?'var(--g)':'var(--r)'}">${s.portal_active?'🟢 Ativo':'🔴 Aguardando'}</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+    <div style="font-family:monospace;font-size:20px;font-weight:800;letter-spacing:3px;color:var(--t);background:var(--card);border:1.5px solid var(--bo);border-radius:10px;padding:8px 16px;flex:1;text-align:center">${s.access_code||'—'}</div>
+    <button onclick="copyPortalLink('${s.id}')" style="padding:10px 14px;border-radius:10px;background:var(--g);border:none;color:#fff;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">📋 Copiar link</button>
+  </div>
+  <div style="font-size:11px;color:var(--t3)">Envie este código ou link ao responsável para que ele crie o acesso no app.</div>
+</div>
+<div id="coach-notes-section" style="margin-top:14px"></div>`;
+opnM('m-profile');
+loadCoachNotes(sid);}
 
 // ── CONFIRMAR AVANÇO DE BOLA ──
 function confirmarAvancoBola(studentId) {
@@ -3843,5 +3897,315 @@ async function loadPresencaHoje() {
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- ══ PORTAL: MODAL CÓDIGOS ══ -->
+<div class="ms" id="m-codigos">
+  <div class="mh">
+    <button class="mb" onclick="clsM('m-codigos')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+    <span style="font-size:16px;font-weight:700;color:var(--t);flex:1;text-align:center">🔑 Códigos de Acesso</span>
+    <div style="width:34px"></div>
+  </div>
+  <div class="mb2">
+    <div style="font-size:12px;color:var(--t2);margin-bottom:14px;padding:10px 12px;background:var(--bg3);border-radius:var(--rs)">Compartilhe o código ou link com o responsável. Ele abre o app, insere o código e cria a própria senha.</div>
+    <div class="sw" style="margin-bottom:12px">
+      <div class="si"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--t3)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Buscar aluno..." oninput="filterCodigos(this.value)" style="background:transparent;border:none;color:var(--t);font-size:14px;flex:1;outline:none"></div>
+    </div>
+    <div id="codigos-list"></div>
+  </div>
+</div>
+
+<!-- ══ PORTAL: TELA DE REGISTRO ══ -->
+<div id="portal-register-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:999;flex-direction:column;align-items:center;justify-content:center;padding:32px">
+  <div style="width:100%;max-width:360px">
+    <div style="text-align:center;margin-bottom:32px">
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:32px;color:var(--g);letter-spacing:.08em;margin-bottom:8px">ACE ◆</div>
+      <div style="font-size:16px;font-weight:700;color:var(--t)">Player Passport</div>
+      <div style="font-size:13px;color:var(--t2);margin-top:4px" id="pr-subtitle">Acesso do Responsável</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--bo);border-radius:20px;padding:28px;box-shadow:var(--shadow-lg)">
+      <div id="pr-student-info" style="display:none;padding:12px;background:var(--gl);border:1px solid var(--gb);border-radius:12px;margin-bottom:16px;text-align:center">
+        <div style="font-size:13px;font-weight:700;color:var(--g)" id="pr-student-name"></div>
+        <div style="font-size:11px;color:var(--t2);margin-top:2px" id="pr-student-detail"></div>
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t2);display:block;margin-bottom:6px">Código de acesso</label>
+        <input id="pr-code" type="text" placeholder="PP-XXXX" maxlength="7" style="width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:18px;font-weight:700;letter-spacing:3px;outline:none;text-transform:uppercase;text-align:center" oninput="validatePortalCode(this.value)">
+        <div id="pr-code-status" style="font-size:12px;margin-top:6px;min-height:16px;text-align:center"></div>
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t2);display:block;margin-bottom:6px">Seu e-mail</label>
+        <input id="pr-email" type="email" placeholder="email@exemplo.com" style="width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:15px;outline:none">
+      </div>
+      <div style="margin-bottom:20px">
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t2);display:block;margin-bottom:6px">Criar senha</label>
+        <input id="pr-pass" type="password" placeholder="mínimo 6 caracteres" style="width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:15px;outline:none">
+      </div>
+      <div id="pr-err" style="font-size:13px;color:var(--r);font-weight:500;margin-bottom:12px;min-height:18px"></div>
+      <button id="pr-btn" onclick="doPortalRegister()" style="width:100%;padding:14px;border-radius:12px;background:var(--g);border:none;color:#fff;font-size:15px;font-weight:700;cursor:pointer">Criar acesso</button>
+      <div style="text-align:center;margin-top:14px"><span style="font-size:13px;color:var(--t2)">Já tem acesso? </span><a href="#" onclick="document.getElementById('portal-register-screen').style.display='none';showLogin();return false;" style="color:var(--g);font-weight:700;font-size:13px">Entrar →</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PORTAL APP (pais/alunos) ══ -->
+<div id="portal-app" style="display:none">
+  <div class="tb" style="position:sticky;top:0;z-index:50">
+    <span class="logo">ACE ◆</span>
+    <span class="ttl" id="portal-title">Meu Passaporte</span>
+    <button onclick="doLogout()" style="padding:6px 12px;border-radius:20px;border:1px solid var(--bo);background:var(--bg3);font-size:12px;font-weight:600;color:var(--t2);cursor:pointer">Sair</button>
+  </div>
+  <div class="pad" id="portal-body"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// PORTAL — FUNÇÕES
+// ══════════════════════════════════════════════════════════════
+
+// ── Copiar link do portal ──
+function copyPortalLink(studentId) {
+  const s = gSt(studentId);
+  if (!s || !s.access_code) { toast('Código não encontrado'); return; }
+  const base = window.location.origin + window.location.pathname;
+  const link = base + '?code=' + s.access_code;
+  navigator.clipboard.writeText(link).then(() => toast('Link copiado! 📋')).catch(() => {
+    prompt('Copie o link:', link);
+  });
+}
+
+// ── Modal Códigos ──
+let codigosAll = [];
+function openCodigosModal() {
+  codigosAll = [...sts].sort((a,b) => a.nome.localeCompare(b.nome));
+  renderCodigos(codigosAll);
+  opnM('m-codigos');
+}
+function filterCodigos(q) {
+  const f = q.trim().toLowerCase();
+  renderCodigos(f ? codigosAll.filter(s => s.nome.toLowerCase().includes(f)) : codigosAll);
+}
+function renderCodigos(list) {
+  const base = window.location.origin + window.location.pathname;
+  document.getElementById('codigos-list').innerHTML = list.length ? list.map(s => {
+    const p = gP(s.pulseira);
+    const link = base + '?code=' + (s.access_code || '—');
+    return `<div style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--bo)">
+      <div class="rav" style="background:${s.cor};width:36px;height:36px;font-size:11px;flex-shrink:0">${ini(s.nome)}<div class="rb2">${p.ball}</div></div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:var(--t);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.nome}</div>
+        <div style="font-size:11px;color:var(--t3)">${s.coach||'—'}</div>
+      </div>
+      <div style="font-family:monospace;font-size:14px;font-weight:700;letter-spacing:2px;color:var(--t);background:var(--bg3);border-radius:8px;padding:4px 8px;flex-shrink:0">${s.access_code||'—'}</div>
+      <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;flex-shrink:0;background:${s.portal_active?'var(--gl)':'var(--rl)'};color:${s.portal_active?'var(--g)':'var(--r)'}">${s.portal_active?'✓':'—'}</span>
+      <button onclick="navigator.clipboard.writeText('${link}').then(()=>toast('Link copiado! 📋'))" style="padding:6px 10px;border-radius:8px;background:var(--g);border:none;color:#fff;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">📋</button>
+    </div>`;
+  }).join('') : '<div style="padding:20px;text-align:center;color:var(--t3);font-size:13px">Nenhum aluno encontrado</div>';
+}
+
+// ── Coach Notes ──
+async function loadCoachNotes(studentId) {
+  const el = document.getElementById('coach-notes-section');
+  if (!el) return;
+  el.innerHTML = `<div style="padding:14px;background:var(--bg3);border-radius:var(--rr);text-align:center;font-size:13px;color:var(--t3)">Carregando anotações...</div>`;
+  try {
+    const { data, error } = await getDb().from('coach_notes').select('*').eq('student_id', studentId).order('created_at', { ascending: false });
+    const notes = error ? [] : (data || []);
+    el.innerHTML = `
+    <div style="padding:16px;background:var(--bg3);border:1px solid var(--bo);border-radius:var(--rr)">
+      <div class="lbl" style="margin-bottom:12px">📝 Anotações do Coach <span style="font-size:10px;font-weight:500;color:var(--t3);text-transform:none;letter-spacing:0">(visível ao responsável, não ao aluno)</span></div>
+      <textarea id="note-input-${studentId}" placeholder="Escreva uma anotação sobre o aluno..." rows="3" style="width:100%;padding:10px 12px;border-radius:var(--rs);border:1.5px solid var(--bo);background:var(--card);color:var(--t);font-size:13px;font-family:inherit;resize:vertical;outline:none;margin-bottom:8px"></textarea>
+      <button onclick="saveCoachNote('${studentId}')" style="width:100%;padding:10px;border-radius:var(--rs);background:var(--g);border:none;color:#fff;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:14px">+ Salvar anotação</button>
+      ${notes.length ? notes.map(n => {
+        const dt = new Date(n.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+        return `<div style="padding:10px 12px;background:var(--card);border:1px solid var(--bo);border-radius:var(--rs);margin-bottom:8px">
+          <div style="font-size:12px;color:var(--t3);margin-bottom:5px">${dt}</div>
+          <div style="font-size:13px;color:var(--t);line-height:1.5">${n.note.replace(/\n/g,'<br>')}</div>
+          <button onclick="deleteCoachNote('${n.id}','${studentId}')" style="border:none;background:none;color:var(--t3);font-size:11px;cursor:pointer;margin-top:4px;padding:0">✕ remover</button>
+        </div>`;
+      }).join('') : '<div style="font-size:13px;color:var(--t3);text-align:center;padding:8px">Nenhuma anotação ainda</div>'}
+    </div>`;
+  } catch(e) { el.innerHTML = ''; }
+}
+
+async function saveCoachNote(studentId) {
+  const inp = document.getElementById('note-input-'+studentId);
+  const text = inp?.value?.trim();
+  if (!text) { toast('Escreva algo antes de salvar'); return; }
+  try {
+    const { error } = await getDb().from('coach_notes').insert({
+      student_id: studentId, coach_id: currentUser.id,
+      academia_id: currentAcademia.id, note: text
+    });
+    if (error) { toast('Erro ao salvar ⚠️'); return; }
+    toast('Anotação salva ✓');
+    loadCoachNotes(studentId);
+  } catch(e) { toast('Erro ao salvar ⚠️'); }
+}
+
+async function deleteCoachNote(noteId, studentId) {
+  if (!confirm('Remover esta anotação?')) return;
+  await getDb().from('coach_notes').delete().eq('id', noteId);
+  loadCoachNotes(studentId);
+}
+
+// ── Portal Register (tela de registro para pais) ──
+let portalRegisterStudent = null;
+function showPortalRegister(code) {
+  document.getElementById('portal-register-screen').style.display = 'flex';
+  if (code) {
+    const inp = document.getElementById('pr-code');
+    inp.value = code.toUpperCase();
+    validatePortalCode(code);
+  }
+}
+
+async function validatePortalCode(raw) {
+  const code = raw.trim().toUpperCase();
+  const status = document.getElementById('pr-code-status');
+  const info = document.getElementById('pr-student-info');
+  if (code.length < 7) { status.textContent = ''; info.style.display = 'none'; portalRegisterStudent = null; return; }
+  status.textContent = 'Verificando...';
+  try {
+    const { data, error } = await getDb().from('alunos').select('id,nome,pulseira,coach_nome,academia_id').eq('access_code', code).eq('ativo', true).single();
+    if (error || !data) {
+      status.innerHTML = '<span style="color:var(--r)">Código inválido</span>';
+      info.style.display = 'none'; portalRegisterStudent = null;
+    } else {
+      const pb = (typeof gP === 'function') ? gP(data.pulseira) : { ball:'🎾', label: data.pulseira };
+      status.innerHTML = '<span style="color:var(--g)">✓ Código válido</span>';
+      document.getElementById('pr-student-name').textContent = data.nome;
+      document.getElementById('pr-student-detail').textContent = (pb.ball||'') + ' ' + (pb.label||'') + ' · Coach ' + (data.coach_nome||'');
+      info.style.display = 'block';
+      portalRegisterStudent = data;
+    }
+  } catch(e) { status.innerHTML = '<span style="color:var(--r)">Erro na verificação</span>'; }
+}
+
+async function doPortalRegister() {
+  if (!portalRegisterStudent) { toast('Insira um código válido'); return; }
+  const email = document.getElementById('pr-email').value.trim();
+  const pass  = document.getElementById('pr-pass').value;
+  const err   = document.getElementById('pr-err');
+  const btn   = document.getElementById('pr-btn');
+  if (!email) { err.textContent = 'Informe seu e-mail'; return; }
+  if (pass.length < 6) { err.textContent = 'Senha mínimo 6 caracteres'; return; }
+  btn.textContent = 'Criando acesso...'; btn.disabled = true; err.textContent = '';
+  try {
+    const { data, error } = await getDb().auth.signUp({
+      email, password: pass,
+      options: { data: { role: 'parent', student_id: portalRegisterStudent.id, academia_id: portalRegisterStudent.academia_id } }
+    });
+    if (error) { err.textContent = error.message; btn.textContent = 'Criar acesso'; btn.disabled = false; return; }
+    // Save portal_account record
+    await getDb().from('portal_accounts').insert({
+      student_id: portalRegisterStudent.id, academia_id: portalRegisterStudent.academia_id,
+      auth_user_id: data.user.id, email, role: 'parent'
+    });
+    currentUser = data.user;
+    await loadPortalAccount();
+    document.getElementById('portal-register-screen').style.display = 'none';
+    showPortalApp();
+    toast('Bem-vindo! Acesso criado com sucesso 🎾');
+  } catch(e) { err.textContent = 'Erro ao criar acesso'; btn.textContent = 'Criar acesso'; btn.disabled = false; }
+}
+
+// ── Portal App (view pais/alunos) ──
+async function loadPortalAccount() {
+  if (!currentUser) return;
+  try {
+    const { data } = await getDb().from('portal_accounts').select('*').eq('auth_user_id', currentUser.id).single();
+    currentPortalAccount = data;
+  } catch(e) { console.error('loadPortalAccount:', e); }
+}
+
+async function showPortalApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-container').style.display = 'none';
+  const pa = document.getElementById('portal-app');
+  pa.style.display = 'block';
+  if (!currentPortalAccount) { pa.innerHTML = '<div style="padding:40px;text-align:center;color:var(--r)">Erro ao carregar perfil. Faça login novamente.</div>'; return; }
+  const role = currentUser.user_metadata?.role || 'parent';
+  document.getElementById('portal-title').textContent = role === 'student' ? 'Meu Passaporte' : 'Passaporte do Aluno';
+  await renderPortalBody(currentPortalAccount.student_id, role);
+}
+
+async function renderPortalBody(studentId, role) {
+  const body = document.getElementById('portal-body');
+  body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--t3)">Carregando...</div>';
+  try {
+    // Load student data
+    const { data: s } = await getDb().from('alunos').select('*').eq('id', studentId).single();
+    if (!s) { body.innerHTML = '<div style="padding:40px;text-align:center;color:var(--r)">Aluno não encontrado</div>'; return; }
+    // Load permissions
+    const { data: perms } = await getDb().from('portal_permissions').select('*').eq('student_id', studentId).single();
+    const p = perms || { show_boneco: true, show_planejador: true, show_fundamentos: true };
+    // Load coach notes (parent only)
+    let notesHtml = '';
+    if (role === 'parent') {
+      const { data: notes } = await getDb().from('coach_notes').select('*').eq('student_id', studentId).order('created_at', { ascending: false });
+      if (notes && notes.length) {
+        notesHtml = `<div class="card" style="margin-bottom:14px"><div class="lbl">📝 Anotações do Coach</div>${notes.map(n=>{
+          const dt=new Date(n.created_at).toLocaleDateString('pt-BR');
+          return `<div style="padding:10px 12px;background:var(--bg3);border-radius:var(--rs);margin-bottom:8px"><div style="font-size:11px;color:var(--t3);margin-bottom:4px">${dt}</div><div style="font-size:13px;color:var(--t);line-height:1.5">${n.note.replace(/\n/g,'<br>')}</div></div>`;
+        }).join('')}</div>`;
+      } else {
+        notesHtml = `<div class="card" style="margin-bottom:14px"><div class="lbl">📝 Anotações do Coach</div><div style="font-size:13px;color:var(--t3);text-align:center;padding:8px">Nenhuma anotação ainda</div></div>`;
+      }
+    }
+    const pb = (typeof gP === 'function') ? gP(s.pulseira) : { ball:'🎾', label: s.pulseira };
+    const age = s.data_nascimento ? (new Date().getFullYear() - new Date(s.data_nascimento).getFullYear()) : '—';
+    // Load turma
+    let turmaLabel = '—';
+    if (s.turma_id) {
+      const { data: t } = await getDb().from('turmas').select('label,horario').eq('id', s.turma_id).single();
+      if (t) turmaLabel = t.label + ' · ' + t.horario;
+    }
+    body.innerHTML = `
+    <div style="background:linear-gradient(135deg,var(--gl),var(--gb)20);border:1px solid var(--gb);border-radius:20px;padding:20px;margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+        <div style="width:60px;height:60px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff">${(s.nome||'?').substring(0,2).toUpperCase()}</div>
+        <div>
+          <div style="font-size:22px;font-weight:800;color:var(--t)">${s.nome}</div>
+          <div style="font-size:13px;color:var(--t2);margin-top:3px">${pb.ball} ${pb.label} · ${age} anos</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        ${[['Coach', s.coach_nome||'—'],['Turma', turmaLabel],['Responsável', s.responsavel_nome||'—'],['Contato', s.responsavel_tel||'—']].map(([l,v])=>`
+          <div style="background:rgba(255,255,255,.7);border-radius:10px;padding:10px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);margin-bottom:3px">${l}</div><div style="font-size:12px;font-weight:600;color:var(--t);overflow:hidden;text-overflow:ellipsis">${v}</div></div>
+        `).join('')}
+      </div>
+      ${role === 'parent' ? `
+      <div style="margin-top:12px;padding:10px 14px;background:rgba(255,255,255,.6);border-radius:var(--rs)">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);margin-bottom:6px">Completar cadastro</div>
+        <input id="portal-resp" type="text" placeholder="Nome do responsável" value="${s.responsavel_nome||''}" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bo);background:var(--card);color:var(--t);font-size:13px;margin-bottom:6px;outline:none">
+        <input id="portal-tel" type="tel" placeholder="Telefone/WhatsApp" value="${s.responsavel_tel||''}" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bo);background:var(--card);color:var(--t);font-size:13px;margin-bottom:8px;outline:none">
+        <button onclick="savePortalCadastro('${s.id}')" style="width:100%;padding:9px;border-radius:8px;background:var(--g);border:none;color:#fff;font-size:13px;font-weight:700;cursor:pointer">Salvar dados</button>
+      </div>` : ''}
+    </div>
+    ${p.show_fundamentos ? `
+    <div class="card" style="margin-bottom:14px">
+      <div class="lbl">Fundamentos</div>
+      ${[['Técnico',(s.fundamentos||{}).tecnico||0,'#2563eb'],['Tático',(s.fundamentos||{}).tatico||0,'#d97706'],['Físico',(s.fundamentos||{}).fisico||0,'#059669'],['Mental',(s.fundamentos||{}).mental||0,'#7c3aed']].map(([n,v,c])=>`<div class="pr"><div class="pn">${n}</div><div class="pt"><div class="pf" style="width:${v}%;background:${c}"></div></div><div class="pv" style="color:${c}">${v}</div></div>`).join('')}
+    </div>` : ''}
+    ${p.show_boneco ? `
+    <div class="card" style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span class="lbl" style="margin:0">Skill Avatar</span><span style="font-size:13px;font-weight:700;color:var(--a)">${s.reveal_pct||0}% revelado</span></div>
+      <div style="text-align:center;padding:10px;color:var(--t3);font-size:13px">🎾 ${s.reveal_pct||0}% do potencial revelado · ⚡ ${s.xp_total||0} XP</div>
+    </div>` : ''}
+    ${notesHtml}
+    `;
+  } catch(e) { body.innerHTML = '<div style="padding:40px;text-align:center;color:var(--r)">Erro ao carregar dados</div>'; console.error(e); }
+}
+
+async function savePortalCadastro(studentId) {
+  const resp = document.getElementById('portal-resp')?.value?.trim();
+  const tel  = document.getElementById('portal-tel')?.value?.trim();
+  if (!resp && !tel) return;
+  const { error } = await getDb().from('alunos').update({ responsavel_nome: resp, responsavel_tel: tel }).eq('id', studentId);
+  if (error) { toast('Erro ao salvar ⚠️'); } else { toast('Dados salvos ✓'); }
+}
+
+</script>
+
 </body>
 </html>
