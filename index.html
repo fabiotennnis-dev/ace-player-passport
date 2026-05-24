@@ -3963,11 +3963,19 @@ async function loadPresencaHoje() {
 // ══════════════════════════════════════════════════════════════
 
 // ── Copiar link do portal ──
+function getAppBase() {
+  const h = window.location.hostname;
+  // If running on the actual app domain, use current URL
+  if (h !== 'vercel.com' && h !== 'localhost' && h !== '127.0.0.1') {
+    return window.location.origin + window.location.pathname.replace(/\/+$/, '');
+  }
+  // Fallback to known production URL
+  return 'https://ace-player-passport-8io7x3ayg-fabiotennnis-6295s-projects.vercel.app';
+}
 function copyPortalLink(studentId) {
   const s = gSt(studentId);
   if (!s || !s.access_code) { toast('Código não encontrado'); return; }
-  const base = window.location.origin + window.location.pathname;
-  const link = base + '?code=' + s.access_code;
+  const link = getAppBase() + '?code=' + s.access_code;
   navigator.clipboard.writeText(link).then(() => toast('Link copiado! 📋')).catch(() => {
     prompt('Copie o link:', link);
   });
@@ -3985,10 +3993,9 @@ function filterCodigos(q) {
   renderCodigos(f ? codigosAll.filter(s => s.nome.toLowerCase().includes(f)) : codigosAll);
 }
 function renderCodigos(list) {
-  const base = window.location.origin + window.location.pathname;
   document.getElementById('codigos-list').innerHTML = list.length ? list.map(s => {
     const p = gP(s.pulseira);
-    const link = base + '?code=' + (s.access_code || '—');
+    const link = getAppBase() + '?code=' + (s.access_code || '—');
     return `<div style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--bo)">
       <div class="rav" style="background:${s.cor};width:36px;height:36px;font-size:11px;flex-shrink:0">${ini(s.nome)}<div class="rb2">${p.ball}</div></div>
       <div style="flex:1;min-width:0">
