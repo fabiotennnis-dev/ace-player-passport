@@ -2437,9 +2437,11 @@ ${s.apto ? `
   </div>
   <div style="font-size:11px;color:var(--t3)">Envie este código ou link ao responsável para que ele crie o acesso no app.</div>
 </div>
-<div id="coach-notes-section" style="margin-top:14px"></div>`;
+<div id="coach-notes-section" style="margin-top:14px"></div>
+<div id="parent-messages-section" style="margin-top:14px"></div>`;
 opnM('m-profile');
-loadCoachNotes(sid);}
+loadCoachNotes(sid);
+loadParentMessages(sid);}
 
 // ── CONFIRMAR AVANÇO DE BOLA ──
 function confirmarAvancoBola(studentId) {
@@ -4055,6 +4057,35 @@ async function deleteCoachNote(noteId, studentId) {
   loadCoachNotes(studentId);
 }
 
+async function loadParentMessages(studentId) {
+  const el = document.getElementById('parent-messages-section');
+  if (!el) return;
+  try {
+    const { data, error } = await getDb().from('parent_messages').select('*').eq('student_id', studentId).order('created_at', { ascending: false });
+    const msgs = error ? [] : (data || []);
+    if (!msgs.length) { el.innerHTML = ''; return; }
+    el.innerHTML = `
+    <div style="padding:16px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--rr)">
+      <div class="lbl" style="margin-bottom:12px;color:#1d4ed8">💬 Mensagens dos Responsáveis (${msgs.length})</div>
+      ${msgs.map(m => {
+        const dt = new Date(m.created_at).toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+        return `<div style="padding:10px 12px;background:#fff;border:1px solid #bfdbfe;border-radius:var(--rs);margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px">
+            <div style="font-size:11px;color:var(--t3)">${dt} · ${m.author_email||'Responsável'}</div>
+            ${!m.read_by_coach ? `<button onclick="markParentMsgRead('${m.id}','${studentId}')" style="border:none;background:var(--g);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;cursor:pointer">Marcar lida</button>` : '<span style="font-size:10px;color:var(--g);font-weight:700">✓ Lida</span>'}
+          </div>
+          <div style="font-size:13px;color:var(--t);line-height:1.5">${m.message.replace(/\n/g,'<br>')}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  } catch(e) { el.innerHTML = ''; }
+}
+
+async function markParentMsgRead(msgId, studentId) {
+  await getDb().from('parent_messages').update({ read_by_coach: true }).eq('id', msgId);
+  loadParentMessages(studentId);
+}
+
 // ── Portal Register (tela de registro para pais) ──
 let portalRegisterStudent = null;
 function showPortalRegister(code) {
@@ -4143,76 +4174,148 @@ async function renderPortalBody(studentId, role) {
   const body = document.getElementById('portal-body');
   body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--t3)">Carregando...</div>';
   try {
-    // Load student data
     const { data: s } = await getDb().from('alunos').select('*').eq('id', studentId).single();
     if (!s) { body.innerHTML = '<div style="padding:40px;text-align:center;color:var(--r)">Aluno não encontrado</div>'; return; }
-    // Load permissions
     const { data: perms } = await getDb().from('portal_permissions').select('*').eq('student_id', studentId).single();
     const p = perms || { show_boneco: true, show_planejador: true, show_fundamentos: true };
-    // Load coach notes (parent only)
+    // Coach notes
     let notesHtml = '';
-    if (role === 'parent') {
-      const { data: notes } = await getDb().from('coach_notes').select('*').eq('student_id', studentId).order('created_at', { ascending: false });
-      if (notes && notes.length) {
-        notesHtml = `<div class="card" style="margin-bottom:14px"><div class="lbl">📝 Anotações do Coach</div>${notes.map(n=>{
-          const dt=new Date(n.created_at).toLocaleDateString('pt-BR');
-          return `<div style="padding:10px 12px;background:var(--bg3);border-radius:var(--rs);margin-bottom:8px"><div style="font-size:11px;color:var(--t3);margin-bottom:4px">${dt}</div><div style="font-size:13px;color:var(--t);line-height:1.5">${n.note.replace(/\n/g,'<br>')}</div></div>`;
-        }).join('')}</div>`;
-      } else {
-        notesHtml = `<div class="card" style="margin-bottom:14px"><div class="lbl">📝 Anotações do Coach</div><div style="font-size:13px;color:var(--t3);text-align:center;padding:8px">Nenhuma anotação ainda</div></div>`;
-      }
+    const { data: notes } = await getDb().from('coach_notes').select('*').eq('student_id', studentId).order('created_at', { ascending: false });
+    if (notes && notes.length) {
+      notesHtml = `<div class="card" style="margin-bottom:14px"><div class="lbl">📝 Anotações do Coach</div>${notes.map(n=>{
+        const dt=new Date(n.created_at).toLocaleDateString('pt-BR');
+        return `<div style="padding:10px 12px;background:var(--bg3);border-radius:var(--rs);margin-bottom:8px"><div style="font-size:11px;color:var(--t3);margin-bottom:4px">${dt}</div><div style="font-size:13px;color:var(--t);line-height:1.5">${n.note.replace(/\n/g,'<br>')}</div></div>`;
+      }).join('')}</div>`;
     }
+    // Parent messages history
+    const { data: pmsgs } = await getDb().from('parent_messages').select('*').eq('student_id', studentId).order('created_at', { ascending: false });
     const pb = (typeof gP === 'function') ? gP(s.pulseira) : { ball:'🎾', label: s.pulseira };
-    const age = s.data_nascimento ? (new Date().getFullYear() - new Date(s.data_nascimento).getFullYear()) : '—';
-    // Load turma
-    let turmaLabel = '—';
+    const nasc = s.data_nascimento ? new Date(s.data_nascimento) : null;
+    const age = nasc ? (new Date().getFullYear() - nasc.getFullYear()) : '—';
+    const nascFmt = nasc ? nasc.toLocaleDateString('pt-BR') : '—';
+    const genMap = { M:'Masculino', F:'Feminino', '':'—' };
+    let turmaLabel = '—', turmaHorario = '—';
     if (s.turma_id) {
       const { data: t } = await getDb().from('turmas').select('label,horario').eq('id', s.turma_id).single();
-      if (t) turmaLabel = t.label + ' · ' + t.horario;
+      if (t) { turmaLabel = t.label; turmaHorario = t.horario; }
     }
+    const portalEmail = currentUser?.email || '—';
+
     body.innerHTML = `
+    <!-- CABEÇALHO DO ALUNO -->
     <div style="background:linear-gradient(135deg,var(--gl),var(--gb)20);border:1px solid var(--gb);border-radius:20px;padding:20px;margin-bottom:16px">
       <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
-        <div style="width:60px;height:60px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff">${(s.nome||'?').substring(0,2).toUpperCase()}</div>
+        <div style="width:60px;height:60px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;flex-shrink:0">${(s.nome||'?').substring(0,2).toUpperCase()}</div>
         <div>
-          <div style="font-size:22px;font-weight:800;color:var(--t)">${s.nome}</div>
-          <div style="font-size:13px;color:var(--t2);margin-top:3px">${pb.ball} ${pb.label} · ${age} anos</div>
+          <div style="font-size:20px;font-weight:800;color:var(--t)">${s.nome}</div>
+          <div style="font-size:13px;color:var(--t2);margin-top:2px">${pb.ball} ${pb.label}</div>
+          <div style="font-size:12px;color:var(--t3);margin-top:1px">Coach ${s.coach_nome||'—'} · ${turmaLabel}</div>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        ${[['Coach', s.coach_nome||'—'],['Turma', turmaLabel],['Responsável', s.responsavel_nome||'—'],['Contato', s.responsavel_tel||'—']].map(([l,v])=>`
-          <div style="background:rgba(255,255,255,.7);border-radius:10px;padding:10px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);margin-bottom:3px">${l}</div><div style="font-size:12px;font-weight:600;color:var(--t);overflow:hidden;text-overflow:ellipsis">${v}</div></div>
-        `).join('')}
+      <!-- INFO GRID -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+        ${[
+          ['Idade', age + (age!=='—'?' anos':'')],
+          ['Nascimento', nascFmt],
+          ['Gênero', genMap[s.gen||'']||'—'],
+          ['Horário', turmaHorario],
+        ].map(([l,v])=>`<div style="background:rgba(255,255,255,.7);border-radius:10px;padding:10px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);margin-bottom:3px">${l}</div><div style="font-size:13px;font-weight:600;color:var(--t)">${v}</div></div>`).join('')}
       </div>
-      ${role === 'parent' ? `
-      <div style="margin-top:12px;padding:10px 14px;background:rgba(255,255,255,.6);border-radius:var(--rs)">
-        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);margin-bottom:6px">Completar cadastro</div>
-        <input id="portal-resp" type="text" placeholder="Nome do responsável" value="${s.responsavel_nome||''}" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bo);background:var(--card);color:var(--t);font-size:13px;margin-bottom:6px;outline:none">
-        <input id="portal-tel" type="tel" placeholder="Telefone/WhatsApp" value="${s.responsavel_tel||''}" style="width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--bo);background:var(--card);color:var(--t);font-size:13px;margin-bottom:8px;outline:none">
-        <button onclick="savePortalCadastro('${s.id}')" style="width:100%;padding:9px;border-radius:8px;background:var(--g);border:none;color:#fff;font-size:13px;font-weight:700;cursor:pointer">Salvar dados</button>
-      </div>` : ''}
+      <!-- DADOS DO RESPONSÁVEL -->
+      <div style="background:rgba(255,255,255,.6);border-radius:var(--rs);padding:12px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t2);margin-bottom:10px">📋 Dados do Responsável</div>
+        <div style="display:grid;gap:7px">
+          <input id="portal-nome" type="text" placeholder="Nome completo do responsável *" value="${s.responsavel_nome||''}" style="width:100%;padding:9px 12px;border-radius:9px;border:1.5px solid var(--bo);background:var(--card);color:var(--t);font-size:13px;outline:none">
+          <input id="portal-email" type="email" placeholder="E-mail do responsável" value="${s.responsavel_email||portalEmail}" style="width:100%;padding:9px 12px;border-radius:9px;border:1.5px solid var(--bo);background:var(--card);color:var(--t);font-size:13px;outline:none">
+          <input id="portal-tel" type="tel" placeholder="WhatsApp / Telefone *" value="${s.responsavel_tel||''}" style="width:100%;padding:9px 12px;border-radius:9px;border:1.5px solid var(--bo);background:var(--card);color:var(--t);font-size:13px;outline:none">
+        </div>
+        <!-- DADOS DO ALUNO -->
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t2);margin:12px 0 8px">🎾 Dados do Aluno</div>
+        <div style="display:grid;gap:7px">
+          <input id="portal-aluno-nome" type="text" placeholder="Nome completo do aluno *" value="${s.nome||''}" style="width:100%;padding:9px 12px;border-radius:9px;border:1.5px solid var(--bo);background:var(--card);color:var(--t);font-size:13px;outline:none">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+            <input id="portal-nasc" type="date" value="${s.data_nascimento||''}" style="width:100%;padding:9px 12px;border-radius:9px;border:1.5px solid var(--bo);background:var(--card);color:var(--t);font-size:13px;outline:none">
+            <select id="portal-gen" style="width:100%;padding:9px 12px;border-radius:9px;border:1.5px solid var(--bo);background:var(--card);color:var(--t);font-size:13px;outline:none">
+              <option value="">Gênero</option>
+              <option value="M" ${s.gen==='M'?'selected':''}>Masculino</option>
+              <option value="F" ${s.gen==='F'?'selected':''}>Feminino</option>
+            </select>
+          </div>
+        </div>
+        <button onclick="savePortalCadastro('${s.id}')" style="width:100%;padding:10px;border-radius:9px;background:var(--g);border:none;color:#fff;font-size:13px;font-weight:700;cursor:pointer;margin-top:10px">💾 Salvar dados</button>
+      </div>
     </div>
+
+    <!-- FUNDAMENTOS -->
     ${p.show_fundamentos ? `
     <div class="card" style="margin-bottom:14px">
       <div class="lbl">Fundamentos</div>
       ${[['Técnico',(s.fundamentos||{}).tecnico||0,'#2563eb'],['Tático',(s.fundamentos||{}).tatico||0,'#d97706'],['Físico',(s.fundamentos||{}).fisico||0,'#059669'],['Mental',(s.fundamentos||{}).mental||0,'#7c3aed']].map(([n,v,c])=>`<div class="pr"><div class="pn">${n}</div><div class="pt"><div class="pf" style="width:${v}%;background:${c}"></div></div><div class="pv" style="color:${c}">${v}</div></div>`).join('')}
     </div>` : ''}
+
+    <!-- PROGRESSO -->
     ${p.show_boneco ? `
     <div class="card" style="margin-bottom:14px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span class="lbl" style="margin:0">Skill Avatar</span><span style="font-size:13px;font-weight:700;color:var(--a)">${s.reveal_pct||0}% revelado</span></div>
-      <div style="text-align:center;padding:10px;color:var(--t3);font-size:13px">🎾 ${s.reveal_pct||0}% do potencial revelado · ⚡ ${s.xp_total||0} XP</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="lbl" style="margin:0">Progresso</span><span style="font-size:13px;font-weight:700;color:var(--a)">⚡ ${s.xp_total||0} XP</span></div>
+      <div style="height:10px;background:var(--bg3);border-radius:5px;overflow:hidden">
+        <div style="width:${Math.min((s.reveal_pct||0),100)}%;height:100%;background:linear-gradient(90deg,var(--g),#00c070);border-radius:5px"></div>
+      </div>
+      <div style="font-size:12px;color:var(--t3);margin-top:6px;text-align:center">${s.reveal_pct||0}% do Skill Avatar revelado</div>
     </div>` : ''}
+
+    <!-- ANOTAÇÕES DO COACH -->
     ${notesHtml}
-    `;
+
+    <!-- MENSAGEM PARA O COACH -->
+    <div class="card" style="margin-bottom:14px">
+      <div class="lbl">💬 Enviar mensagem ao Coach</div>
+      <div style="font-size:12px;color:var(--t3);margin-bottom:10px">Dúvidas, observações ou recados — o coach e a administração receberão sua mensagem.</div>
+      <textarea id="portal-msg" placeholder="Escreva sua mensagem aqui..." rows="3" style="width:100%;padding:10px 12px;border-radius:var(--rs);border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-family:inherit;resize:vertical;outline:none;margin-bottom:8px"></textarea>
+      <button onclick="sendParentMessage('${s.id}','${s.academia_id||''}')" style="width:100%;padding:11px;border-radius:var(--rs);background:var(--b);border:none;color:#fff;font-size:13px;font-weight:700;cursor:pointer">📨 Enviar mensagem</button>
+      ${pmsgs && pmsgs.length ? `
+      <div style="margin-top:14px"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:8px">Mensagens enviadas</div>
+      ${pmsgs.map(m=>{
+        const dt=new Date(m.created_at).toLocaleDateString('pt-BR');
+        return `<div style="padding:9px 11px;background:var(--bg3);border-radius:var(--rs);margin-bottom:6px;border-left:3px solid var(--b)"><div style="font-size:11px;color:var(--t3);margin-bottom:3px">${dt} · ${m.read_by_coach?'<span style="color:var(--g)">✓ Lida pelo coach</span>':'Aguardando'}</div><div style="font-size:13px;color:var(--t)">${m.message.replace(/\n/g,'<br>')}</div></div>`;
+      }).join('')}</div>` : ''}
+    </div>`;
   } catch(e) { body.innerHTML = '<div style="padding:40px;text-align:center;color:var(--r)">Erro ao carregar dados</div>'; console.error(e); }
 }
 
 async function savePortalCadastro(studentId) {
-  const resp = document.getElementById('portal-resp')?.value?.trim();
-  const tel  = document.getElementById('portal-tel')?.value?.trim();
-  if (!resp && !tel) return;
-  const { error } = await getDb().from('alunos').update({ responsavel_nome: resp, responsavel_tel: tel }).eq('id', studentId);
+  const nome  = document.getElementById('portal-aluno-nome')?.value?.trim();
+  const resp  = document.getElementById('portal-nome')?.value?.trim();
+  const email = document.getElementById('portal-email')?.value?.trim();
+  const tel   = document.getElementById('portal-tel')?.value?.trim();
+  const nasc  = document.getElementById('portal-nasc')?.value;
+  const gen   = document.getElementById('portal-gen')?.value;
+  if (!resp && !tel && !nome) { toast('Preencha ao menos o nome e contato'); return; }
+  const upd = {};
+  if (nome)  upd.nome = nome;
+  if (resp)  upd.responsavel_nome = resp;
+  if (email) upd.responsavel_email = email;
+  if (tel)   upd.responsavel_tel = tel;
+  if (nasc)  upd.data_nascimento = nasc;
+  if (gen)   upd.gen = gen;
+  const { error } = await getDb().from('alunos').update(upd).eq('id', studentId);
   if (error) { toast('Erro ao salvar ⚠️'); } else { toast('Dados salvos ✓'); }
+}
+
+async function sendParentMessage(studentId, academiaId) {
+  const inp = document.getElementById('portal-msg');
+  const msg = inp?.value?.trim();
+  if (!msg) { toast('Escreva uma mensagem antes de enviar'); return; }
+  const { error } = await getDb().from('parent_messages').insert({
+    student_id: studentId,
+    academia_id: academiaId || null,
+    message: msg,
+    author_email: currentUser?.email || ''
+  });
+  if (error) { toast('Erro ao enviar ⚠️'); return; }
+  inp.value = '';
+  toast('Mensagem enviada ao coach ✓');
+  // Refresh to show in history
+  await renderPortalBody(studentId, 'parent');
 }
 
 </script>
