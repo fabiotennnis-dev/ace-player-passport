@@ -217,7 +217,7 @@ let _db = null;
 function getDb() {
   if (!_db && window.supabase) {
     _db = window.supabase.createClient(SB_URL, SB_KEY, {
-      auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: false }
+      auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: true }
     });
   }
   return _db;
@@ -241,8 +241,21 @@ async function initApp() {
   if (!db) { showLogin(); return; }
 
   // Check for ?code= param — portal registration flow
-  const urlCode = new URLSearchParams(window.location.search).get('code');
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlCode = urlParams.get('code');
   if (urlCode) { showPortalRegister(urlCode); return; }
+
+  // Check for ?coach_invite= param — coach registration flow
+  const urlCoachInvite = urlParams.get('coach_invite');
+  if (urlCoachInvite) { showCoachRegister(urlCoachInvite); return; }
+
+  // Listen for PASSWORD_RECOVERY event (user clicked reset email link)
+  db.auth.onAuthStateChange((event, session) => {
+    if (event === 'PASSWORD_RECOVERY') {
+      currentUser = session?.user || null;
+      showNewPassScreen();
+    }
+  });
 
   try {
     const { data: { session } } = await db.auth.getSession();
@@ -2026,6 +2039,16 @@ async function gerarPassportPDF(alunoId) {
       </div>
       <div id="login-err" style="font-size:13px;color:var(--r);font-weight:500;margin-bottom:12px;min-height:18px">Erro de conexão. Tente novamente.</div>
       <button id="login-btn" onclick="doLogin()" style="width:100%;padding:14px;border-radius:12px;background:var(--g);border:none;color:#fff;font-family:&#39;Syne&#39;,sans-serif;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(0,135,90,.3)">Entrar</button>
+      <div style="text-align:center;margin-top:14px">
+        <a href="#" onclick="toggleForgotPass();return false;" style="font-size:13px;color:var(--t3);text-decoration:none">Esqueci minha senha</a>
+      </div>
+      <!-- forgot password section (inline, hidden by default) -->
+      <div id="forgot-pass-section" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--bo)">
+        <div style="font-size:12px;font-weight:700;color:var(--t2);margin-bottom:8px">Recuperar senha</div>
+        <input id="fp-email" type="email" placeholder="seu@email.com" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:14px;outline:none;margin-bottom:8px">
+        <div id="fp-msg" style="font-size:12px;min-height:16px;margin-bottom:8px"></div>
+        <button onclick="doForgotPass()" style="width:100%;padding:11px;border-radius:10px;background:var(--b);border:none;color:#fff;font-size:13px;font-weight:700;cursor:pointer">📧 Enviar link de recuperação</button>
+      </div>
     </div>
     <div style="text-align:center;margin-top:16px">
       <a href="#" onclick="showPortalRegister('');return false;" style="font-size:14px;color:var(--g);font-weight:700;text-decoration:none">Sou responsável ou aluno → Criar acesso</a>
@@ -3401,8 +3424,9 @@ function renderCoachListAc() {
         '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3);flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>' +
       '</div>' +
       '<div style="display:flex;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--bo)">' +
-        '<button onclick="viewCoachProfile(\'' + c.nome + '\')" style="flex:1;padding:7px;border-radius:10px;background:var(--bg3);border:1px solid var(--bo);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer">👥 Ver alunos</button>' +
-        '<button onclick="deleteCoach(\'' + c.id + '\')" style="flex:1;padding:7px;border-radius:10px;background:var(--rl);border:1px solid var(--r);color:var(--r);font-size:12px;font-weight:600;cursor:pointer">🗑️ Remover</button>' +
+        '<button onclick="viewCoachProfile(\'' + c.nome + '\')" style="flex:1;padding:7px;border-radius:10px;background:var(--bg3);border:1px solid var(--bo);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer">👥 Alunos</button>' +
+        (c.email ? '<button onclick="genCoachInvite(\'' + c.id + '\',\'' + c.nome.replace(/'/g,'\\\'') + '\')" style="flex:1;padding:7px;border-radius:10px;background:var(--bl);border:1px solid rgba(37,99,235,.3);color:var(--b);font-size:12px;font-weight:600;cursor:pointer">📨 Invite</button>' : '<button onclick="openCadCoach(\'' + c.id + '\')" style="flex:1;padding:7px;border-radius:10px;background:var(--bg3);border:1px solid var(--bo);color:var(--t3);font-size:12px;font-weight:600;cursor:pointer">+ E-mail</button>') +
+        '<button onclick="deleteCoach(\'' + c.id + '\')" style="flex:1;padding:7px;border-radius:10px;background:var(--rl);border:1px solid var(--r);color:var(--r);font-size:12px;font-weight:600;cursor:pointer">🗑️</button>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -3534,6 +3558,11 @@ function openCadCoach(id) {
   html2 += '<div style="font-size:12px;color:var(--t2)">Nesta fun&ccedil;&atilde;o, seu WhatsApp e e-mail ficam dispon&iacute;veis para contato dos respons&aacute;veis.</div></div></div>';
 
   if (c) {
+    if (c.email) {
+      html2 += '<button onclick="genCoachInvite(\'' + c.id + '\',\'' + c.nome.replace(/'/g,'\\\'') + '\')" style="width:100%;padding:12px;border-radius:var(--rs);border:1px solid var(--b);background:var(--bl);color:var(--b);font-size:13px;font-weight:600;cursor:pointer;margin-top:8px">📨 Gerar link de acesso para este coach</button>';
+    } else {
+      html2 += '<div style="font-size:12px;color:var(--t3);text-align:center;margin-top:8px;padding:10px;background:var(--bg3);border-radius:var(--rs)">⚠️ Preencha o e-mail para gerar link de acesso</div>';
+    }
     html2 += '<button onclick="deleteCoach(' + c.id + ')" style="width:100%;padding:12px;border-radius:var(--rs);border:1px solid var(--r);background:var(--rl);color:var(--r);font-size:13px;font-weight:600;cursor:pointer;margin-top:8px">Remover coach</button>';
   }
 
@@ -3917,6 +3946,61 @@ async function loadPresencaHoje() {
 </div>
 
 <!-- ══ PORTAL: TELA DE REGISTRO ══ -->
+<!-- ══ NOVA SENHA (chegou pelo link de recuperação) ══ -->
+<div id="new-pass-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:999;flex-direction:column;align-items:center;justify-content:center;padding:32px">
+  <div style="width:100%;max-width:360px">
+    <div style="text-align:center;margin-bottom:32px">
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:32px;color:var(--g);letter-spacing:.08em;margin-bottom:8px">ACE ◆</div>
+      <div style="font-size:16px;font-weight:700;color:var(--t)">Criar nova senha</div>
+      <div style="font-size:13px;color:var(--t2);margin-top:4px">Escolha uma senha segura</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--bo);border-radius:20px;padding:28px;box-shadow:var(--shadow-lg)">
+      <div style="margin-bottom:14px">
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t2);display:block;margin-bottom:6px">Nova senha</label>
+        <input id="np-pass" type="password" placeholder="mínimo 6 caracteres" style="width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:15px;outline:none">
+      </div>
+      <div style="margin-bottom:20px">
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t2);display:block;margin-bottom:6px">Confirmar senha</label>
+        <input id="np-pass2" type="password" placeholder="repita a senha" style="width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:15px;outline:none">
+      </div>
+      <div id="np-err" style="font-size:13px;color:var(--r);font-weight:500;margin-bottom:12px;min-height:18px"></div>
+      <button id="np-btn" onclick="doSaveNewPass()" style="width:100%;padding:14px;border-radius:12px;background:var(--g);border:none;color:#fff;font-size:15px;font-weight:700;cursor:pointer">Salvar nova senha</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ COACH REGISTRATION (chegou pelo link de convite) ══ -->
+<div id="coach-register-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:999;flex-direction:column;align-items:center;justify-content:center;padding:32px">
+  <div style="width:100%;max-width:360px">
+    <div style="text-align:center;margin-bottom:32px">
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:32px;color:var(--g);letter-spacing:.08em;margin-bottom:8px">ACE ◆</div>
+      <div style="font-size:16px;font-weight:700;color:var(--t)">Acesso Coach</div>
+      <div style="font-size:13px;color:var(--t2);margin-top:4px" id="cr-subtitle">Crie sua senha de acesso</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--bo);border-radius:20px;padding:28px;box-shadow:var(--shadow-lg)">
+      <div id="cr-coach-info" style="display:none;padding:12px;background:var(--gl);border:1px solid var(--gb);border-radius:12px;margin-bottom:16px;text-align:center">
+        <div style="font-size:13px;font-weight:700;color:var(--g)" id="cr-coach-name"></div>
+        <div style="font-size:11px;color:var(--t2);margin-top:2px" id="cr-coach-detail"></div>
+      </div>
+      <div id="cr-loading" style="text-align:center;padding:20px;color:var(--t3);font-size:13px">Verificando convite...</div>
+      <div id="cr-form" style="display:none">
+        <div style="margin-bottom:14px">
+          <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t2);display:block;margin-bottom:6px">E-mail</label>
+          <input id="cr-email" type="email" placeholder="seu@email.com" style="width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:15px;outline:none">
+        </div>
+        <div style="margin-bottom:20px">
+          <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t2);display:block;margin-bottom:6px">Criar senha</label>
+          <input id="cr-pass" type="password" placeholder="mínimo 6 caracteres" style="width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:15px;outline:none">
+        </div>
+        <div id="cr-err" style="font-size:13px;color:var(--r);font-weight:500;margin-bottom:12px;min-height:18px"></div>
+        <button id="cr-btn" onclick="doCoachRegister()" style="width:100%;padding:14px;border-radius:12px;background:var(--g);border:none;color:#fff;font-size:15px;font-weight:700;cursor:pointer">Criar acesso</button>
+      </div>
+      <div id="cr-error-box" style="display:none;text-align:center;padding:16px;color:var(--r);font-size:13px;font-weight:500"></div>
+      <div style="text-align:center;margin-top:14px"><a href="#" onclick="document.getElementById('coach-register-screen').style.display='none';showLogin();return false;" style="color:var(--t3);font-size:13px">Voltar ao login →</a></div>
+    </div>
+  </div>
+</div>
+
 <div id="portal-register-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:999;flex-direction:column;align-items:center;justify-content:center;padding:32px">
   <div style="width:100%;max-width:360px">
     <div style="text-align:center;margin-bottom:32px">
@@ -4316,6 +4400,208 @@ async function sendParentMessage(studentId, academiaId) {
   toast('Mensagem enviada ao coach ✓');
   // Refresh to show in history
   await renderPortalBody(studentId, 'parent');
+}
+
+// ══════════════════════════════════════════════════════════════
+// RECUPERAÇÃO DE SENHA
+// ══════════════════════════════════════════════════════════════
+
+function toggleForgotPass() {
+  const sec = document.getElementById('forgot-pass-section');
+  if (!sec) return;
+  const isHidden = sec.style.display === 'none';
+  sec.style.display = isHidden ? 'block' : 'none';
+  if (isHidden) {
+    const em = document.getElementById('login-email').value.trim();
+    if (em) document.getElementById('fp-email').value = em;
+    document.getElementById('fp-msg').textContent = '';
+  }
+}
+
+async function doForgotPass() {
+  const email = document.getElementById('fp-email').value.trim();
+  const msg   = document.getElementById('fp-msg');
+  if (!email) { msg.innerHTML = '<span style="color:var(--r)">Informe seu e-mail</span>'; return; }
+  msg.innerHTML = '<span style="color:var(--t3)">Enviando...</span>';
+  try {
+    const redirectTo = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? window.location.origin
+      : 'https://ace-player-passport.vercel.app';
+    const { error } = await getDb().auth.resetPasswordForEmail(email, { redirectTo });
+    if (error) {
+      msg.innerHTML = '<span style="color:var(--r)">Erro: ' + error.message + '</span>';
+    } else {
+      msg.innerHTML = '<span style="color:var(--g)">✓ Link enviado! Verifique seu e-mail.</span>';
+    }
+  } catch(e) {
+    msg.innerHTML = '<span style="color:var(--r)">Erro de conexão</span>';
+  }
+}
+
+function showNewPassScreen() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-container').style.display = 'none';
+  const el = document.getElementById('portal-app');
+  if (el) el.style.display = 'none';
+  const cr = document.getElementById('coach-register-screen');
+  if (cr) cr.style.display = 'none';
+  const np = document.getElementById('new-pass-screen');
+  if (np) { np.style.display = 'flex'; }
+  document.getElementById('np-err').textContent = '';
+}
+
+async function doSaveNewPass() {
+  const pass  = document.getElementById('np-pass').value;
+  const pass2 = document.getElementById('np-pass2').value;
+  const err   = document.getElementById('np-err');
+  const btn   = document.getElementById('np-btn');
+  if (pass.length < 6) { err.textContent = 'Senha mínimo 6 caracteres'; return; }
+  if (pass !== pass2)  { err.textContent = 'As senhas não coincidem'; return; }
+  btn.textContent = 'Salvando...'; btn.disabled = true; err.textContent = '';
+  try {
+    const { error } = await getDb().auth.updateUser({ password: pass });
+    if (error) {
+      err.textContent = error.message;
+      btn.textContent = 'Salvar nova senha'; btn.disabled = false;
+    } else {
+      toast('Senha atualizada com sucesso ✓');
+      // Redirect to login after short delay
+      setTimeout(async () => {
+        await getDb().auth.signOut();
+        document.getElementById('new-pass-screen').style.display = 'none';
+        showLogin();
+      }, 1500);
+    }
+  } catch(e) {
+    err.textContent = e.message || 'Erro ao salvar senha';
+    btn.textContent = 'Salvar nova senha'; btn.disabled = false;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// COACH INVITE — GERAR LINK
+// ══════════════════════════════════════════════════════════════
+
+function genInviteToken() {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let t = '';
+  for (let i = 0; i < 24; i++) t += chars[Math.floor(Math.random() * chars.length)];
+  return t;
+}
+
+async function genCoachInvite(coachId, coachNome) {
+  if (!currentAcademia) { toast('Academia não carregada'); return; }
+  // Find email of this coach
+  const c = coaches.find(x => String(x.id) === String(coachId));
+  if (!c || !c.email) { toast('Este coach não tem e-mail cadastrado'); return; }
+
+  const token = genInviteToken();
+  try {
+    const { error } = await getDb().from('coach_invites').insert({
+      token,
+      academia_id:     currentAcademia.id,
+      coach_record_id: String(coachId),
+      email:           c.email
+    });
+    if (error) { toast('Erro ao gerar convite: ' + error.message); return; }
+
+    const base = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? window.location.origin
+      : 'https://ace-player-passport.vercel.app';
+    const link = base + '?coach_invite=' + token;
+
+    // Copy to clipboard
+    try {
+      await navigator.clipboard.writeText(link);
+      toast('Link copiado! 📋 Envie para ' + (coachNome || c.nome));
+    } catch(e) {
+      // Fallback: show in prompt
+      prompt('Copie o link de acesso para ' + (coachNome || c.nome) + ':', link);
+    }
+  } catch(e) {
+    toast('Erro ao gerar convite');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// COACH REGISTER — CADASTRO VIA LINK DE CONVITE
+// ══════════════════════════════════════════════════════════════
+
+let coachInviteData = null; // { invite_id, academia_id, coach_record_id, email }
+
+async function showCoachRegister(token) {
+  const screen = document.getElementById('coach-register-screen');
+  if (!screen) { showLogin(); return; }
+  screen.style.display = 'flex';
+
+  try {
+    const { data, error } = await getDb().rpc('lookup_coach_invite', { p_token: token });
+    const row = data && data[0];
+
+    document.getElementById('cr-loading').style.display = 'none';
+
+    if (error || !row) {
+      document.getElementById('cr-error-box').style.display = 'block';
+      document.getElementById('cr-error-box').textContent = 'Link de convite inválido ou já utilizado.';
+      return;
+    }
+
+    coachInviteData = { invite_id: row.invite_id, academia_id: row.academia_id, coach_record_id: row.coach_record_id, email: row.email, token };
+    document.getElementById('cr-email').value = row.email || '';
+    document.getElementById('cr-form').style.display = 'block';
+
+    // Pre-fill coach name if possible
+    if (row.coach_name) {
+      document.getElementById('cr-coach-name').textContent = row.coach_name;
+      document.getElementById('cr-coach-info').style.display = 'block';
+      if (row.coach_funcao) document.getElementById('cr-coach-detail').textContent = row.coach_funcao;
+    }
+
+  } catch(e) {
+    document.getElementById('cr-loading').style.display = 'none';
+    document.getElementById('cr-error-box').style.display = 'block';
+    document.getElementById('cr-error-box').textContent = 'Erro ao verificar convite.';
+  }
+}
+
+async function doCoachRegister() {
+  if (!coachInviteData) { toast('Convite inválido'); return; }
+  const email = document.getElementById('cr-email').value.trim();
+  const pass  = document.getElementById('cr-pass').value;
+  const err   = document.getElementById('cr-err');
+  const btn   = document.getElementById('cr-btn');
+  if (!email) { err.textContent = 'Informe seu e-mail'; return; }
+  if (pass.length < 6) { err.textContent = 'Senha mínimo 6 caracteres'; return; }
+  btn.textContent = 'Criando acesso...'; btn.disabled = true; err.textContent = '';
+  try {
+    // 1. Create auth user
+    const { data, error } = await getDb().auth.signUp({
+      email, password: pass,
+      options: { data: { role: 'coach', academia_id: coachInviteData.academia_id } }
+    });
+    if (error) { err.textContent = error.message; btn.textContent = 'Criar acesso'; btn.disabled = false; return; }
+    if (!data.user) { err.textContent = 'Verifique seu e-mail para confirmar o cadastro.'; btn.textContent = 'Criar acesso'; btn.disabled = false; return; }
+
+    // 2. Link to academia in coach_academias
+    await getDb().from('coach_academias').insert({
+      coach_id:   data.user.id,
+      academia_id: coachInviteData.academia_id,
+      ativo:      true
+    });
+
+    // 3. Mark invite as used
+    await getDb().from('coach_invites').update({ used: true }).eq('token', coachInviteData.token);
+
+    // 4. Log in and go to app
+    currentUser = data.user;
+    document.getElementById('coach-register-screen').style.display = 'none';
+    await loadAcademia();
+    showApp();
+    toast('Bem-vindo ao ACE Player Passport! 🎾');
+  } catch(e) {
+    err.textContent = e.message || 'Erro ao criar acesso';
+    btn.textContent = 'Criar acesso'; btn.disabled = false;
+  }
 }
 
 </script>
