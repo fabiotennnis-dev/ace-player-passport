@@ -3589,16 +3589,15 @@ async function saveCoach() {
   if (!funcao) { toast('Selecione a função ⚠️'); return; }
 
   if (editCoachId) {
-    // Update local
-    const c = coaches.find(x => String(x.id) === String(editCoachId));
-    if (c) { c.nome = nome; c.funcao = funcao; c.tel = tel; c.email = email; }
-    // Update Supabase
+    // Update Supabase first
     if (currentUser && currentAcademia) {
       try {
         await getDb().from('coaches_academia').update({ nome, funcao, tel, email })
           .eq('id', String(editCoachId));
       } catch(e) { console.error('updateCoach:', e); }
     }
+    // Reload from DB so local array has fresh data (including email)
+    await loadCoaches();
     toast('Coach atualizado ✓');
   } else {
     const newCoach = { id: Date.now(), nome, funcao, tel, email };
