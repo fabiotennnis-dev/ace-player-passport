@@ -2461,10 +2461,12 @@ ${s.apto ? `
   <div style="font-size:11px;color:var(--t3)">Envie este código ou link ao responsável para que ele crie o acesso no app.</div>
 </div>
 <div id="coach-notes-section" style="margin-top:14px"></div>
-<div id="parent-messages-section" style="margin-top:14px"></div>`;
+<div id="parent-messages-section" style="margin-top:14px"></div>
+<div id="tournament-section" style="margin-top:14px"></div>`;
 opnM('m-profile');
 loadCoachNotes(sid);
-loadParentMessages(sid);}
+loadParentMessages(sid);
+loadTournamentEvals(sid);}
 
 // ── CONFIRMAR AVANÇO DE BOLA ──
 function confirmarAvancoBola(studentId) {
@@ -3928,6 +3930,16 @@ async function loadPresencaHoje() {
 
 <div class="toast" id="toast"></div>
 
+<!-- ══ MODAL: SCOUT PÓS-TORNEIO ══ -->
+<div class="ms" id="m-torneio">
+  <div class="mh">
+    <button class="mb" onclick="clsM('m-torneio')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+    <span style="font-size:16px;font-weight:700;color:var(--t);flex:1;text-align:center" id="m-torneio-title">Scout de Torneio</span>
+    <div style="width:34px"></div>
+  </div>
+  <div class="mb2" id="m-torneio-body" style="overflow-y:auto;padding-bottom:32px"></div>
+</div>
+
 <!-- ══ PORTAL: MODAL CÓDIGOS ══ -->
 <div class="ms" id="m-codigos">
   <div class="mh">
@@ -4623,6 +4635,281 @@ async function doCoachRegister() {
     err.textContent = e.message || 'Erro ao criar acesso';
     btn.textContent = 'Criar acesso'; btn.disabled = false;
   }
+}
+
+// ══════════════════════════════════════════════════════════════
+// SCOUT PÓS-TORNEIO
+// ══════════════════════════════════════════════════════════════
+
+let teForm = {}; // estado do formulário em edição
+let teEditId = null;
+
+// Estrelas 1-5: renderiza botões de seleção
+function teStars(field, val) {
+  return [1,2,3,4,5].map(n => {
+    const on = val >= n;
+    return `<button onclick="setTE('${field}',${n})" style="width:36px;height:36px;border-radius:9px;border:1.5px solid ${on?'var(--g)':'var(--bo)'};background:${on?'var(--gl)':'var(--bg3)'};color:${on?'var(--g)':'var(--t3)'};font-size:15px;font-weight:700;cursor:pointer;transition:all .15s">${n}</button>`;
+  }).join('');
+}
+
+function setTE(field, val) {
+  teForm[field] = val;
+  renderTEForm(teForm._studentId);
+}
+
+// Seção do scout com título
+function teSection(icon, title) {
+  return `<div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--t3);margin:18px 0 10px;display:flex;align-items:center;gap:6px"><span>${icon}</span>${title}</div>`;
+}
+
+// Linha de avaliação 1-5
+function teRow(label, field, val) {
+  return `<div style="margin-bottom:12px">
+    <div style="font-size:13px;font-weight:500;color:var(--t2);margin-bottom:6px">${label}</div>
+    <div style="display:flex;gap:6px">${teStars(field, val||0)}</div>
+  </div>`;
+}
+
+// Linha de contagem numérica
+function teCount(label, field, val) {
+  return `<div style="margin-bottom:12px">
+    <div style="font-size:13px;font-weight:500;color:var(--t2);margin-bottom:6px">${label}</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <button onclick="setTE('${field}',Math.max(0,(teForm['${field}']||0)-1))" style="width:34px;height:34px;border-radius:9px;border:1.5px solid var(--bo);background:var(--bg3);font-size:18px;font-weight:700;color:var(--t2);cursor:pointer">−</button>
+      <span style="font-size:18px;font-weight:800;color:var(--t);min-width:28px;text-align:center">${val||0}</span>
+      <button onclick="setTE('${field}',(teForm['${field}']||0)+1)" style="width:34px;height:34px;border-radius:9px;border:1.5px solid var(--bo);background:var(--bg3);font-size:18px;font-weight:700;color:var(--t2);cursor:pointer">+</button>
+    </div>
+  </div>`;
+}
+
+function renderTEForm(studentId) {
+  const f = teForm;
+  f._studentId = studentId;
+  const body = document.getElementById('m-torneio-body');
+  if (!body) return;
+
+  const notaGeralBtns = [1,2,3,4,5,6,7,8,9,10].map(n => {
+    const on = f.nota_geral === n;
+    const col = n<=4?'var(--r)':n<=6?'#f59e0b':n<=8?'#3b82f6':'var(--g)';
+    return `<button onclick="setTE('nota_geral',${n})" style="flex:1;padding:8px 4px;border-radius:9px;border:1.5px solid ${on?col:'var(--bo)'};background:${on?col+'22':'var(--bg3)'};color:${on?col:'var(--t3)'};font-size:13px;font-weight:800;cursor:pointer">${n}</button>`;
+  }).join('');
+
+  body.innerHTML = `
+  <div style="padding:0 2px">
+
+    ${teSection('📋','Dados da Partida')}
+    <div style="margin-bottom:10px">
+      <div style="font-size:13px;font-weight:500;color:var(--t2);margin-bottom:6px">Nome do torneio *</div>
+      <input id="te-torneio" type="text" placeholder="Ex: Copa Raw Open" value="${f.torneio||''}"
+        oninput="teForm.torneio=this.value"
+        style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:14px;outline:none">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div>
+        <div style="font-size:13px;font-weight:500;color:var(--t2);margin-bottom:6px">Data</div>
+        <input id="te-data" type="date" value="${f.data_partida||''}"
+          oninput="teForm.data_partida=this.value"
+          style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:14px;outline:none">
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:500;color:var(--t2);margin-bottom:6px">Adversário</div>
+        <input id="te-adversario" type="text" placeholder="Nome" value="${f.adversario||''}"
+          oninput="teForm.adversario=this.value"
+          style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:14px;outline:none">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div>
+        <div style="font-size:13px;font-weight:500;color:var(--t2);margin-bottom:6px">Resultado</div>
+        <div style="display:flex;gap:6px">
+          <button onclick="setTE('resultado','vitoria')" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid ${f.resultado==='vitoria'?'var(--g)':'var(--bo)'};background:${f.resultado==='vitoria'?'var(--gl)':'var(--bg3)'};color:${f.resultado==='vitoria'?'var(--g)':'var(--t2)'};font-size:13px;font-weight:700;cursor:pointer">✅ Vitória</button>
+          <button onclick="setTE('resultado','derrota')" style="flex:1;padding:9px;border-radius:10px;border:1.5px solid ${f.resultado==='derrota'?'var(--r)':'var(--bo)'};background:${f.resultado==='derrota'?'var(--rl)':'var(--bg3)'};color:${f.resultado==='derrota'?'var(--r)':'var(--t2)'};font-size:13px;font-weight:700;cursor:pointer">❌ Derrota</button>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:500;color:var(--t2);margin-bottom:6px">Placar</div>
+        <input id="te-placar" type="text" placeholder="6-3, 4-6, 6-2" value="${f.placar||''}"
+          oninput="teForm.placar=this.value"
+          style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:14px;outline:none">
+      </div>
+    </div>
+
+    ${teSection('🎾','Saque')}
+    ${teRow('% 1º saque dentro','saque_primeiro_pct',f.saque_primeiro_pct)}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      ${teCount('Duplas faltas','saque_duplas_faltas',f.saque_duplas_faltas)}
+      ${teCount('Aces','saque_aces',f.saque_aces)}
+    </div>
+    ${teRow('Eficiência no 1º saque','saque_efic_primeiro',f.saque_efic_primeiro)}
+    ${teRow('Eficiência no 2º saque','saque_efic_segundo',f.saque_efic_segundo)}
+
+    ${teSection('↩️','Devolução')}
+    ${teRow('Erros de devolução (1º saque)','dev_erros_primeiro',f.dev_erros_primeiro)}
+    ${teRow('Erros de devolução (2º saque)','dev_erros_segundo',f.dev_erros_segundo)}
+    ${teRow('Agressividade na devolução','dev_agressividade',f.dev_agressividade)}
+
+    ${teSection('⚡','Erros & Winners')}
+    ${teRow('Erros não forçados (1=muitos · 5=poucos)','erros_nao_forcados',f.erros_nao_forcados)}
+    ${teRow('Erros forçados (1=muitos · 5=poucos)','erros_forcados',f.erros_forcados)}
+    ${teRow('Winners / bolas vencedoras','winners',f.winners)}
+
+    ${teSection('🧠','Mental & Tático')}
+    ${teRow('Comportamento em pontos importantes','mental_pontos_imp',f.mental_pontos_imp)}
+    ${teRow('Reação após ponto/game perdido','mental_reacao',f.mental_reacao)}
+    ${teRow('Concentração e foco','mental_concentracao',f.mental_concentracao)}
+    ${teRow('Gestão tática (escolha de golpes)','mental_tatica',f.mental_tatica)}
+    ${teRow('Atitude e respeito em quadra','mental_atitude',f.mental_atitude)}
+
+    ${teSection('🏃','Físico & Movimentação')}
+    ${teRow('Movimentação em quadra','fisico_movimentacao',f.fisico_movimentacao)}
+    ${teRow('Recuperação de posição','fisico_recuperacao',f.fisico_recuperacao)}
+    ${teRow('Resistência (final da partida)','fisico_resistencia',f.fisico_resistencia)}
+
+    ${teSection('📝','Análise do Coach')}
+    <textarea id="te-analise" placeholder="Pontos fortes, pontos a desenvolver, observações..."
+      oninput="teForm.analise=this.value"
+      style="width:100%;padding:12px;border-radius:10px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:14px;outline:none;min-height:90px;resize:vertical;font-family:inherit">${f.analise||''}</textarea>
+
+    <div style="margin-top:14px">
+      <div style="font-size:13px;font-weight:500;color:var(--t2);margin-bottom:8px">Nota geral da partida</div>
+      <div style="display:flex;gap:4px">${notaGeralBtns}</div>
+    </div>
+
+    <div id="te-err" style="font-size:13px;color:var(--r);margin-top:10px;min-height:16px"></div>
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-top:14px">
+      <button class="bs" onclick="clsM('m-torneio')">Cancelar</button>
+      <button class="bp" onclick="saveTournamentEval('${studentId}')">💾 Salvar avaliação</button>
+    </div>
+    ${teEditId ? `<button onclick="deleteTournamentEval('${teEditId}','${studentId}')" style="width:100%;margin-top:8px;padding:11px;border-radius:var(--rs);border:1px solid var(--r);background:var(--rl);color:var(--r);font-size:13px;font-weight:600;cursor:pointer">🗑️ Excluir avaliação</button>` : ''}
+  </div>`;
+}
+
+function openTournamentEval(studentId, existing) {
+  teEditId = existing ? existing.id : null;
+  teForm = existing ? { ...existing, _studentId: studentId } : { _studentId: studentId };
+  document.getElementById('m-torneio-title').textContent = existing ? '✏️ Editar Scout' : '🏆 Scout de Torneio';
+  renderTEForm(studentId);
+  opnM('m-torneio');
+}
+
+async function saveTournamentEval(studentId) {
+  const f = teForm;
+  if (!f.torneio?.trim()) { document.getElementById('te-err').textContent = 'Informe o nome do torneio ⚠️'; return; }
+  const btn = document.querySelector('#m-torneio-body .bp');
+  if (btn) { btn.textContent = 'Salvando...'; btn.disabled = true; }
+
+  const payload = {
+    student_id:           studentId,
+    academia_id:          currentAcademia?.id,
+    coach_id:             currentUser?.id,
+    torneio:              f.torneio?.trim(),
+    data_partida:         f.data_partida || null,
+    adversario:           f.adversario?.trim() || null,
+    resultado:            f.resultado || null,
+    placar:               f.placar?.trim() || null,
+    saque_primeiro_pct:   f.saque_primeiro_pct || null,
+    saque_duplas_faltas:  f.saque_duplas_faltas ?? null,
+    saque_aces:           f.saque_aces ?? null,
+    saque_efic_primeiro:  f.saque_efic_primeiro || null,
+    saque_efic_segundo:   f.saque_efic_segundo || null,
+    dev_erros_primeiro:   f.dev_erros_primeiro || null,
+    dev_erros_segundo:    f.dev_erros_segundo || null,
+    dev_agressividade:    f.dev_agressividade || null,
+    erros_nao_forcados:   f.erros_nao_forcados || null,
+    erros_forcados:       f.erros_forcados || null,
+    winners:              f.winners || null,
+    mental_pontos_imp:    f.mental_pontos_imp || null,
+    mental_reacao:        f.mental_reacao || null,
+    mental_concentracao:  f.mental_concentracao || null,
+    mental_tatica:        f.mental_tatica || null,
+    mental_atitude:       f.mental_atitude || null,
+    fisico_movimentacao:  f.fisico_movimentacao || null,
+    fisico_recuperacao:   f.fisico_recuperacao || null,
+    fisico_resistencia:   f.fisico_resistencia || null,
+    analise:              f.analise?.trim() || null,
+    nota_geral:           f.nota_geral || null
+  };
+
+  try {
+    let error;
+    if (teEditId) {
+      ({ error } = await getDb().from('tournament_evaluations').update(payload).eq('id', teEditId));
+    } else {
+      ({ error } = await getDb().from('tournament_evaluations').insert(payload));
+    }
+    if (error) { document.getElementById('te-err').textContent = 'Erro: ' + error.message; if (btn) { btn.textContent = '💾 Salvar avaliação'; btn.disabled = false; } return; }
+    clsM('m-torneio');
+    toast(teEditId ? 'Avaliação atualizada ✓' : 'Scout salvo com sucesso 🏆');
+    loadTournamentEvals(studentId);
+  } catch(e) {
+    document.getElementById('te-err').textContent = e.message;
+    if (btn) { btn.textContent = '💾 Salvar avaliação'; btn.disabled = false; }
+  }
+}
+
+async function deleteTournamentEval(evalId, studentId) {
+  if (!confirm('Excluir esta avaliação de torneio?')) return;
+  await getDb().from('tournament_evaluations').delete().eq('id', evalId);
+  clsM('m-torneio');
+  toast('Avaliação excluída');
+  loadTournamentEvals(studentId);
+}
+
+async function loadTournamentEvals(studentId) {
+  const el = document.getElementById('tournament-section');
+  if (!el) return;
+  try {
+    const { data } = await getDb().from('tournament_evaluations')
+      .select('*').eq('student_id', studentId).order('data_partida', { ascending: false });
+
+    const notaColor = n => n <= 4 ? 'var(--r)' : n <= 6 ? '#f59e0b' : n <= 8 ? '#3b82f6' : 'var(--g)';
+    const starBar = (val, max=5) => {
+      if (!val) return '<span style="color:var(--t3);font-size:11px">—</span>';
+      return [1,2,3,4,5].map(n => `<span style="font-size:10px;color:${n<=val?'var(--g)':'var(--bo)'}">${n<=val?'●':'○'}</span>`).join('');
+    };
+
+    el.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="lbl" style="margin:0">🏆 Scouts de Torneio</div>
+        <button onclick="openTournamentEval('${studentId}')" style="padding:6px 14px;border-radius:20px;background:var(--g);border:none;color:#fff;font-size:12px;font-weight:700;cursor:pointer">+ Novo</button>
+      </div>
+      ${!data || !data.length
+        ? `<div style="padding:14px;text-align:center;color:var(--t3);font-size:13px;background:var(--bg3);border-radius:var(--rs)">Nenhuma avaliação de torneio ainda</div>`
+        : data.map(ev => {
+            const dt = ev.data_partida ? new Date(ev.data_partida + 'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+            const res = ev.resultado === 'vitoria' ? '<span style="color:var(--g);font-weight:700;font-size:11px">✅ Vitória</span>' : ev.resultado === 'derrota' ? '<span style="color:var(--r);font-weight:700;font-size:11px">❌ Derrota</span>' : '';
+            const nota = ev.nota_geral ? `<span style="padding:3px 10px;border-radius:20px;background:${notaColor(ev.nota_geral)}22;color:${notaColor(ev.nota_geral)};font-size:13px;font-weight:800">${ev.nota_geral}/10</span>` : '';
+            const avg = fields => { const vals = fields.map(f=>ev[f]).filter(Boolean); return vals.length ? Math.round(vals.reduce((a,b)=>a+b,0)/vals.length) : null; };
+            const saqueAvg  = avg(['saque_primeiro_pct','saque_efic_primeiro','saque_efic_segundo']);
+            const mentalAvg = avg(['mental_pontos_imp','mental_reacao','mental_concentracao','mental_tatica','mental_atitude']);
+            const errosAvg  = avg(['erros_nao_forcados','erros_forcados','winners']);
+            return `<div onclick="openTournamentEval('${studentId}',${JSON.stringify(ev).replace(/'/g,"\\'")})" style="background:var(--card);border:1px solid var(--bo);border-radius:var(--rs);padding:14px;margin-bottom:10px;cursor:pointer;box-shadow:var(--shadow)">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+                <div>
+                  <div style="font-size:14px;font-weight:700;color:var(--t)">${ev.torneio}</div>
+                  <div style="font-size:11px;color:var(--t3);margin-top:2px">${dt}${ev.adversario?' · vs '+ev.adversario:''}</div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">${res}${nota}</div>
+              </div>
+              ${ev.placar?`<div style="font-size:12px;color:var(--t2);margin-bottom:8px">📊 ${ev.placar}</div>`:''}
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+                <div style="background:var(--bg3);border-radius:8px;padding:8px;text-align:center">
+                  <div style="font-size:10px;color:var(--t3);margin-bottom:3px">SAQUE</div>
+                  <div>${starBar(saqueAvg)}</div>
+                </div>
+                <div style="background:var(--bg3);border-radius:8px;padding:8px;text-align:center">
+                  <div style="font-size:10px;color:var(--t3);margin-bottom:3px">MENTAL</div>
+                  <div>${starBar(mentalAvg)}</div>
+                </div>
+                <div style="background:var(--bg3);border-radius:8px;padding:8px;text-align:center">
+                  <div style="font-size:10px;color:var(--t3);margin-bottom:3px">ERROS</div>
+                  <div>${starBar(errosAvg)}</div>
+                </div>
+              </div>
+            </div>`;
+          }).join('')
+      }`;
+  } catch(e) { console.error('loadTournamentEvals:', e); }
 }
 
 </script>
