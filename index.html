@@ -3983,9 +3983,10 @@ async function loadPresencaHoje() {
       </div>
       <div id="cr-loading" style="text-align:center;padding:20px;color:var(--t3);font-size:13px">Verificando convite...</div>
       <div id="cr-form" style="display:none">
-        <div style="margin-bottom:14px">
-          <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t2);display:block;margin-bottom:6px">E-mail</label>
-          <input id="cr-email" type="email" placeholder="seu@email.com" style="width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:15px;outline:none">
+        <div style="margin-bottom:14px;padding:12px 14px;border-radius:12px;background:var(--bg3);border:1.5px solid var(--bo)">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:4px">E-mail</div>
+          <div id="cr-email-display" style="font-size:15px;color:var(--t);font-weight:600">—</div>
+          <input id="cr-email" type="hidden">
         </div>
         <div style="margin-bottom:20px">
           <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t2);display:block;margin-bottom:6px">Criar senha</label>
@@ -4546,7 +4547,9 @@ async function showCoachRegister(token) {
     }
 
     coachInviteData = { invite_id: row.invite_id, academia_id: row.academia_id, coach_record_id: row.coach_record_id, email: row.email, token };
-    document.getElementById('cr-email').value = row.email || '';
+    const emailVal = row.email || '';
+    document.getElementById('cr-email').value = emailVal;
+    document.getElementById('cr-email-display').textContent = emailVal || '(e-mail não encontrado)';
     document.getElementById('cr-form').style.display = 'block';
 
     // Pre-fill coach name if possible
@@ -4565,7 +4568,7 @@ async function showCoachRegister(token) {
 
 async function doCoachRegister() {
   if (!coachInviteData) { toast('Convite inválido'); return; }
-  const email = document.getElementById('cr-email').value.trim();
+  const email = (document.getElementById('cr-email').value || coachInviteData.email || '').trim();
   const pass  = document.getElementById('cr-pass').value;
   const err   = document.getElementById('cr-err');
   const btn   = document.getElementById('cr-btn');
