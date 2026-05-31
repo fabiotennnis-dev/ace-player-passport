@@ -4581,7 +4581,26 @@ async function doCoachRegister() {
       email, password: pass,
       options: { data: { role: 'coach', academia_id: coachInviteData.academia_id } }
     });
-    if (error) { err.textContent = error.message; btn.textContent = 'Criar acesso'; btn.disabled = false; return; }
+    if (error) {
+      // Email já cadastrado — tentar fazer login direto com a senha fornecida
+      if (error.message.toLowerCase().includes('already registered') || error.message.toLowerCase().includes('already been registered')) {
+        const { data: loginData, error: loginErr } = await getDb().auth.signInWithPassword({ email, password: pass });
+        if (loginErr) {
+          err.innerHTML = 'Este e-mail já tem acesso.<br><small style="color:var(--t3)">Se esqueceu a senha, volte ao login e clique em "Esqueci minha senha".</small>';
+          btn.textContent = 'Criar acesso'; btn.disabled = false; return;
+        }
+        // Login funcionou — garante link com academia e segue
+        currentUser = loginData.user;
+        await getDb().from('coach_academias').upsert({ coach_id: currentUser.id, academia_id: coachInviteData.academia_id, ativo: true }, { onConflict: 'coach_id,academia_id' });
+        await getDb().from('coach_invites').update({ used: true }).eq('token', coachInviteData.token);
+        document.getElementById('coach-register-screen').style.display = 'none';
+        await loadAcademia();
+        showApp();
+        toast('Bem-vindo ao ACE Player Passport! 🎾');
+        return;
+      }
+      err.textContent = error.message; btn.textContent = 'Criar acesso'; btn.disabled = false; return;
+    }
     if (!data.user) { err.textContent = 'Verifique seu e-mail para confirmar o cadastro.'; btn.textContent = 'Criar acesso'; btn.disabled = false; return; }
 
     // 2. Link to academia in coach_academias
