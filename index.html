@@ -2354,7 +2354,7 @@ function rEvalList(){
 
 function rAc(){document.getElementById('act').textContent=sts.length;const dist={};sts.forEach(s=>{dist[s.pulseira]=(dist[s.pulseira]||0)+1});renderCoachListAc();document.getElementById('distl').innerHTML=Object.entries(dist).map(([pid,cnt])=>{const p=gP(pid);const pct=Math.round(cnt/sts.length*100);return `<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><div style="font-size:20px;width:26px">${p.ball}</div><div style="flex:1"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:13px;font-weight:500;color:var(--t2)">${p.label}</span><span style="font-size:13px;font-weight:700;color:var(--t)">${cnt} aluno${cnt!==1?'s':''}</span></div><div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${p.color};border-radius:3px"></div></div></div></div>`;}).join('');}
 
-function opPro(){const s=gSt(sid);if(!s)return;const p=gP(s.pulseira);const td=gT(s.turma);const sk=sC(s.reveal);document.getElementById('pb').innerHTML=`
+function opPro(){clsM('m-coach');const s=gSt(sid);if(!s)return;const p=gP(s.pulseira);const td=gT(s.turma);const sk=sC(s.reveal);document.getElementById('pb').innerHTML=`
 <div style="background:linear-gradient(135deg,${s.cor}18,${s.cor}08);border:1px solid ${s.cor}30;border-radius:20px;padding:20px;margin-bottom:16px">
   <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
     <div style="width:60px;height:60px;border-radius:50%;background:${s.cor};display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;flex-shrink:0;box-shadow:0 4px 12px ${s.cor}40">${ini(s.nome)}</div>
