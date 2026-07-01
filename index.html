@@ -118,7 +118,7 @@ body{background:var(--bg);font-family:-apple-system,'SF Pro Text','DM Sans',sans
 /* MODAL */
 .ms{position:fixed;inset:0;background:var(--bg);z-index:150;display:flex;flex-direction:column;pointer-events:none;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1)}
 .ms.open{pointer-events:all;transform:translateX(0)}
-.mh{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--bo);flex-shrink:0;background:rgba(255,255,255,.96);backdrop-filter:blur(16px)}
+.mh{display:flex;align-items:center;gap:12px;padding:14px 20px;padding-top:calc(14px + env(safe-area-inset-top,0px));border-bottom:1px solid var(--bo);flex-shrink:0;background:rgba(255,255,255,.96);backdrop-filter:blur(16px)}
 .mb{background:none;border:none;color:var(--t2);cursor:pointer;padding:6px;display:flex;align-items:center;border-radius:8px}
 .mb:active{background:var(--bg3)}
 .mb2{flex:1;overflow-y:auto;padding:20px}
@@ -2462,7 +2462,10 @@ ${s.apto ? `
 </div>
 <div id="coach-notes-section" style="margin-top:14px"></div>
 <div id="parent-messages-section" style="margin-top:14px"></div>
-<div id="tournament-section" style="margin-top:14px"></div>`;
+<div id="tournament-section" style="margin-top:14px"></div>
+<div style="margin-top:24px;padding-bottom:8px">
+  <button onclick="clsM('m-profile')" style="width:100%;padding:15px;border-radius:14px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t2);font-size:15px;font-weight:700;cursor:pointer">← Voltar</button>
+</div>`;
 opnM('m-profile');
 loadCoachNotes(sid);
 loadParentMessages(sid);
