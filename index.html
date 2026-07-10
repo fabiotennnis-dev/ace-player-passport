@@ -4525,7 +4525,7 @@ async function genCoachInvite(coachId, coachNome) {
     const base = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
       ? window.location.origin
       : 'https://ace-player-passport.vercel.app';
-    const link = base + '?coach_invite=' + token;
+    const link = base + '/?coach_invite=' + token;
 
     // Copy to clipboard
     try {
