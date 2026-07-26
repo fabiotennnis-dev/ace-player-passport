@@ -283,7 +283,7 @@ async function loadAcademia() {
     const db = getDb();
     const { data, error } = await db
       .from('coach_academias')
-      .select('academia_id, academias(id, nome, slug)')
+      .select('academia_id, academias(id, nome, slug, plano, limite_alunos)')
       .eq('coach_id', currentUser.id)
       .eq('ativo', true)
       .single();
@@ -3050,7 +3050,11 @@ else if(cst===3){
 
 else{const lk='ace.rawtennis.com.br/aluno/'+Math.random().toString(36).substr(2,8).toUpperCase();cb.innerHTML=`<div style="text-align:center;padding:24px 0"><div style="font-size:56px;margin-bottom:14px">🎉</div><div style="font-size:24px;font-weight:800;color:var(--t);margin-bottom:8px">${cd.nome} cadastrado!</div><div style="font-size:14px;color:var(--t2);line-height:1.6;margin-bottom:22px">Compartilhe o link com o responsável para acessar o passaporte.</div><div style="background:var(--gl);border:1.5px solid var(--gb);border-radius:var(--rs);padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:14px"><span style="font-size:13px;font-weight:600;color:var(--g);flex:1;text-align:left;word-break:break-all">${lk}</span><button onclick="toast('Link copiado ✓')" style="padding:8px 14px;border-radius:10px;background:var(--g);border:none;color:#fff;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0">Copiar</button></div><button class="bp" onclick="clsM('m-cad');goS('alunos');toast(cd.nome+' adicionado ✓')">Ver lista de alunos →</button></div>`;cn.innerHTML='';}}
 
-async function cN(){if(cst===1){const nome=document.getElementById('cn2')?.value?.trim();if(!nome){toast('Preencha o nome do aluno ⚠️');return;}cd.nome=nome;cd.nasc=document.getElementById('cna')?.value||'';cd.gen=document.getElementById('cg')?.value||'';}else if(cst===2){cd.resp=document.getElementById('cr')?.value?.trim()||'';cd.tel=document.getElementById('ct')?.value||'';cd.email=document.getElementById('ce')?.value||'';}else if(cst===3){
+async function cN(){if(cst===1){
+  const limite = currentAcademia?.limite_alunos ?? 30;
+  const ativos = sts.filter(s => !s.inativo).length;
+  if (ativos >= limite) { showUpgradeModal(ativos, limite); return; }
+  const nome=document.getElementById('cn2')?.value?.trim();if(!nome){toast('Preencha o nome do aluno ⚠️');return;}cd.nome=nome;cd.nasc=document.getElementById('cna')?.value||'';cd.gen=document.getElementById('cg')?.value||'';}else if(cst===2){cd.resp=document.getElementById('cr')?.value?.trim()||'';cd.tel=document.getElementById('ct')?.value||'';cd.email=document.getElementById('ce')?.value||'';}else if(cst===3){
   // Ler campos do step 3
   const c3coach  = document.getElementById('c3-coach')?.value?.trim() || '';
   const c3quadra = document.getElementById('c3-quadra')?.value?.trim() || '';
@@ -3944,6 +3948,19 @@ async function loadPresencaHoje() {
   <div style="padding:12px 20px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bo);background:rgba(255,255,255,.96);backdrop-filter:blur(16px);flex-shrink:0"><button onclick="clsM('m-torneio')" style="width:100%;padding:14px;border-radius:14px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t2);font-size:15px;font-weight:700;cursor:pointer">← Voltar</button></div>
 </div>
 
+<!-- ══ UPGRADE MODAL ══ -->
+<div class="ms" id="m-upgrade" style="display:flex;flex-direction:column">
+  <div class="mh">
+    <button class="mb" onclick="clsM('m-upgrade')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+    <span style="font-size:16px;font-weight:700;color:var(--t);flex:1;text-align:center">Upgrade de Plano</span>
+    <div style="width:34px"></div>
+  </div>
+  <div class="mb2" id="upgrade-body" style="flex:1;overflow-y:auto"></div>
+  <div style="padding:12px 20px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bo);background:rgba(255,255,255,.96);backdrop-filter:blur(16px);flex-shrink:0">
+    <button onclick="clsM('m-upgrade')" style="width:100%;padding:14px;border-radius:14px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t2);font-size:15px;font-weight:700;cursor:pointer">← Voltar</button>
+  </div>
+</div>
+
 <!-- ══ PORTAL: MODAL CÓDIGOS ══ -->
 <div class="ms" id="m-codigos" style="display:flex;flex-direction:column">
   <div class="mh">
@@ -4498,6 +4515,40 @@ async function doSaveNewPass() {
 // ══════════════════════════════════════════════════════════════
 // COACH INVITE — GERAR LINK
 // ══════════════════════════════════════════════════════════════
+
+const PLANOS = [
+  { id:'starter',   label:'Starter',   limite:30,  preco:'R$ 99/mês' },
+  { id:'growth',    label:'Growth',    limite:80,  preco:'R$ 199/mês' },
+  { id:'pro',       label:'Pro',       limite:150, preco:'R$ 349/mês' },
+  { id:'unlimited', label:'Unlimited', limite:9999,preco:'R$ 549/mês' },
+];
+
+function showUpgradeModal(ativos, limite) {
+  const planoAtual = currentAcademia?.plano || 'starter';
+  const idxAtual   = PLANOS.findIndex(p => p.id === planoAtual);
+  const proximo    = PLANOS[idxAtual + 1] || PLANOS[PLANOS.length - 1];
+
+  document.getElementById('upgrade-body').innerHTML = `
+    <div style="text-align:center;padding:24px 20px 8px">
+      <div style="font-size:48px;margin-bottom:12px">🚀</div>
+      <div style="font-size:20px;font-weight:800;color:var(--t);margin-bottom:8px">Limite atingido!</div>
+      <div style="font-size:14px;color:var(--t2);margin-bottom:24px">
+        Você tem <strong>${ativos} alunos</strong> — limite do plano <strong>${PLANOS[idxAtual]?.label || planoAtual}</strong> é <strong>${limite}</strong>.
+      </div>
+      <div style="background:var(--gl);border:1.5px solid var(--gb);border-radius:16px;padding:20px;margin-bottom:20px">
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--g);margin-bottom:6px">Próximo plano</div>
+        <div style="font-size:22px;font-weight:800;color:var(--t)">${proximo.label}</div>
+        <div style="font-size:15px;color:var(--g);font-weight:700;margin-top:2px">${proximo.preco}</div>
+        <div style="font-size:13px;color:var(--t2);margin-top:6px">até ${proximo.limite === 9999 ? 'alunos ilimitados' : proximo.limite + ' alunos'}</div>
+      </div>
+      <a href="https://wa.me/5561999999999?text=Quero+fazer+upgrade+para+o+plano+${proximo.label}" target="_blank"
+         style="display:block;width:100%;padding:15px;border-radius:14px;background:var(--g);color:#fff;font-size:16px;font-weight:700;text-decoration:none;text-align:center;box-sizing:border-box">
+        📲 Fazer upgrade agora
+      </a>
+    </div>
+  `;
+  opnM('m-upgrade');
+}
 
 function genInviteToken() {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
