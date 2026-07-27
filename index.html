@@ -2208,6 +2208,8 @@ async function gerarPassportPDF(alunoId) {
 <button onclick="openTurmas()" class="shb" style="border-radius:var(--rr);background:var(--card);box-shadow:var(--shadow)"><span class="shi">📅</span><span style="flex:1"><span class="sht">Turmas &amp; Calendário</span><span class="shs">Gerenciar dias, horários e coaches</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3)"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
 <button onclick="openReq()" class="shb" style="border-radius:var(--rr);background:var(--card);box-shadow:var(--shadow)"><span class="shi">📊</span><span style="flex:1"><span class="sht">Requisitos por nível</span><span class="shs">98 critérios — técnico, tático, físico, mental</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3)"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
 </div>
+<div class="lbl">Meu Plano</div>
+<div id="plano-card" onclick="openMeuPlano()" style="background:var(--card);border-radius:var(--rr);box-shadow:var(--shadow);padding:16px 18px;margin-bottom:20px;cursor:pointer;border:1px solid var(--bo)"></div>
 <div class="lbl">Distribuição por nível</div>
 <div class="card"><div id="distl"><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><div style="font-size:20px;width:26px">🟢🟡</div><div style="flex:1"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:13px;font-weight:500;color:var(--t2)">Verde-Amarela</span><span style="font-size:13px;font-weight:700;color:var(--t)">3 alunos</span></div><div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="width:50%;height:100%;background:#ca8a04;border-radius:3px"></div></div></div></div><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><div style="font-size:20px;width:26px">🔴🔴</div><div style="flex:1"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:13px;font-weight:500;color:var(--t2)">Verm-Verm</span><span style="font-size:13px;font-weight:700;color:var(--t)">1 aluno</span></div><div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="width:17%;height:100%;background:#b91c1c;border-radius:3px"></div></div></div></div><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><div style="font-size:20px;width:26px">🟢</div><div style="flex:1"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:13px;font-weight:500;color:var(--t2)">Verde</span><span style="font-size:13px;font-weight:700;color:var(--t)">2 alunos</span></div><div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="width:33%;height:100%;background:#059669;border-radius:3px"></div></div></div></div></div></div>
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;margin-top:4px"><div class="lbl" style="margin:0">Coaches</div><button onclick="openCadCoach(null)" style="padding:6px 16px;border-radius:20px;background:var(--g);border:none;color:#fff;font-size:13px;font-weight:700;cursor:pointer">+ Cadastrar</button></div>
@@ -2352,7 +2354,41 @@ function rEvalList(){
     : '<div style="text-align:center;padding:60px 20px"><div style="font-size:40px;margin-bottom:12px">🎾</div><div style="font-size:16px;font-weight:700;color:var(--t);margin-bottom:6px">Nenhum aluno cadastrado</div><div style="font-size:13px;color:var(--t2)">Clique em + Cadastrar novo aluno para começar</div></div>';
 }
 
-function rAc(){document.getElementById('act').textContent=sts.length;const dist={};sts.forEach(s=>{dist[s.pulseira]=(dist[s.pulseira]||0)+1});renderCoachListAc();document.getElementById('distl').innerHTML=Object.entries(dist).map(([pid,cnt])=>{const p=gP(pid);const pct=Math.round(cnt/sts.length*100);return `<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><div style="font-size:20px;width:26px">${p.ball}</div><div style="flex:1"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:13px;font-weight:500;color:var(--t2)">${p.label}</span><span style="font-size:13px;font-weight:700;color:var(--t)">${cnt} aluno${cnt!==1?'s':''}</span></div><div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${p.color};border-radius:3px"></div></div></div></div>`;}).join('');}
+function rAc(){
+  const ativos=sts.filter(s=>!s.inativo).length;
+  document.getElementById('act').textContent=ativos;
+  const dist={};sts.forEach(s=>{dist[s.pulseira]=(dist[s.pulseira]||0)+1});
+  renderCoachListAc();
+  document.getElementById('distl').innerHTML=Object.entries(dist).map(([pid,cnt])=>{const p=gP(pid);const pct=Math.round(cnt/sts.length*100);return `<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><div style="font-size:20px;width:26px">${p.ball}</div><div style="flex:1"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:13px;font-weight:500;color:var(--t2)">${p.label}</span><span style="font-size:13px;font-weight:700;color:var(--t)">${cnt} aluno${cnt!==1?'s':''}</span></div><div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${p.color};border-radius:3px"></div></div></div></div>`;}).join('');
+  // Plano card
+  const pc=document.getElementById('plano-card');
+  if(pc){
+    const planoId=currentAcademia?.plano||'starter';
+    const limite=currentAcademia?.limite_alunos??30;
+    const planoInfo=PLANOS.find(p=>p.id===planoId)||PLANOS[0];
+    const pct=limite>=9999?Math.min(ativos/300*100,100):Math.round(ativos/limite*100);
+    const barColor=pct>=90?'var(--r)':pct>=70?'#f59e0b':'var(--g)';
+    const limLabel=limite>=9999?'∞':limite;
+    pc.innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div>
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:4px">Plano atual</div>
+          <div style="font-size:20px;font-weight:800;color:var(--t)">${planoInfo.label}</div>
+          <div style="font-size:13px;color:var(--t2);font-weight:600;margin-top:1px">${planoInfo.preco}</div>
+        </div>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3);margin-top:4px"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:13px;color:var(--t2)">Alunos ativos</span>
+        <span style="font-size:13px;font-weight:700;color:${barColor}">${ativos} / ${limLabel}</span>
+      </div>
+      <div style="height:8px;background:var(--bg3);border-radius:4px;overflow:hidden">
+        <div style="width:${pct}%;height:100%;background:${barColor};border-radius:4px;transition:width .4s"></div>
+      </div>
+      ${pct>=80?`<div style="font-size:12px;color:${barColor};font-weight:600;margin-top:8px">⚠️ ${100-pct}% do limite restante — toque para fazer upgrade</div>`:''}
+    `;
+  }
+}
 
 function opPro(){clsM('m-coach');const s=gSt(sid);if(!s)return;const p=gP(s.pulseira);const td=gT(s.turma);const sk=sC(s.reveal);document.getElementById('pb').innerHTML=`
 <div style="background:linear-gradient(135deg,${s.cor}18,${s.cor}08);border:1px solid ${s.cor}30;border-radius:20px;padding:20px;margin-bottom:16px">
@@ -3948,6 +3984,19 @@ async function loadPresencaHoje() {
   <div style="padding:12px 20px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bo);background:rgba(255,255,255,.96);backdrop-filter:blur(16px);flex-shrink:0"><button onclick="clsM('m-torneio')" style="width:100%;padding:14px;border-radius:14px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t2);font-size:15px;font-weight:700;cursor:pointer">← Voltar</button></div>
 </div>
 
+<!-- ══ MEU PLANO MODAL ══ -->
+<div class="ms" id="m-meu-plano" style="display:flex;flex-direction:column">
+  <div class="mh">
+    <button class="mb" onclick="clsM('m-meu-plano')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+    <span style="font-size:16px;font-weight:700;color:var(--t);flex:1;text-align:center">Meu Plano</span>
+    <div style="width:34px"></div>
+  </div>
+  <div id="meu-plano-body" style="flex:1;overflow-y:auto;padding:20px 20px 0"></div>
+  <div style="padding:12px 20px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--bo);background:rgba(255,255,255,.96);backdrop-filter:blur(16px);flex-shrink:0">
+    <button onclick="clsM('m-meu-plano')" style="width:100%;padding:14px;border-radius:14px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t2);font-size:15px;font-weight:700;cursor:pointer">← Voltar</button>
+  </div>
+</div>
+
 <!-- ══ UPGRADE MODAL ══ -->
 <div class="ms" id="m-upgrade" style="display:flex;flex-direction:column">
   <div class="mh">
@@ -4522,6 +4571,48 @@ const PLANOS = [
   { id:'pro',       label:'Pro',       limite:150, preco:'R$ 349/mês' },
   { id:'unlimited', label:'Unlimited', limite:9999,preco:'R$ 549/mês' },
 ];
+
+function openMeuPlano() {
+  const planoId   = currentAcademia?.plano || 'starter';
+  const limite    = currentAcademia?.limite_alunos ?? 30;
+  const ativos    = sts.filter(s => !s.inativo).length;
+  const planoInfo = PLANOS.find(p => p.id === planoId) || PLANOS[0];
+  const idxAtual  = PLANOS.findIndex(p => p.id === planoId);
+  const pct       = limite >= 9999 ? Math.min(Math.round(ativos/300*100), 100) : Math.round(ativos / limite * 100);
+  const barColor  = pct >= 90 ? 'var(--r)' : pct >= 70 ? '#f59e0b' : 'var(--g)';
+  const limLabel  = limite >= 9999 ? '∞' : limite;
+
+  const planosHTML = PLANOS.map((p, i) => {
+    const atual = i === idxAtual;
+    return `
+      <div style="border:${atual ? '2px solid var(--g)' : '1.5px solid var(--bo)'};border-radius:14px;padding:14px 16px;margin-bottom:10px;background:${atual ? 'var(--gl)' : 'var(--card)'}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <div style="font-size:15px;font-weight:800;color:var(--t)">${p.label}${atual ? ' <span style="font-size:11px;font-weight:700;color:var(--g);background:#dcfce7;padding:2px 8px;border-radius:20px;margin-left:4px">atual</span>' : ''}</div>
+          <div style="font-size:15px;font-weight:700;color:var(--t2)">${p.preco}</div>
+        </div>
+        <div style="font-size:13px;color:var(--t3)">até ${p.limite >= 9999 ? 'alunos ilimitados' : p.limite + ' alunos'}</div>
+        ${!atual && i > idxAtual ? `<a href="https://wa.me/5561996047071?text=Quero+fazer+upgrade+para+o+plano+${encodeURIComponent(p.label)}" target="_blank" style="display:block;margin-top:10px;padding:10px;border-radius:10px;background:var(--g);color:#fff;font-size:13px;font-weight:700;text-decoration:none;text-align:center">📲 Fazer upgrade</a>` : ''}
+      </div>`;
+  }).join('');
+
+  document.getElementById('meu-plano-body').innerHTML = `
+    <div style="background:var(--card);border:1.5px solid var(--bo);border-radius:16px;padding:18px;margin-bottom:20px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:8px">Uso atual</div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:14px;color:var(--t2)">Alunos ativos</span>
+        <span style="font-size:14px;font-weight:800;color:${barColor}">${ativos} / ${limLabel}</span>
+      </div>
+      <div style="height:10px;background:var(--bg3);border-radius:5px;overflow:hidden;margin-bottom:8px">
+        <div style="width:${pct}%;height:100%;background:${barColor};border-radius:5px;transition:width .4s"></div>
+      </div>
+      <div style="font-size:12px;color:var(--t3)">${pct}% do limite utilizado</div>
+    </div>
+    <div style="font-size:13px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Todos os planos</div>
+    ${planosHTML}
+    <div style="text-align:center;padding:16px 0 4px;font-size:12px;color:var(--t3)">Dúvidas? Fale pelo WhatsApp · (61) 99604-7071</div>
+  `;
+  opnM('m-meu-plano');
+}
 
 function showUpgradeModal(ativos, limite) {
   const planoAtual = currentAcademia?.plano || 'starter';

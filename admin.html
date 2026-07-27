@@ -614,6 +614,12 @@
       padding: 3px 10px;
     }
 
+    .status-plano { color: var(--navy); background: var(--gold-light); border-color: var(--gold); }
+    .status-plano.status-growth    { color: #1d4ed8; background: #eff6ff; border-color: #bfdbfe; }
+    .status-plano.status-pro       { color: #7c3aed; background: #f5f3ff; border-color: #ddd6fe; }
+    .status-plano.status-unlimited { color: #b45309; background: #fffbeb; border-color: #fcd34d; }
+    .detail-section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-2); margin-bottom: 8px; }
+
     .btn-expand {
       background: none;
       border: 1.5px solid var(--border);
@@ -1197,7 +1203,7 @@
         <td class="ac-count">${ac.alunoCount}</td>
         <td class="ac-date">${dateStr}</td>
         <td class="status-cell">
-          <span class="status-badge">✅ Ativa</span>
+          <span class="status-badge status-plano status-${ac.plano || 'starter'}">${(ac.plano || 'starter').charAt(0).toUpperCase() + (ac.plano || 'starter').slice(1)} (${ac.limite_alunos ?? 30})</span>
           <button
             id="expand-${ac.id}"
             class="btn-expand"
@@ -1212,6 +1218,28 @@
           <div class="detail-panel">
             <div class="detail-section-label">Coaches (${ac.coachCount})</div>
             <div class="coach-chips">${coachChips}</div>
+            <div class="detail-section-label" style="margin-top:14px">Plano & Faturamento</div>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:10px">
+              <div>
+                <label style="font-size:11px;font-weight:700;color:var(--text-2);display:block;margin-bottom:4px">PLANO</label>
+                <select id="sel-plano-${ac.id}" style="padding:8px 10px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;font-weight:600;background:#fff">
+                  <option value="starter"   ${(ac.plano||'starter')==='starter'   ? 'selected':''}>Starter (30 alunos)</option>
+                  <option value="growth"    ${ac.plano==='growth'    ? 'selected':''}>Growth (80 alunos)</option>
+                  <option value="pro"       ${ac.plano==='pro'       ? 'selected':''}>Pro (150 alunos)</option>
+                  <option value="unlimited" ${ac.plano==='unlimited' ? 'selected':''}>Unlimited (∞)</option>
+                </select>
+              </div>
+              <div style="flex:1;min-width:180px">
+                <label style="font-size:11px;font-weight:700;color:var(--text-2);display:block;margin-bottom:4px">ID CLIENTE ASAAS</label>
+                <input id="inp-asaas-${ac.id}" type="text" value="${escapeHtml(ac.asaas_customer_id||'')}"
+                  placeholder="cus_xxxxxxxx"
+                  style="width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid var(--border);font-size:13px;font-family:monospace" />
+              </div>
+              <button onclick="salvarPlano('${ac.id}')"
+                style="padding:8px 18px;border-radius:8px;background:var(--navy);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer">
+                Salvar
+              </button>
+            </div>
             <div class="detail-actions">
               <button
                 class="btn-deactivate"
@@ -1259,6 +1287,37 @@
       '⚠️ Para desativar, use o painel do Supabase (requer permissão de admin).',
       'warning'
     );
+  }
+
+  /* ──────────────────────────────
+     SALVAR PLANO + ASAAS ID
+  ────────────────────────────── */
+  const PLANOS_LIMITE = { starter: 30, growth: 80, pro: 150, unlimited: 9999 };
+
+  async function salvarPlano(academiaId) {
+    const plano         = document.getElementById('sel-plano-' + academiaId)?.value;
+    const asaasId       = (document.getElementById('inp-asaas-' + academiaId)?.value || '').trim();
+    const limiteAlunos  = PLANOS_LIMITE[plano] ?? 30;
+
+    const updates = { plano, limite_alunos: limiteAlunos };
+    if (asaasId) updates.asaas_customer_id = asaasId;
+
+    const { error } = await sb.from('academias').update(updates).eq('id', academiaId);
+    if (error) {
+      showToast('Erro ao salvar: ' + error.message, 'error');
+      return;
+    }
+
+    // Atualiza o badge na linha sem recarregar a página
+    const badge = document.querySelector(`#row-${academiaId} .status-plano`);
+    if (badge) {
+      const label = plano.charAt(0).toUpperCase() + plano.slice(1);
+      const lim   = limiteAlunos === 9999 ? '∞' : limiteAlunos;
+      badge.textContent = `${label} (${lim})`;
+      badge.className = `status-badge status-plano status-${plano}`;
+    }
+
+    showToast('✅ Plano atualizado com sucesso!');
   }
 
   /* ──────────────────────────────
