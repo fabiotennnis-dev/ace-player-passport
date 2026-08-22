@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inscrição Online — ACE Tournament</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system,'DM Sans',system-ui,sans-serif; background: #f1f5f9; min-height: 100vh; }
+
+.header { background:#111;color:white;padding:16px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.3); }
+.header .eyebrow { font-size:10px;color:#9ca3af;letter-spacing:2px;text-transform:uppercase; }
+.header h1 { font-size:20px;font-weight:800;letter-spacing:-.5px;margin:2px 0; }
+.header .subtitle { font-size:11px;color:#6b7280; }
+
+.stepper { display:flex;align-items:center;justify-content:center;padding:16px;background:white;border-bottom:1px solid #e5e7eb;gap:0; }
+.step { display:flex;flex-direction:column;align-items:center;gap:4px;flex:1; }
+.step-circle { width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;background:#f3f4f6;color:#9ca3af;border:2px solid #e5e7eb;transition:all .3s; }
+.step-circle.active { background:#111;color:white;border-color:#111; }
+.step-circle.done { background:#16a34a;color:white;border-color:#16a34a; }
+.step-label { font-size:9px;font-weight:600;color:#9ca3af;text-align:center; }
+.step-label.active { color:#111; }
+.step-line { flex:1;height:2px;background:#e5e7eb;margin-top:-20px; }
+.step-line.done { background:#16a34a; }
+
+.main { padding:20px 16px 100px;max-width:480px;margin:0 auto; }
+.card { background:white;border-radius:20px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:16px; }
+.card-title { font-size:16px;font-weight:800;color:#111;margin-bottom:4px; }
+.card-sub { font-size:12px;color:#6b7280;margin-bottom:16px; }
+
+.torneio-banner { background:linear-gradient(135deg,#111 0%,#1f2937 100%);border-radius:16px;padding:20px;margin-bottom:20px;color:white; }
+.torneio-banner .tag { font-size:10px;font-weight:700;letter-spacing:1px;color:#9ca3af;text-transform:uppercase;margin-bottom:8px; }
+.torneio-banner h2 { font-size:22px;font-weight:800;margin-bottom:4px; }
+.torneio-banner .info { font-size:12px;color:#9ca3af;margin-bottom:16px; }
+.torneio-banner .details { display:grid;grid-template-columns:1fr 1fr;gap:10px; }
+.torneio-banner .detail-item { background:rgba(255,255,255,.08);border-radius:10px;padding:10px; }
+.torneio-banner .detail-label { font-size:9px;color:#6b7280;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px; }
+.torneio-banner .detail-val { font-size:13px;font-weight:700;color:white; }
+
+.form-group { margin-bottom:14px; }
+.form-label { font-size:11px;font-weight:700;color:#374151;margin-bottom:6px;display:block; }
+.form-input { width:100%;padding:12px 14px;border:2px solid #e5e7eb;border-radius:12px;font-size:14px;color:#111;outline:none;transition:border-color .2s;background:white; }
+.form-input:focus { border-color:#111; }
+.form-select { width:100%;padding:12px 14px;border:2px solid #e5e7eb;border-radius:12px;font-size:14px;color:#111;outline:none;background:white;appearance:none;cursor:pointer; }
+.form-select:focus { border-color:#111; }
+.select-wrap { position:relative; }
+.select-wrap::after { content:'▾';position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#9ca3af;pointer-events:none; }
+
+.cat-grid { display:grid;grid-template-columns:1fr 1fr;gap:8px; }
+.cat-option { border:2px solid #e5e7eb;border-radius:14px;padding:12px;cursor:pointer;transition:all .2s;background:white;text-align:left; }
+.cat-option:hover { border-color:#d1d5db; }
+.cat-option .cat-emoji { font-size:20px;margin-bottom:4px; }
+.cat-option .cat-name { font-size:12px;font-weight:700;color:#111; }
+.cat-option .cat-idade { font-size:10px;color:#9ca3af;margin-top:2px; }
+.cat-option .cat-valor { font-size:13px;font-weight:800;margin-top:6px; }
+
+.valor-box { background:#f8fafc;border:2px solid #e5e7eb;border-radius:14px;padding:16px;margin-top:16px; }
+.valor-row { display:flex;justify-content:space-between;align-items:center;margin-bottom:8px; }
+.valor-row:last-child { margin-bottom:0;padding-top:10px;border-top:1px solid #e5e7eb;margin-top:6px; }
+.valor-label { font-size:13px;color:#6b7280; }
+.valor-label.total { font-size:14px;font-weight:700;color:#111; }
+.valor-val { font-size:13px;font-weight:600;color:#111; }
+.valor-val.total { font-size:18px;font-weight:800;color:#111; }
+
+.pix-box { background:#f0fdf4;border:2px solid #bbf7d0;border-radius:16px;padding:20px;text-align:center;margin-bottom:16px; }
+.pix-box .pix-title { font-size:14px;font-weight:800;color:#15803d;margin-bottom:4px; }
+.pix-box .pix-sub { font-size:11px;color:#6b7280;margin-bottom:16px; }
+.pix-qr { width:160px;height:160px;background:white;border-radius:12px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;border:2px solid #bbf7d0;font-size:60px; }
+.pix-key-box { background:white;border:1.5px solid #bbf7d0;border-radius:10px;padding:10px 14px;font-size:12px;color:#374151;font-weight:600;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px; }
+.copy-btn { background:#16a34a;color:white;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap; }
+.pix-valor { font-size:22px;font-weight:800;color:#15803d;margin:12px 0 4px; }
+.pix-nome { font-size:12px;color:#6b7280; }
+
+.upload-area { border:2.5px dashed #e5e7eb;border-radius:16px;padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s;background:#fafafa; }
+.upload-area:hover { border-color:#111;background:#f8f9fa; }
+.upload-area.has-file { border-color:#16a34a;background:#f0fdf4;border-style:solid; }
+.upload-icon { font-size:36px;margin-bottom:10px; }
+.upload-title { font-size:14px;font-weight:700;color:#374151;margin-bottom:4px; }
+.upload-sub { font-size:11px;color:#9ca3af; }
+.file-preview { display:none;background:white;border:1.5px solid #bbf7d0;border-radius:12px;padding:12px 14px;margin-top:12px;align-items:center;gap:10px; }
+.file-preview.show { display:flex; }
+.file-icon { font-size:24px; }
+.file-name { flex:1;font-size:12px;font-weight:600;color:#374151; }
+.file-remove { font-size:16px;cursor:pointer;color:#9ca3af; }
+
+.status-card { border-radius:20px;padding:28px 20px;text-align:center; }
+.status-icon { font-size:56px;margin-bottom:12px; }
+.status-title { font-size:20px;font-weight:800;color:#111;margin-bottom:6px; }
+.status-sub { font-size:13px;color:#6b7280;line-height:1.6; }
+.inscricao-summary { background:#f8fafc;border-radius:14px;padding:16px;margin-top:16px;text-align:left; }
+.summary-row { display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6; }
+.summary-row:last-child { border-bottom:none; }
+.summary-label { font-size:12px;color:#6b7280; }
+.summary-val { font-size:12px;font-weight:700;color:#111; }
+
+.bottom-bar { position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e5e7eb;padding:12px 16px 24px; }
+.btn-primary { width:100%;padding:15px;border-radius:14px;border:none;background:#111;color:white;font-size:15px;font-weight:800;cursor:pointer;transition:all .2s;letter-spacing:.2px; }
+.btn-primary:active { transform:scale(.98); }
+.btn-primary:disabled { background:#d1d5db;color:#9ca3af;cursor:not-allowed; }
+.btn-secondary { width:100%;padding:13px;border-radius:14px;border:2px solid #e5e7eb;background:white;color:#374151;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px; }
+
+.step-view { display:none; }
+.step-view.active { display:block; }
+.alert-info { background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px 14px;font-size:12px;color:#1e40af;margin-bottom:14px;line-height:1.5; }
+.alert-warn { background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:12px 14px;font-size:12px;color:#92400e;margin-bottom:14px;line-height:1.5; }
+#loading-screen { position:fixed;inset:0;background:#111;display:flex;align-items:center;justify-content:center;z-index:999;color:white;font-size:16px;font-weight:700; }
+</style>
+</head>
+<body>
+
+<div id="loading-screen">⏳ Carregando torneio...</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="eyebrow">ACE Tournament</div>
+  <h1>🎾 Inscrição Online</h1>
+  <div class="subtitle" id="header-subtitle">Carregando...</div>
+</div>
+
+<!-- STEPPER -->
+<div class="stepper">
+  <div class="step"><div class="step-circle active" id="sc1">1</div><div class="step-label active" id="sl1">Atleta</div></div>
+  <div class="step-line" id="line1"></div>
+  <div class="step"><div class="step-circle" id="sc2">2</div><div class="step-label" id="sl2">Categoria</div></div>
+  <div class="step-line" id="line2"></div>
+  <div class="step"><div class="step-circle" id="sc3">3</div><div class="step-label" id="sl3">Pagamento</div></div>
+  <div class="step-line" id="line3"></div>
+  <div class="step"><div class="step-circle" id="sc4">4</div><div class="step-label" id="sl4">Confirmação</div></div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- STEP 1 -->
+  <div class="step-view active" id="step1">
+    <div class="torneio-banner" id="torneio-banner">
+      <div class="tag">Torneio</div>
+      <h2 id="torneio-nome">Carregando...</h2>
+      <div class="info" id="torneio-info"></div>
+      <div class="details" id="torneio-details"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Dados do Atleta</div>
+      <div class="card-sub">Preencha os dados de quem vai jogar</div>
+      <div class="form-group">
+        <label class="form-label">Nome completo do atleta *</label>
+        <input class="form-input" type="text" placeholder="Ex: João Guilherme Guerra" id="nome-atleta">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Data de nascimento *</label>
+        <input class="form-input" type="date" id="data-nasc">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Sexo *</label>
+        <div class="select-wrap">
+          <select class="form-select" id="sexo">
+            <option value="">Selecione...</option>
+            <option>Masculino</option>
+            <option>Feminino</option>
+          </select>
+        </div>
+      </div>
+      <div style="border-top:1px solid #f3f4f6;margin:16px 0"></div>
+      <div class="card-title" style="margin-bottom:4px">Dados do Responsável</div>
+      <div class="card-sub">Para contato e notificações do torneio</div>
+      <div class="form-group">
+        <label class="form-label">Nome do responsável *</label>
+        <input class="form-input" type="text" placeholder="Ex: Maria Guerra" id="nome-resp">
+      </div>
+      <div class="form-group">
+        <label class="form-label">WhatsApp *</label>
+        <input class="form-input" type="tel" placeholder="(61) 99999-9999" id="whatsapp">
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input class="form-input" type="email" placeholder="email@exemplo.com" id="email">
+      </div>
+    </div>
+    <div class="alert-info">📱 Você receberá atualizações do torneio pelo WhatsApp informado — resultados, horários e chamadas de quadra.</div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step-view" id="step2">
+    <div class="card">
+      <div class="card-title">Escolha a Categoria</div>
+      <div class="card-sub">Baseada na idade e nível do atleta</div>
+      <div class="cat-grid" id="cat-grid"><!-- renderizado via JS --></div>
+      <div class="valor-box" id="valor-box" style="display:none">
+        <div class="valor-row">
+          <span class="valor-label">Inscrição — <span id="cat-label-val">—</span></span>
+          <span class="valor-val" id="val-inscricao">—</span>
+        </div>
+        <div class="valor-row">
+          <span class="valor-label total">Total</span>
+          <span class="valor-val total" id="val-total">—</span>
+        </div>
+      </div>
+    </div>
+    <div class="alert-warn">⚠️ A inscrição só é confirmada após o envio do comprovante de pagamento. Vagas limitadas por categoria.</div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step-view" id="step3">
+    <div class="pix-box">
+      <div class="pix-title">💰 Pague via PIX</div>
+      <div class="pix-sub">Escaneie o QR Code ou copie a chave abaixo</div>
+      <div class="pix-qr">📱</div>
+      <div class="pix-valor" id="pix-valor">—</div>
+      <div class="pix-nome" id="pix-nome-display">—</div>
+      <div style="margin-top:14px">
+        <div class="pix-key-box">
+          <span style="font-family:monospace" id="pix-chave-display">—</span>
+          <button class="copy-btn" onclick="copiarChave()">Copiar</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Envie o Comprovante</div>
+      <div class="card-sub">Foto ou print do comprovante de pagamento</div>
+      <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
+        <div class="upload-icon" id="upload-icon">📎</div>
+        <div class="upload-title" id="upload-title">Toque para enviar o comprovante</div>
+        <div class="upload-sub" id="upload-sub">JPG, PNG ou PDF · Máx. 10MB</div>
+      </div>
+      <input type="file" id="file-input" accept="image/*,.pdf" style="display:none" onchange="handleFile(this)">
+      <div class="file-preview" id="file-preview">
+        <div class="file-icon">🧾</div>
+        <div class="file-name" id="file-name">comprovante.jpg</div>
+        <div class="file-remove" onclick="removeFile()">✕</div>
+      </div>
+    </div>
+    <div class="alert-info">🕐 Após o envio do comprovante, sua inscrição será <strong>revisada em até 2 horas</strong>. Você receberá uma confirmação pelo WhatsApp.</div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step-view" id="step4">
+    <div class="card status-card" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7)">
+      <div class="status-icon">🎾</div>
+      <div class="status-title">Inscrição Enviada!</div>
+      <div class="status-sub">Seu comprovante foi recebido e está sendo analisado pela equipe.</div>
+      <div style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:999px;font-size:12px;font-weight:700;background:#dcfce7;color:#16a34a;border:1.5px solid #bbf7d0;margin-top:16px">⏳ Aguardando confirmação</div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="margin-bottom:12px">Resumo da Inscrição</div>
+      <div class="inscricao-summary">
+        <div class="summary-row"><span class="summary-label">Atleta</span><span class="summary-val" id="summ-atleta">—</span></div>
+        <div class="summary-row"><span class="summary-label">Responsável</span><span class="summary-val" id="summ-resp">—</span></div>
+        <div class="summary-row"><span class="summary-label">Categoria</span><span class="summary-val" id="summ-cat">—</span></div>
+        <div class="summary-row"><span class="summary-label">Torneio</span><span class="summary-val" id="summ-torneio">—</span></div>
+        <div class="summary-row"><span class="summary-label">Valor</span><span class="summary-val" id="summ-valor">—</span></div>
+        <div class="summary-row"><span class="summary-label">Código</span><span class="summary-val" style="color:#6b7280;font-family:monospace" id="summ-codigo">—</span></div>
+        <div class="summary-row"><span class="summary-label">Status</span><span class="summary-val" style="color:#f59e0b">⏳ Em análise</span></div>
+      </div>
+    </div>
+    <div class="card" style="background:#eff6ff;border:1.5px solid #bfdbfe">
+      <div style="font-size:14px;font-weight:800;color:#1e40af;margin-bottom:8px">📱 Próximos passos</div>
+      <div style="font-size:12px;color:#1e40af;line-height:1.8">
+        1. A equipe vai analisar seu comprovante<br>
+        2. Você receberá uma confirmação pelo WhatsApp<br>
+        3. Após confirmado, seu atleta estará inscrito oficialmente<br>
+        4. Acompanhe o torneio pelo WhatsApp da academia
+      </div>
+    </div>
+    <button class="btn-secondary" onclick="novaInscricao()">➕ Inscrever outro atleta</button>
+  </div>
+
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <button class="btn-primary" id="btn-next" onclick="nextStep()">Continuar →</button>
+</div>
+
+<script>
+  // ── SUPABASE ──
+  const SB_URL = 'https://elihmklizdmjnvstgiqq.supabase.co';
+  const SB_KEY = 'sb_publishable_Q9mcknF35hu-6kWPoRv7Pg_MAfS23a2';
+  const sb = window.Supabase?.createClient(SB_URL, SB_KEY, { auth: { persistSession: false } });
+
+  let torneioData  = null;
+  let categorias   = [];
+  let catSelected  = null;
+  let valorSel     = 0;
+  let catLabel     = '';
+  let fileAnexado  = false;
+  let fileObj      = null;
+  let currentStep  = 1;
+  let inscricaoId  = null;
+
+  // Carrega Supabase SDK se não estiver presente
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+  script.onload = init;
+  document.head.appendChild(script);
+
+  async function init() {
+    const supabase = window.supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: false } });
+    window._sb = supabase;
+
+    const params  = new URLSearchParams(location.search);
+    const torneioId = params.get('t');
+    if (!torneioId) { showError('Link inválido — nenhum torneio especificado.'); return; }
+
+    const { data: t, error } = await supabase
+      .from('torneios')
+      .select('*, categorias_torneio(*)')
+      .eq('id', torneioId)
+      .eq('ativo', true)
+      .single();
+
+    if (error || !t) { showError('Torneio não encontrado ou encerrado.'); return; }
+
+    torneioData = t;
+    categorias  = (t.categorias_torneio || []).sort((a,b) => a.valor - b.valor);
+
+    renderBanner();
+    renderCategorias();
+    document.getElementById('loading-screen').style.display = 'none';
+  }
+
+  function showError(msg) {
+    document.getElementById('loading-screen').innerHTML = `<div style="text-align:center;padding:32px"><div style="font-size:40px;margin-bottom:12px">⚠️</div><div>${msg}</div></div>`;
+  }
+
+  function renderBanner() {
+    const t = torneioData;
+    const dtInicio = t.data_inicio ? new Date(t.data_inicio+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}) : '';
+    const dtFim    = t.data_fim    ? new Date(t.data_fim+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long'}) : '';
+    const dtLimite = t.data_limite_inscricao ? new Date(t.data_limite_inscricao+'T12:00:00').toLocaleDateString('pt-BR') : '—';
+    const cats     = categorias.map(c => c.nome.replace('Bola ','')).join(' · ');
+    const valMin   = categorias.length ? 'R$ '+Math.min(...categorias.map(c=>c.valor)) : '';
+    const valMax   = categorias.length ? Math.max(...categorias.map(c=>c.valor)) : '';
+
+    document.getElementById('torneio-nome').textContent    = t.nome;
+    document.getElementById('torneio-info').textContent    = `${dtInicio}${dtFim?' a '+dtFim:''} ${t.local?'· '+t.local:''}`;
+    document.getElementById('header-subtitle').textContent = `${t.nome} · ${t.local||''}`;
+    document.getElementById('torneio-details').innerHTML   = `
+      <div class="detail-item"><div class="detail-label">Inscrições até</div><div class="detail-val">${dtLimite}</div></div>
+      <div class="detail-item"><div class="detail-label">Categorias</div><div class="detail-val">${cats||'—'}</div></div>
+      <div class="detail-item"><div class="detail-label">Formato</div><div class="detail-val">${t.formato||'Grupos + Semis + Final'}</div></div>
+      <div class="detail-item"><div class="detail-label">Valor</div><div class="detail-val">${valMin} – R$ ${valMax}</div></div>
+    `;
+  }
+
+  function renderCategorias() {
+    const grid = document.getElementById('cat-grid');
+    grid.innerHTML = categorias.map(c => {
+      const fullRow = categorias.indexOf(c) === categorias.length-1 && categorias.length % 2 !== 0;
+      return `
+        <div class="cat-option${fullRow?' style="grid-column:span 2"':''}"
+             onclick="selectCategoria('${c.id}','${c.nome}','${c.emoji||'🎾'}','${c.cor||'#111'}',${c.valor})"
+             id="cat-${c.id}">
+          <div class="cat-emoji">${c.emoji||'🎾'}</div>
+          <div class="cat-name">${c.nome}</div>
+          <div class="cat-idade">${c.idade_desc||''}</div>
+          <div class="cat-valor" style="color:${c.cor||'#111'}">R$ ${c.valor}</div>
+        </div>`;
+    }).join('');
+  }
+
+  function selectCategoria(id, nome, emoji, cor, valor) {
+    document.querySelectorAll('.cat-option').forEach(el => {
+      el.style.borderColor = '#e5e7eb'; el.style.background = 'white';
+    });
+    const el = document.getElementById('cat-'+id);
+    if (el) { el.style.borderColor = cor; el.style.background = cor+'15'; }
+    catSelected = id; valorSel = valor;
+    catLabel = emoji + ' ' + nome;
+    const fmt = 'R$ '+valor.toFixed(2).replace('.',',');
+    document.getElementById('valor-box').style.display   = 'block';
+    document.getElementById('cat-label-val').textContent = nome;
+    document.getElementById('val-inscricao').textContent = fmt;
+    document.getElementById('val-total').textContent     = fmt;
+    document.getElementById('pix-valor').textContent     = fmt;
+    document.getElementById('pix-chave-display').textContent = torneioData.pix_chave || '—';
+    document.getElementById('pix-nome-display').textContent  = (torneioData.pix_nome||'') + (torneioData.pix_cnpj?' · CNPJ '+torneioData.pix_cnpj:'');
+  }
+
+  // ── NAVEGAÇÃO ──
+  function updateStepper(step) {
+    for (let i=1;i<=4;i++) {
+      const c = document.getElementById('sc'+i);
+      const l = document.getElementById('sl'+i);
+      if (i<step) { c.className='step-circle done'; c.textContent='✓'; }
+      else if (i===step) { c.className='step-circle active'; c.textContent=i; l.className='step-label active'; }
+      else { c.className='step-circle'; c.textContent=i; l.className='step-label'; }
+      if (i<4) document.getElementById('line'+i).className = i<step?'step-line done':'step-line';
+    }
+  }
+
+  function nextStep() {
+    if (currentStep===1) {
+      if (!document.getElementById('nome-atleta').value ||
+          !document.getElementById('data-nasc').value ||
+          !document.getElementById('nome-resp').value ||
+          !document.getElementById('whatsapp').value) {
+        alert('Preencha todos os campos obrigatórios (*)'); return;
+      }
+    }
+    if (currentStep===2 && !catSelected) { alert('Selecione uma categoria'); return; }
+    if (currentStep===3) {
+      if (!fileAnexado) { alert('Envie o comprovante de pagamento'); return; }
+      enviarInscricao(); return;
+    }
+    if (currentStep<4) {
+      document.getElementById('step'+currentStep).classList.remove('active');
+      currentStep++;
+      document.getElementById('step'+currentStep).classList.add('active');
+      updateStepper(currentStep);
+      window.scrollTo(0,0);
+      if (currentStep===4) document.getElementById('btn-next').style.display='none';
+    }
+  }
+
+  // ── UPLOAD ──
+  function handleFile(input) {
+    if (input.files && input.files[0]) {
+      fileObj = input.files[0];
+      fileAnexado = true;
+      document.getElementById('upload-area').classList.add('has-file');
+      document.getElementById('upload-icon').textContent  = '✅';
+      document.getElementById('upload-title').textContent = 'Comprovante anexado!';
+      document.getElementById('upload-sub').textContent   = 'Toque para trocar';
+      document.getElementById('file-preview').classList.add('show');
+      document.getElementById('file-name').textContent = fileObj.name;
+    }
+  }
+  function removeFile() {
+    fileAnexado = false; fileObj = null;
+    document.getElementById('file-input').value = '';
+    document.getElementById('upload-area').classList.remove('has-file');
+    document.getElementById('upload-icon').textContent  = '📎';
+    document.getElementById('upload-title').textContent = 'Toque para enviar o comprovante';
+    document.getElementById('upload-sub').textContent   = 'JPG, PNG ou PDF · Máx. 10MB';
+    document.getElementById('file-preview').classList.remove('show');
+  }
+
+  function copiarChave() {
+    const chave = torneioData?.pix_chave || '';
+    navigator.clipboard.writeText(chave).catch(()=>{});
+    const btn = document.querySelector('.copy-btn');
+    if (btn) { btn.textContent='Copiado!'; setTimeout(()=>btn.textContent='Copiar',2000); }
+  }
+
+  // ── SALVAR NO SUPABASE ──
+  async function enviarInscricao() {
+    const btn = document.getElementById('btn-next');
+    btn.disabled = true; btn.textContent = 'Enviando...';
+
+    const codigo = '#RTK-'+new Date().getFullYear()+'-'+String(Math.floor(Math.random()*9000)+1000);
+
+    let comprovanteUrl = null;
+    if (fileObj) {
+      const ext  = fileObj.name.split('.').pop();
+      const path = `${torneioData.id}/${Date.now()}.${ext}`;
+      const { data: up } = await window._sb.storage.from('comprovantes').upload(path, fileObj, { upsert: true });
+      if (up) {
+        const { data: pub } = window._sb.storage.from('comprovantes').getPublicUrl(path);
+        comprovanteUrl = pub?.publicUrl || null;
+      }
+    }
+
+    const payload = {
+      torneio_id:    torneioData.id,
+      academia_id:   torneioData.academia_id,
+      categoria_id:  catSelected,
+      nome_atleta:   document.getElementById('nome-atleta').value.trim(),
+      data_nasc:     document.getElementById('data-nasc').value || null,
+      sexo:          document.getElementById('sexo').value || null,
+      nome_resp:     document.getElementById('nome-resp').value.trim(),
+      whatsapp:      document.getElementById('whatsapp').value.trim(),
+      email:         document.getElementById('email').value.trim() || null,
+      valor:         valorSel,
+      status:        'aguardando',
+      comprovante_url: comprovanteUrl,
+      codigo:        codigo,
+    };
+
+    const { data, error } = await window._sb.from('inscricoes_torneio').insert(payload).select().single();
+    if (error) {
+      alert('Erro ao enviar inscrição: '+error.message);
+      btn.disabled=false; btn.textContent='Enviar inscrição →';
+      return;
+    }
+
+    inscricaoId = data?.id;
+    document.getElementById('summ-atleta').textContent  = payload.nome_atleta;
+    document.getElementById('summ-resp').textContent    = payload.nome_resp;
+    document.getElementById('summ-cat').textContent     = catLabel;
+    document.getElementById('summ-torneio').textContent = torneioData.nome;
+    document.getElementById('summ-valor').textContent   = 'R$ '+valorSel.toFixed(2).replace('.',',');
+    document.getElementById('summ-codigo').textContent  = codigo;
+
+    document.getElementById('step3').classList.remove('active');
+    currentStep=4;
+    document.getElementById('step4').classList.add('active');
+    updateStepper(4);
+    document.getElementById('btn-next').style.display='none';
+    window.scrollTo(0,0);
+  }
+
+  function novaInscricao() {
+    currentStep=1; catSelected=null; fileAnexado=false; fileObj=null;
+    document.querySelectorAll('.step-view').forEach(v=>v.classList.remove('active'));
+    document.getElementById('step1').classList.add('active');
+    document.getElementById('btn-next').style.display='block';
+    document.getElementById('btn-next').disabled=false;
+    document.getElementById('btn-next').textContent='Continuar →';
+    ['nome-atleta','data-nasc','nome-resp','whatsapp','email'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('sexo').value='';
+    removeFile();
+    updateStepper(1);
+    window.scrollTo(0,0);
+  }
+</script>
+</body>
+</html>
