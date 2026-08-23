@@ -240,10 +240,13 @@ async function initApp() {
   const db = getDb();
   if (!db) { showLogin(); return; }
 
-  // Check for ?code= param — portal registration flow
+  // Check for ?a= param — portal registration flow (novo: acesso por nome)
   const urlParams = new URLSearchParams(window.location.search);
+  const urlAcademia = urlParams.get('a');
+  if (urlAcademia) { showPortalRegister(urlAcademia); return; }
+  // Backward compat: ?code= (links antigos ainda funcionam)
   const urlCode = urlParams.get('code');
-  if (urlCode) { showPortalRegister(urlCode); return; }
+  if (urlCode) { showPortalRegister(null); return; }
 
   // Check for ?coach_invite= param — coach registration flow
   const urlCoachInvite = urlParams.get('coach_invite');
@@ -4141,14 +4144,15 @@ async function loadPresencaHoje() {
       <div style="font-size:13px;color:var(--t2);margin-top:4px" id="pr-subtitle">Acesso do Responsável</div>
     </div>
     <div style="background:var(--card);border:1px solid var(--bo);border-radius:20px;padding:28px;box-shadow:var(--shadow-lg)">
+      <div style="margin-bottom:14px">
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t2);display:block;margin-bottom:6px">Nome completo do filho / filha *</label>
+        <input id="pr-nome" type="text" placeholder="Ex: João Guilherme Santos" autocomplete="off" style="width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:15px;outline:none" oninput="onPortalNomeInput(this.value)">
+        <div id="pr-nome-status" style="font-size:12px;margin-top:6px;min-height:16px;text-align:center"></div>
+      </div>
+      <div id="pr-student-matches" style="display:none;margin-bottom:14px"></div>
       <div id="pr-student-info" style="display:none;padding:12px;background:var(--gl);border:1px solid var(--gb);border-radius:12px;margin-bottom:16px;text-align:center">
         <div style="font-size:13px;font-weight:700;color:var(--g)" id="pr-student-name"></div>
         <div style="font-size:11px;color:var(--t2);margin-top:2px" id="pr-student-detail"></div>
-      </div>
-      <div style="margin-bottom:14px">
-        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t2);display:block;margin-bottom:6px">Código de acesso</label>
-        <input id="pr-code" type="text" placeholder="PP-XXXX" maxlength="7" style="width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:18px;font-weight:700;letter-spacing:3px;outline:none;text-transform:uppercase;text-align:center" oninput="validatePortalCode(this.value)">
-        <div id="pr-code-status" style="font-size:12px;margin-top:6px;min-height:16px;text-align:center"></div>
       </div>
       <div style="margin-bottom:14px">
         <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t2);display:block;margin-bottom:6px">Seu e-mail</label>
@@ -4191,9 +4195,8 @@ function getAppBase() {
   return 'https://ace-player-passport.vercel.app';
 }
 function copyPortalLink(studentId) {
-  const s = gSt(studentId);
-  if (!s || !s.access_code) { toast('Código não encontrado'); return; }
-  const link = getAppBase() + '?code=' + s.access_code;
+  if (!currentAcademia?.id) { toast('Academia não carregada'); return; }
+  const link = getAppBase() + '/?a=' + currentAcademia.id;
   navigator.clipboard.writeText(link).then(() => toast('Link copiado! 📋')).catch(() => {
     prompt('Copie o link:', link);
   });
@@ -4304,36 +4307,78 @@ async function markParentMsgRead(msgId, studentId) {
 
 // ── Portal Register (tela de registro para pais) ──
 let portalRegisterStudent = null;
-function showPortalRegister(code) {
+let portalAcademiaId = null;
+let portalNomeTimer  = null;
+
+function showPortalRegister(academiaId) {
+  portalAcademiaId = academiaId || null;
+  portalRegisterStudent = null;
   document.getElementById('portal-register-screen').style.display = 'flex';
-  if (code) {
-    const inp = document.getElementById('pr-code');
-    inp.value = code.toUpperCase();
-    validatePortalCode(code);
+  document.getElementById('pr-nome').value = '';
+  document.getElementById('pr-nome-status').textContent = '';
+  document.getElementById('pr-student-info').style.display = 'none';
+  document.getElementById('pr-student-matches').style.display = 'none';
+}
+
+function onPortalNomeInput(val) {
+  clearTimeout(portalNomeTimer);
+  const nome = val.trim();
+  const status = document.getElementById('pr-nome-status');
+  if (nome.length < 3) {
+    status.textContent = '';
+    document.getElementById('pr-student-info').style.display = 'none';
+    document.getElementById('pr-student-matches').style.display = 'none';
+    portalRegisterStudent = null;
+    return;
+  }
+  status.textContent = 'Buscando...';
+  portalNomeTimer = setTimeout(() => lookupStudentByName(nome), 500);
+}
+
+async function lookupStudentByName(nome) {
+  const status   = document.getElementById('pr-nome-status');
+  const info     = document.getElementById('pr-student-info');
+  const matches  = document.getElementById('pr-student-matches');
+  if (!portalAcademiaId) {
+    status.innerHTML = '<span style="color:var(--r)">Link de acesso inválido — peça ao coach um novo link</span>';
+    return;
+  }
+  try {
+    const { data, error } = await getDb().rpc('lookup_student_by_name', {
+      p_nome: nome, p_academia_id: portalAcademiaId
+    });
+    if (error || !data || data.length === 0) {
+      status.innerHTML = '<span style="color:var(--r)">Aluno não encontrado — verifique o nome</span>';
+      info.style.display = 'none'; matches.style.display = 'none';
+      portalRegisterStudent = null; return;
+    }
+    if (data.length === 1) {
+      selectPortalStudent(data[0]);
+      matches.style.display = 'none';
+    } else {
+      status.innerHTML = '<span style="color:#f59e0b">Vários alunos encontrados — selecione o seu filho:</span>';
+      info.style.display = 'none';
+      matches.style.display = 'block';
+      matches.innerHTML = data.map(row => `
+        <div onclick="selectPortalStudent(${JSON.stringify(row).replace(/"/g,'&quot;')})" style="padding:10px 14px;border:1.5px solid var(--bo);border-radius:12px;margin-bottom:8px;cursor:pointer;background:var(--bg3)">
+          <div style="font-size:14px;font-weight:700;color:var(--t)">${row.student_name}</div>
+          <div style="font-size:12px;color:var(--t2);margin-top:2px">🎾 ${row.pulseira||''}</div>
+        </div>`).join('');
+      portalRegisterStudent = null;
+    }
+  } catch(e) {
+    status.innerHTML = '<span style="color:var(--r)">Erro na busca</span>';
   }
 }
 
-async function validatePortalCode(raw) {
-  const code = raw.trim().toUpperCase();
-  const status = document.getElementById('pr-code-status');
-  const info = document.getElementById('pr-student-info');
-  if (code.length < 7) { status.textContent = ''; info.style.display = 'none'; portalRegisterStudent = null; return; }
-  status.textContent = 'Verificando...';
-  try {
-    const { data, error } = await getDb().rpc('lookup_portal_code', { p_code: code });
-    const row = data && data[0];
-    if (error || !row) {
-      status.innerHTML = '<span style="color:var(--r)">Código inválido</span>';
-      info.style.display = 'none'; portalRegisterStudent = null;
-    } else {
-      const pb = (typeof gP === 'function') ? gP(row.pulseira) : { ball:'🎾', label: row.pulseira };
-      status.innerHTML = '<span style="color:var(--g)">✓ Código válido</span>';
-      document.getElementById('pr-student-name').textContent = row.student_name;
-      document.getElementById('pr-student-detail').textContent = (pb.ball||'') + ' ' + (pb.label||'') + ' · Coach ' + (row.coach_nome||'');
-      info.style.display = 'block';
-      portalRegisterStudent = { id: row.student_id, nome: row.student_name, pulseira: row.pulseira, coach_nome: row.coach_nome, academia_id: row.academia_id };
-    }
-  } catch(e) { status.innerHTML = '<span style="color:var(--r)">Erro na verificação</span>'; }
+function selectPortalStudent(row) {
+  const pb = (typeof gP === 'function') ? gP(row.pulseira) : { ball:'🎾', label: row.pulseira };
+  document.getElementById('pr-nome-status').innerHTML = '<span style="color:var(--g)">✓ Aluno encontrado</span>';
+  document.getElementById('pr-student-name').textContent = row.student_name;
+  document.getElementById('pr-student-detail').textContent = (pb.ball||'🎾') + ' ' + (pb.label||row.pulseira||'');
+  document.getElementById('pr-student-info').style.display = 'block';
+  document.getElementById('pr-student-matches').style.display = 'none';
+  portalRegisterStudent = { id: row.student_id, nome: row.student_name, pulseira: row.pulseira, academia_id: row.academia_id };
 }
 
 async function doPortalRegister() {
