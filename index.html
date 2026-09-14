@@ -567,8 +567,261 @@ async function saveTurmaSupabase(turma) {
 
 let calPedTurmaId = null;
 
-// Dados pedagógicos por pulseira
+// ── Nova estrutura: caracois → temas → a1/a2 por pulseira ──
 const CAL_PED = {
+  roxa: {
+    label: "Roxa", ball: "🟣", quadra: "10×6m · Sem rede",
+    caracois: [
+      { id:"k1", nome:"Caracol 1", nivel:"Base",
+        temas:[
+          { id:"fdq",  nome:"Fundo de Quadra",     foco:"Pé",  emoji:"⚡", obj:"Trocar bolas gol a gol, 3 devoluções",
+            a1:"Posição início do jogo · Base neutra arremesso FH · Arranque (estrela) · SAQ base semi-aberta FH · Posição 0 joelhos flexionados",
+            a2:"Percepção de alvos e zonas + Posição 0 · Pegada raquete + mão livre no coração · Jogo gol a gol" },
+          { id:"fdq2", nome:"FdQ com Adversidade",  foco:"Mão", emoji:"🔄", obj:"Trocar bola com adversidade, gol a gol",
+            a1:"Apoio neutro (arr.) / Pés dinâmicos (dev.) · Giro dos ombros FH e BH · Ponto de contato na frente do corpo",
+            a2:"Equilíbrio da base + precisão dos golpes · Anunciar 'fora'/'dentro' para o colega · Jogo gol a gol" },
+          { id:"saque", nome:"Saque",               foco:"Mão", emoji:"🎾", obj:"Partida adaptada: 1º a 3 gols ou 5 min",
+            a1:"Dominar espaço acima da cabeça · Base semi-aberta no saque · Segurar raquete no fim do cabo · Toss + ponto de contato acima da cabeça",
+            a2:"Pré-evento: recuperar conteúdos · Partida adaptada com saque (1º a 3 gols ou 5 min)" }
+        ]
+      },
+      { id:"k2", nome:"Caracol 2", nivel:"Intermediário",
+        temas:[
+          { id:"fdq_av", nome:"FdQ Dinâmico",       foco:"Pé",  emoji:"⚡", obj:"FdQ com deslocamento dinâmico",
+            a1:"Pés 'pregados' + frear/parar + SAQ equilibrado · Mão livre no coração antes do TAC · Percepção lateral FH/BH",
+            a2:"Trocas cruzadas e paralelas FH/BH · Jogo com pontos" },
+          { id:"rede",  nome:"Voleio e Rede",       foco:"Mão", emoji:"🖐", obj:"Interceptar com voleio + jogo de rede",
+            a1:"Posição 0 voleio · Mão livre coração · Preparação aberta · Percepção dos momentos TIC e TOC",
+            a2:"Jogo de rede TIC/TOC · Partida com incentivo a subir à rede" },
+          { id:"saque2",nome:"Saque + Regulamento", foco:"Olho",emoji:"🎯", obj:"Partida com saque e contagem",
+            a1:"Empunhadura saque · Toss controlado · Ponto de contato elevado · Mão livre posição 0",
+            a2:"Recuperação de quadra + regra 2 bolas + sorteio · Partida 7 pontos" }
+        ]
+      }
+    ]
+  },
+  verm_branca: {
+    label: "Vermelha-Branca", ball: "🔴", quadra: "11×6m · Rede 0,50m",
+    caracois: [
+      { id:"k1", nome:"Caracol 1", nivel:"Base",
+        temas:[
+          { id:"obs_fdq", nome:"OBS + FdQ",         foco:"Olho",emoji:"👁", obj:"1 arremesso + 1 troca, rede 0,50m",
+            a1:"Anunciar quique Fora/Dentro + posicionamento · Posição '0' mão livre no coração + prep. linear · Pés 'pregados' + frear/parar + SAQ equilibrado",
+            a2:"Percepção: anúncio 'TAC' e recepção de bola · Pegada (almofadinha) e ponto de contato · Contar e anunciar para o adversário" },
+          { id:"rede",    nome:"Voleio e Rede",     foco:"Mão", emoji:"🖐", obj:"Interceptar com voleio + conhecer jogo de rede",
+            a1:"Posição 0 inferior + arrancar · Posição 0 superior (mão coração) + prep. aberta · Percepção dos momentos TIC e TOC",
+            a2:"Contar + regra das 2 bolas no saque · Jogo de rede TIC/TOC" },
+          { id:"saque",   nome:"Saque",             foco:"Mão", emoji:"🎾", obj:"Partida de 7 pontos, 11×6m, rede 0,50m",
+            a1:"Base ½ aberta e equilíbrio no saque · Empunhadura eastern a continental · Toss controlado · Ponto de contato elevado",
+            a2:"Recuperação quadra + regra 2 bolas + sorteio · Partida 7 pontos" }
+        ]
+      },
+      { id:"k2", nome:"Caracol 2", nivel:"Intermediário",
+        temas:[
+          { id:"fdq_saq", nome:"FdQ + SAQ",         foco:"Pé",  emoji:"⚡", obj:"FdQ com SAQ e precisão",
+            a1:"Pés 'pregados' + frear/parar avançado · SAQ equilibrado e dinâmico · Posição 0 mão livre evoluída",
+            a2:"Trocas FH e BH com direcionamento · Jogo com pontos e contagem" },
+          { id:"rede2",   nome:"Jogo de Rede",      foco:"Mão", emoji:"🖐", obj:"Subir à rede e finalizar",
+            a1:"Empunhadura voleio FH e BH · Prep. curta voleio · Posição pós-voleio",
+            a2:"Jogo de rede com abordagem · Partida com incentivo ao voleio" },
+          { id:"constr",  nome:"Construção + Dev.", foco:"Olho",emoji:"🎯", obj:"Partida regulamentar adaptada",
+            a1:"Percepção de situação favorável/desfavorável · Regra pontuação completa · Posição sacador",
+            a2:"Partida regulamentar 11×6m · Set curto autônomo" }
+        ]
+      }
+    ]
+  },
+  verm_verm: {
+    label: "Vermelha-Vermelha", ball: "🔴🔴", quadra: "12×8m · Rede 0,80m",
+    caracois: [
+      { id:"k1", nome:"Caracol 1", nivel:"Base",
+        temas:[
+          { id:"fdq_fh",  nome:"FdQ (FH)",          foco:"Mão", emoji:"⚡", obj:"1 arremesso + 2 trocas FH",
+            a1:"Anunciar Fora/Dentro + tie-break · Posição '0' mão livre no coração + prep. linear · Pés 'pregados' (arr.) + frear/parar (dev.)",
+            a2:"Percepção: anúncio 'TAC' e recepção de bola · Pegada (almofadinha) e ponto de contato · Jogo pontos FH" },
+          { id:"rede",    nome:"Voleio e Rede",     foco:"Mão", emoji:"🖐", obj:"1 arremesso + approach + interceptar com voleio",
+            a1:"Joelhos flex. Posição '0' + SAQ base ½ aberta · Mão livre coração + empunhadura FH-BH voleio · Percepção lateral FH/BH + apontar no smash",
+            a2:"Preparação curta voleio + troféu smash · Contagem, pontuação, atacar ou defender" },
+          { id:"constr",  nome:"Construção FH/BH",  foco:"Olho",emoji:"🎯", obj:"1 arremesso + 2 trocas FH/BH + SAQ 2 cruzadas",
+            a1:"Percepção e decisão para usar 'vazios' · Empunhadura Eastern FH + 'escovar' a bola · Empunhadura Eastern BH",
+            a2:"Ponto contato na frente + toss equilibrado · Trajetórias diferentes / rodízio tie-break" }
+        ]
+      },
+      { id:"k2", nome:"Caracol 2", nivel:"Avançado",
+        temas:[
+          { id:"fdq_dir", nome:"FdQ Direcionamento", foco:"Pé", emoji:"⚡", obj:"Usar os espaços da quadra",
+            a1:"Empunhadura Eastern FH e BH evoluída · Ponto de contato na frente do corpo · Base ½ aberta cruzada",
+            a2:"FdQ direcionado cruzado e paralelo · Jogo pontos com regra de direcionamento" },
+          { id:"rede2",   nome:"Rede 1º e 2º",      foco:"Mão",emoji:"🖐", obj:"Vencer pontos na rede",
+            a1:"Prep. curta voleio 1º e 2º · Giro tronco no voleio · Smash: posicionamento e equilíbrio",
+            a2:"Approach + jogo de rede · Partida incentivando subida à rede" },
+          { id:"saque2",  nome:"Saque + Regulamento",foco:"Olho",emoji:"🎾",obj:"Partida regulamentar 12×8m",
+            a1:"Toss direcionado · Ponto de contato elevado + mão livre posição 0 · Contagem regular",
+            a2:"Partida set curto autônomo 12×8m · Tie-break" }
+        ]
+      }
+    ]
+  },
+  verm_laranja: {
+    label: "Vermelha-Laranja", ball: "🔴🟠", quadra: "12,80×5,50m",
+    caracois: [
+      { id:"k1", nome:"Caracol 1", nivel:"Base",
+        temas:[
+          { id:"fdq",   nome:"Fundo de Quadra",     foco:"Pé",  emoji:"⚡", obj:"Deslocar o adversário",
+            a1:"Posição '0' dinâmica / Arr ½ aberto / SAQ ½ aberto · Percepção profundidade cruzadas · Mão livre coração antes do TAC e 1º giro",
+            a2:"Tac-Tac-Hop (TTH) movimentação + equilíbrio SAQ · Golpes FdQ com preparação 'troféu'" },
+          { id:"rede",  nome:"Jogo de Rede",        foco:"Mão", emoji:"🖐", obj:"Subir para rede em situação tática",
+            a1:"Troféu na preparação dos golpes (verticalidade) · Identificar posição na rede + subir e posicionar · Expectativa mão livre + empunhadura continental",
+            a2:"Smash: movimentação, posicionamento, equilíbrio · Decisão atacar ou defender + ordem pontuação" },
+          { id:"constr",nome:"FH e BH + Tie-Break", foco:"Olho",emoji:"🎯", obj:"Construir o ponto nos 'vazios'",
+            a1:"Técnica de movimentação para frear/alinhar-se · Diferenciar empunhaduras FH e BH · Percepção lateral + tempo de percepção",
+            a2:"Base ½ aberta e neutra + DEV: tac-tac/hop · Posições na quadra + tie-break / sacador" }
+        ]
+      },
+      { id:"k2", nome:"Caracol 2", nivel:"Avançado",
+        temas:[
+          { id:"fdq2",  nome:"FdQ Tático",          foco:"Olho",emoji:"⚡", obj:"FdQ com decisão tática",
+            a1:"Reconhecer situação favorável/desfavorável · TTH evolução + SAQ avançado · Prep. 'troféu' em deslocamento",
+            a2:"FdQ direcionado com decisão · Jogo pontos com regra tática" },
+          { id:"rede2", nome:"Rede + Defesa",       foco:"Pé",  emoji:"🖐", obj:"Jogo completo rede e defesa",
+            a1:"Approach com aceleração · Split step pós-golpe · Defesa extrema + posicionamento",
+            a2:"Partida incentivando rede e defesa · Jogo pontos" },
+          { id:"comp",  nome:"Jogo Completo",       foco:"Olho",emoji:"🏆", obj:"Set curto autônomo regulamentar",
+            a1:"Contagem regulamentar completa · Posição sacador +1 · Ponto forte e fraco",
+            a2:"Set curto autônomo · 2 games regulamentares" }
+        ]
+      }
+    ]
+  },
+  laranja: {
+    label: "Laranja-Laranja", ball: "🟠", quadra: "18×8m · Rede 0,80m",
+    caracois: [
+      { id:"k1", nome:"Caracol 1", nivel:"Base",
+        temas:[
+          { id:"fdq18",  nome:"FdQ 18m + Saque",   foco:"Olho",emoji:"⚡", obj:"Trocar FdQ em quadra 18m",
+            a1:"Percepção lateral rápida + posição sacador · Empunhadura FH/BH + mão livre / continental · Passos laterais + equilíbrio pé esq. no saque",
+            a2:"Giro + troféu FH/BH + subida junta dos braços SAQ · 3 Tempos após quique + SAQ e os 2 toss · Reconhecer situação favorável/desfavorável" },
+          { id:"fdq_dir",nome:"FdQ Direcionamento", foco:"Mão", emoji:"🎯", obj:"Utilizar espaços da quadra",
+            a1:"Perceber profundidade (1 e 2) + diferenciar S1 e S2 · Preparação elevada (troféu) + soltar · Base ½ aberta cruzar + dinâmica pé esq. SAQ",
+            a2:"Ação mão spin + ponto contato + pronação SAQ · D2: ponto fraco / acelerar paralela + noAD" },
+          { id:"def_rede",nome:"Defesa e Rede",     foco:"Pé",  emoji:"🖐", obj:"Jogar 2 games em contagem tradicional",
+            a1:"Defesa extrema / Distinguir smash e voleio · Split step + passos cruzados / avançar rede · Slice continental / prep. curta voleio",
+            a2:"3 Tempos quique + posição sacador +1 · 2 games contagem regular" }
+        ]
+      },
+      { id:"k2", nome:"Caracol 2", nivel:"Avançado",
+        temas:[
+          { id:"fdq_con",nome:"FdQ Construção",     foco:"Mão", emoji:"⚡", obj:"Construir com efeito e profundidade",
+            a1:"Troféu alto FH/BH evoluído · Ponto de contato elevado + spin · Transferência de peso",
+            a2:"FdQ construção com profundidade · Jogo pontos com regra profundidade" },
+          { id:"fdq_ac", nome:"FdQ Aceleração",     foco:"Olho",emoji:"🎯", obj:"Acelerar em situação favorável",
+            a1:"D2: situação favorável / D2 aceleração paralela · Prep. 'troféu' + ação mão antebraço chicote · noAD regulamento",
+            a2:"FdQ aceleração e construção · Jogo pontos com decisão tática" },
+          { id:"comp",   nome:"Jogo Completo",      foco:"Olho",emoji:"🏆", obj:"Jogo autônomo 18m",
+            a1:"Contagem regulamentar · Posição sacador +1 · Set curto",
+            a2:"2 games regulamentares autônomos · Feedback individual" }
+        ]
+      }
+    ]
+  },
+  laranja_verde: {
+    label: "Laranja-Verde", ball: "🟠🟢", quadra: "18m · Quadra oficial",
+    caracois: [
+      { id:"k1", nome:"Caracol 1", nivel:"Base",
+        temas:[
+          { id:"obs_fdq",nome:"OBS + FdQ",          foco:"Pé",  emoji:"⚡", obj:"Construir com efeitos, profundidade e direcionamento",
+            a1:"tac,tac,HOP – joelhos flex. + SAQ base neutra · Posição expectativa 'jedi solto' + SAQ continental · Percepção lateral e empunhadura + SAQ torre alta",
+            a2:"Empunhadura FH/BH e giro no 1º voo · Base flexionada e avança + SAQ: perna esq. p/ cima · Identificar situação tática FdQ" },
+          { id:"atacar", nome:"Atacar e Acelerar",  foco:"Mão", emoji:"🎯", obj:"Construir ao acelerar em situação favorável",
+            a1:"Passos laterais p/ entrar + SAQ: empurrar solo · TEC-TAC: troféu na prep. + S1 no saque · TEC-TAC: ação mão-antebraço no chicote",
+            a2:"Base ½ aberta para cruzar e transferir · D2: ponto fraco/paralela + regra noAD" },
+          { id:"rede_def",nome:"Rede + Defesa + Dev.",foco:"Olho",emoji:"🖐", obj:"Autônomo 2 games",
+            a1:"Identificar e utilizar ponto forte · Golpear e correr p/ frente até split step · Jogo de rede: empunhaduras voleio e contato",
+            a2:"Movimentação de defesa c/ apoios abertos · Posição sacador +1 (simples e dupla) · 2 games autônomos" }
+        ]
+      },
+      { id:"k2", nome:"Caracol 2", nivel:"Avançado",
+        temas:[
+          { id:"fdq_pad",nome:"FdQ Padrões",        foco:"Olho",emoji:"⚡", obj:"Padrões de jogo FdQ",
+            a1:"Padrões de jogo: ponto fraco / aceleração · Ação mão-antebraço spin (FH/BH) avançado · Ritmo de movimentação na fase do deslocamento",
+            a2:"FdQ com padrão de jogo definido · Jogo pontos com regra de padrão" },
+          { id:"constr2",nome:"Construção + 2ª Bola",foco:"Mão",emoji:"🎯", obj:"Construir o ponto com 2ª bola",
+            a1:"Técnica de perna: ancorar–transferir + SAQ p/ cima · ½ quadra do BH + D2: posicionamento p/ sair · Passos cruzados inside out",
+            a2:"FdQ inside out + construção · Jogo pontos com regra inside out" },
+          { id:"auto",   nome:"Automação Jogo",     foco:"Olho",emoji:"🏆", obj:"Set curto autônomo quadra oficial",
+            a1:"Posição sacador avançada + 1 · Ponto forte + regras gerais · Identificar 3 situações TA",
+            a2:"Set curto autônomo quadra 18m · Feedback individual" }
+        ]
+      }
+    ]
+  },
+  verde_verde: {
+    label: "Verde-Verde", ball: "🟢", quadra: "Quadra 24m · Set curto autônomo",
+    caracois: [
+      { id:"k1", nome:"Caracol 1", nivel:"Base",
+        temas:[
+          { id:"fdq_con",nome:"FdQ Construção",     foco:"Pé",  emoji:"⚡", obj:"Construir o ponto movimentando o adversário",
+            a1:"HOP com recepção dinâmica e equilibrada · Identificar 3 situações TA de FdQ/saque · Troféu alto FH e BH + continental + pronação SAQ",
+            a2:"Base ½ aberta + joelhos flex. + diferenciar 1º/2º SAQ · Soltar após prep. + terminação c/ amplitude + SAQ spin" },
+          { id:"fdq_def",nome:"FdQ Defesa",         foco:"Mão", emoji:"🛡", obj:"Defender em Fundo de Quadra",
+            a1:"Soltar após prep. + terminação c/ amplitude · Empunhadura e ação punho/mão no slice FH e BH · Posição quadra para defender + zona de recuperação",
+            a2:"Passo cruzado + base aberta (apoios abertos) · Ponto forte + regras gerais (autonomia)" },
+          { id:"rede_saq",nome:"Jogo de Rede + SAQ",foco:"Olho",emoji:"🖐", obj:"Set curto autônomo quadra 24m",
+            a1:"Identificar quando subir + escolha D2 · Recuperar em função dos voleios V1 ou V2 · Slice no voleio + giro do tronco",
+            a2:"Approach c/ aceleração + projeção cotovelo SAQ · Quando/como subir rede? + pegar rede + ponto fraco" }
+        ]
+      },
+      { id:"k2", nome:"Caracol 2", nivel:"Avançado",
+        temas:[
+          { id:"fdq_sit",nome:"FdQ Situações",      foco:"Olho",emoji:"⚡", obj:"FdQ com decisão por situação",
+            a1:"3 situações TA evoluídas: neutra / favorável / desfavorável · Ação mão-antebraço spin avançado · Padrões de jogo FdQ",
+            a2:"FdQ com padrão tático · Jogo pontos com situações definidas" },
+          { id:"def_ext",nome:"Defesa Extrema",     foco:"Pé",  emoji:"🛡", obj:"Defender e contra-atacar",
+            a1:"Movimentação de defesa extrema · Slice FH/BH de defesa · Recuperação + mudança situação",
+            a2:"Jogo de defesa extrema · Partida pontos incentivando defesa e contra-ataque" },
+          { id:"rede_ag",nome:"Rede Agressiva",     foco:"Mão", emoji:"🖐", obj:"Set curto autônomo quadra 24m avançado",
+            a1:"Approach + 1º voleio agressivo · Smash com deslocamento · Voleio baixo de construção",
+            a2:"Set curto autônomo 24m · Feedback pós-set" }
+        ]
+      }
+    ]
+  },
+  verde_amarela: {
+    label: "Verde-Amarelo", ball: "🟢🟡", quadra: "Quadra 24m · Oficial",
+    caracois: [
+      { id:"k1", nome:"Caracol 1", nivel:"Base",
+        temas:[
+          { id:"fdq_neu",nome:"FdQ Neutro",         foco:"Pé",  emoji:"⚡", obj:"Jogar com consistência em situação neutra",
+            a1:"HOP com recepção dinâmica e equilibrada · Ação mão-antebraço no spin (FH/BH) · Ritmo de movimentação na fase do deslocamento",
+            a2:"Soltar após prep. + terminação c/ amplitude + SAQ spin · Identificar 3 situações TA de FdQ e do saque" },
+          { id:"fdq_fav",nome:"FdQ Favorável + IO", foco:"Olho",emoji:"🎯", obj:"Jogar utilizando o ponto forte",
+            a1:"Técnica de perna: ancorar–transferir + SAQ p/ cima · ½ quadra do BH + D2: posicionamento p/ sair · Passos cruzados inside out",
+            a2:"Ponto contato na frente (giro tronco + braço janela) · Ponto forte + regras gerais (autonomia)" },
+          { id:"rede_dev",nome:"Jogo de Rede + Dev.",foco:"Mão",emoji:"🖐", obj:"Vencer pontos na rede + set curto",
+            a1:"Identificar e conhecer 1º e 2º voleio · Voleios + split step + SAQ equilíbrio dos pés · Giro do tronco no voleio",
+            a2:"Voleio construção baixo + DEV: transferir + recuperação · Quando/como subir p/ rede? + ponto fraco" }
+        ]
+      },
+      { id:"k2", nome:"Caracol 2", nivel:"Avançado",
+        temas:[
+          { id:"fdq_pad",nome:"FdQ Padrões",        foco:"Olho",emoji:"⚡", obj:"FdQ com padrões de jogo definidos",
+            a1:"Padrões de jogo: ponto fraco / SAQ potência ou colocado · Ritmo de movimentação avançado · Inside out + padrão D2",
+            a2:"FdQ com padrão definido · Jogo pontos com regra de padrão" },
+          { id:"constr2",nome:"Construção Complexa", foco:"Mão",emoji:"🎯", obj:"Construção com efeito e profundidade",
+            a1:"Ação mão-antebraço spin avançado FH/BH · Ponto de contato elevado e projetado · Slice continental defesa/construção",
+            a2:"FdQ construção combinada · Jogo pontos com situação mista" },
+          { id:"auto",   nome:"Automação Completa", foco:"Olho",emoji:"🏆", obj:"Set regulamentar autônomo",
+            a1:"Posição sacador +1 avançada · 3 situações TA integradas · Ponto forte + ponto fraco do adversário",
+            a2:"Set regulamentar completo · Análise pós-set" }
+        ]
+      }
+    ]
+  },
+};
+
+// Mapa de pulseira para chave do CAL_PED (mantido para compatibilidade)
+// LEGADO: o campo 'ciclos' não existe mais — substituído por 'caracois'
+const CAL_PED_LEGACY = {
   roxa: {
     label: "Roxa", ball: "🟣", quadra: "10×6m · Sem rede",
     ciclos: [
@@ -835,7 +1088,6 @@ const CAL_PED = {
   },
 };
 
-// Mapa de pulseira para chave do CAL_PED
 const PULS_CAL_MAP = {
   roxa: 'roxa', azul: 'roxa',
   verm_branca: 'verm_branca', vermelha_branca: 'verm_branca',
@@ -847,19 +1099,26 @@ const PULS_CAL_MAP = {
   verde_amarela: 'verde_amarela', verde: 'verde_amarela',
 };
 
+// Pega o progresso do caracol (novo formato: { caracol, sessoes })
+function getCalProgLocal(turmaId) {
+  const raw = localStorage.getItem('calped_prog_' + turmaId);
+  if (!raw) return { caracol: 0, sessoes: {} };
+  const p = JSON.parse(raw);
+  // migração do formato antigo { ciclo, aulas }
+  if (p.ciclo !== undefined && p.sessoes === undefined) return { caracol: 0, sessoes: {} };
+  return { caracol: p.caracol || 0, sessoes: p.sessoes || {} };
+}
+function saveCalProgLocal(turmaId, prog) {
+  localStorage.setItem('calped_prog_' + turmaId, JSON.stringify(prog));
+}
+
 // ── ABRIR CALENDÁRIO PEDAGÓGICO (seletor de turma) ──
 function openCalPed() {
   const el = document.getElementById('calped-body');
   if (!el) return;
-
-  // Get current coach name
   const coachNome = currentUser?.user_metadata?.nome || currentUser?.email?.split('@')[0] || 'Coach';
   const ini2 = n => n ? n.substring(0,2).toUpperCase() : '?';
-
-  // Group turmas by coach
   const allCoaches = [...new Set(tms.map(t => t.coach || 'Sem coach'))];
-
-  // Always show current coach first
   const sortedCoaches = [coachNome, ...allCoaches.filter(c => c !== coachNome && c !== 'Sem coach')];
   if (allCoaches.includes('Sem coach')) sortedCoaches.push('Sem coach');
 
@@ -878,21 +1137,17 @@ function openCalPed() {
       const totalAulas = coachTurmas.reduce((sum, t) => {
         const calKey = PULS_CAL_MAP[t.pulseira] || t.pulseira;
         const cal = CAL_PED[calKey];
-        const prog = JSON.parse(localStorage.getItem('calped_prog_' + t.id) || '{"ciclo":0,"aulas":{}}');
-        const ciclo = cal ? cal.ciclos[prog.ciclo] : null;
-        return sum + (ciclo ? ciclo.aulas.length : 0);
+        const prog = getCalProgLocal(t.id);
+        return sum + Object.values(prog.sessoes||{}).filter(Boolean).length;
       }, 0);
-      const totalDone = coachTurmas.reduce((sum, t) => {
-        const prog = JSON.parse(localStorage.getItem('calped_prog_' + t.id) || '{"ciclo":0,"aulas":{}}');
-        return sum + Object.values(prog.aulas).filter(s => s === 'done').length;
-      }, 0);
+      const totalDone = totalAulas;
 
       return `<div onclick="openCalPedCoach('${coachName}')" style="background:var(--card);border:${isMe ? '2px solid var(--g)' : '1px solid var(--bo)'};border-radius:16px;padding:16px;margin-bottom:12px;cursor:pointer;transition:all .15s" ontouchstart="this.style.opacity='.7'" ontouchend="this.style.opacity='1'">
         <div style="display:flex;align-items:center;gap:14px">
           <div style="width:46px;height:46px;border-radius:50%;background:${isMe ? 'var(--g)' : 'var(--t3)'};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0">${ini2(coachName)}</div>
           <div style="flex:1">
             <div style="font-size:15px;font-weight:700;color:var(--t)">${coachName}${isMe ? ' <span style="font-size:11px;color:var(--g);font-weight:600">(você)</span>' : ''}</div>
-            <div style="font-size:12px;color:var(--t2);margin-top:2px">${coachTurmas.length} turma${coachTurmas.length !== 1 ? 's' : ''} · ${totalDone} aulas concluídas</div>
+            <div style="font-size:12px;color:var(--t2);margin-top:2px">${coachTurmas.length} turma${coachTurmas.length !== 1 ? 's' : ''} · ${totalDone} sessões concluídas</div>
           </div>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3)"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
@@ -913,22 +1168,30 @@ async function getCalProg(turmaId) {
   if (_calCache[turmaId]) return _calCache[turmaId];
   try {
     const { data, error } = await getDb().from('cal_progress').select('ciclo_index, aulas_json').eq('turma_id', turmaId).single();
-    if (!error && data) { _calCache[turmaId] = { ciclo: data.ciclo_index, aulas: data.aulas_json || {} }; return _calCache[turmaId]; }
+    if (!error && data) {
+      const aj = data.aulas_json || {};
+      // novo formato: aulas_json tem campo 'sessoes'
+      const prog = { caracol: data.ciclo_index || 0, sessoes: aj.sessoes || {} };
+      _calCache[turmaId] = prog; return prog;
+    }
   } catch(e) {}
-  const raw = localStorage.getItem('calped_prog_' + turmaId);
-  const prog = raw ? JSON.parse(raw) : { ciclo: 0, aulas: {} };
-  _calCache[turmaId] = prog;
-  return prog;
+  _calCache[turmaId] = getCalProgLocal(turmaId);
+  return _calCache[turmaId];
 }
 
 async function saveCalProg(turmaId, prog) {
   _calCache[turmaId] = prog;
+  saveCalProgLocal(turmaId, prog);
   if (!currentUser || !currentAcademia) return;
   try {
-    const { error } = await getDb().from('cal_progress').upsert({ turma_id: turmaId, academia_id: currentAcademia.id, coach_id: currentUser.id, ciclo_index: prog.ciclo, aulas_json: prog.aulas, updated_at: new Date().toISOString() }, { onConflict: 'turma_id' });
+    const { error } = await getDb().from('cal_progress').upsert({
+      turma_id: turmaId, academia_id: currentAcademia.id, coach_id: currentUser.id,
+      ciclo_index: prog.caracol || 0,
+      aulas_json: { sessoes: prog.sessoes || {} },
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'turma_id' });
     if (!error) localStorage.removeItem('calped_prog_' + turmaId);
-    else localStorage.setItem('calped_prog_' + turmaId, JSON.stringify(prog));
-  } catch(e) { localStorage.setItem('calped_prog_' + turmaId, JSON.stringify(prog)); }
+  } catch(e) {}
 }
 
 async function getCalNotes(turmaId, aulaId) {
@@ -998,10 +1261,10 @@ async function openCalPedCoach(coachName) {
       const calKey = PULS_CAL_MAP[t.pulseira] || t.pulseira;
       const cal = CAL_PED[calKey];
       const prog = await getCalProg(t.id);
-      const cicloAtual = cal ? cal.ciclos[prog.ciclo] : null;
-      const totalAulas = cicloAtual ? cicloAtual.aulas.length : 0;
-      const concluidas = cicloAtual ? cicloAtual.aulas.filter(a => prog.aulas[a.id] === 'done').length : 0;
-      const pct = totalAulas > 0 ? Math.round((concluidas/totalAulas)*100) : 0;
+      const caracolAtual = cal ? cal.caracois[prog.caracol || 0] : null;
+      const totalSessoes = caracolAtual ? caracolAtual.temas.length * 2 : 0;
+      const concluidas = caracolAtual ? caracolAtual.temas.reduce((n,tema) => n + (prog.sessoes[tema.id+'_a1']?1:0) + (prog.sessoes[tema.id+'_a2']?1:0), 0) : 0;
+      const pct = totalSessoes > 0 ? Math.round((concluidas/totalSessoes)*100) : 0;
       return `<div onclick="openCalPedTurma('${t.id}')" style="background:var(--card);border:1px solid var(--bo);border-radius:16px;padding:16px;margin-bottom:12px;cursor:pointer" ontouchstart="this.style.opacity='.7'" ontouchend="this.style.opacity='1'">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
           <div style="width:42px;height:42px;border-radius:12px;background:${t.cor};display:flex;align-items:center;justify-content:center;font-size:20px">${cal ? cal.ball : '🎾'}</div>
@@ -1012,13 +1275,13 @@ async function openCalPedCoach(coachName) {
           </div>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3)"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
-        ${cicloAtual ? `<div style="font-size:12px;font-weight:600;color:var(--t2);margin-bottom:6px">${cicloAtual.nome}</div><div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${t.cor};border-radius:3px;transition:width .4s"></div></div><div style="font-size:11px;color:var(--t2);margin-top:4px">${concluidas} de ${totalAulas} aulas concluídas · ${pct}%</div>` : '<div style="font-size:12px;color:var(--t3)">Nível sem conteúdo cadastrado</div>'}
+        ${caracolAtual ? `<div style="font-size:12px;font-weight:600;color:var(--t2);margin-bottom:6px">🐌 ${caracolAtual.nome} · ${caracolAtual.nivel}</div><div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${t.cor};border-radius:3px;transition:width .4s"></div></div><div style="font-size:11px;color:var(--t2);margin-top:4px">${concluidas} de ${totalSessoes} sessões · ${pct}%</div>` : '<div style="font-size:12px;color:var(--t3)">Nível sem conteúdo cadastrado</div>'}
       </div>`;
     }))).join('')}
   `;
 }
 
-// ── ABRIR CICLOS DA TURMA (async) ──
+// ── ABRIR TURMA — PERIODIZAÇÃO CARACOL (async) ──
 async function openCalPedTurma(turmaId) {
   calPedTurmaId = turmaId;
   const t = tms.find(x => String(x.id) === String(turmaId));
@@ -1029,149 +1292,135 @@ async function openCalPedTurma(turmaId) {
   const el = document.getElementById('calped-body');
   el.innerHTML = `<div style="text-align:center;padding:40px"><div class="spin"></div></div>`;
   const prog = await getCalProg(turmaId);
-  const focoColor = { Olho:'#2563eb', Mão:'#d97706', Pé:'#059669' };
+  const caracolIdx = prog.caracol || 0;
+  const caracol = cal.caracois[caracolIdx];
+  if (!caracol) { el.innerHTML = `<div style="text-align:center;padding:40px;color:var(--t2)">Nenhum caracol disponível</div>`; return; }
+  const totalSessoes = caracol.temas.length * 2;
+  const concluidas = caracol.temas.reduce((n,tema) => n + (prog.sessoes[tema.id+'_a1']?1:0) + (prog.sessoes[tema.id+'_a2']?1:0), 0);
+  const pct = Math.round((concluidas/totalSessoes)*100);
+  const tudo_feito = concluidas === totalSessoes;
   el.innerHTML = `
+    <button onclick="openCalPedCoach('${(t.coach||'Sem coach').replace(/'/g,"\\'")}') " style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--g);font-size:13px;font-weight:700;cursor:pointer;margin-bottom:16px;padding:0">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      ${t.coach || 'Treinadores'}
+    </button>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
       <div style="width:38px;height:38px;border-radius:10px;background:${t.cor};display:flex;align-items:center;justify-content:center;font-size:18px">${cal.ball}</div>
       <div><div style="font-size:16px;font-weight:800;color:var(--t)">${t.label}</div><div style="font-size:12px;color:var(--t2)">${cal.label} · ${cal.quadra}</div></div>
     </div>
-    ${cal.ciclos.map((c, ci) => {
-      const isCurrent = ci === prog.ciclo;
-      const isDone = ci < prog.ciclo;
-      const concluidas = c.aulas.filter(a => prog.aulas[a.id] === 'done').length;
-      const pct = Math.round((concluidas/c.aulas.length)*100);
-      return `<div style="background:var(--card);border:${isCurrent ? '2px solid '+t.cor : '1px solid var(--bo)'};border-radius:16px;padding:16px;margin-bottom:12px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <div style="flex:1">
-            <span style="font-size:11px;font-weight:700;color:${isCurrent ? t.cor : isDone ? 'var(--g)' : 'var(--t3)'};text-transform:uppercase">${isDone ? '✅ Concluído' : isCurrent ? '▶ Em andamento' : '⬜ Próximo'}</span>
-            <div style="font-size:14px;font-weight:700;color:var(--t);margin-top:2px">${c.nome}</div>
-            <div style="font-size:12px;color:var(--t2);margin-top:1px">🎯 ${c.obj}</div>
-          </div>
-          <div style="display:flex;gap:6px;flex-shrink:0;margin-left:8px">
-            ${ci > 0 && isCurrent ? `<button onclick="avancarCiclo('${t.id}',${ci-1})" style="padding:6px 12px;border-radius:20px;background:var(--bg3);border:1px solid var(--bo);color:var(--t2);font-size:11px;font-weight:700;cursor:pointer">← Voltar</button>` : ''}
-            ${ci < cal.ciclos.length - 1 && isCurrent ? `<button onclick="avancarCiclo('${t.id}',${ci+1})" style="padding:6px 12px;border-radius:20px;background:var(--gl);border:1px solid var(--gb);color:var(--g);font-size:11px;font-weight:700;cursor:pointer">Avançar →</button>` : ''}
-          </div>
+    <div style="background:var(--card);border:2px solid ${t.cor};border-radius:16px;padding:16px;margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:${t.cor};text-transform:uppercase;letter-spacing:.06em">🐌 ${caracol.nome}</div>
+          <div style="font-size:13px;font-weight:600;color:var(--t);margin-top:2px">${caracol.nivel}</div>
         </div>
-        <div style="height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:12px"><div style="width:${pct}%;height:100%;background:${t.cor};border-radius:3px;transition:width .4s"></div></div>
-        <div style="font-size:11px;color:var(--t2);margin-bottom:12px">${concluidas} de ${c.aulas.length} aulas concluídas · ${pct}%</div>
-        ${c.aulas.map(a => {
-          const status = prog.aulas[a.id] || 'pending';
-          const bg = status === 'done' ? 'var(--gl)' : status === 'progress' ? '#FEF9EE' : 'var(--bg3)';
-          const icon = status === 'done' ? '✅' : status === 'progress' ? '🔵' : '⬜';
-          const fc = focoColor[a.foco] || 'var(--t3)';
-          return `<div onclick="openPlanoAula('${t.id}','${c.id}','${a.id}')" style="background:${bg};border:1px solid var(--bo);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:10px">
-            <span style="font-size:18px">${icon}</span>
-            <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:var(--t)">${a.nums} · <span style="color:var(--t2);font-weight:500">${a.tema}</span></div><div style="font-size:12px;color:var(--t2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.sub}</div></div>
-            <div style="font-size:10px;font-weight:700;color:${fc};background:${fc}15;padding:2px 7px;border-radius:10px">${a.foco}</div>
-          </div>`;
-        }).join('')}
+        <div style="text-align:right">
+          <div style="font-size:20px;font-weight:800;color:${t.cor}">${pct}%</div>
+          <div style="font-size:11px;color:var(--t2)">${concluidas}/${totalSessoes} sessões</div>
+        </div>
+      </div>
+      <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${t.cor};border-radius:3px;transition:width .4s"></div></div>
+    </div>
+    ${caracol.temas.map(tema => {
+      const a1Done = !!prog.sessoes[tema.id+'_a1'];
+      const a2Done = !!prog.sessoes[tema.id+'_a2'];
+      const icon = (a1Done && a2Done) ? '✅' : (a1Done || a2Done) ? '▶' : '⬜';
+      return `<div onclick="openTemaDetalhe('${turmaId}','${tema.id}')" style="background:var(--card);border:1px solid var(--bo);border-radius:16px;padding:14px;margin-bottom:10px;cursor:pointer" ontouchstart="this.style.opacity='.7'" ontouchend="this.style.opacity='1'">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <span style="font-size:22px">${tema.emoji}</span>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:700;color:var(--t)">${tema.nome}</div>
+            <div style="font-size:12px;color:var(--t2);margin-top:1px">Foco: ${tema.foco} · ${tema.obj}</div>
+          </div>
+          <span style="font-size:18px">${icon}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" onclick="event.stopPropagation()">
+          <button onclick="marcarSessao('${turmaId}','${tema.id}','a1')" style="padding:10px 8px;border-radius:12px;background:${a1Done?'var(--gl)':'var(--bg3)'};border:${a1Done?'2px solid var(--g)':'1px solid var(--bo)'};color:${a1Done?'var(--g)':'var(--t2)'};font-size:12px;font-weight:700;cursor:pointer;text-align:center">${a1Done?'✅':'⬜'} Aula 1</button>
+          <button onclick="marcarSessao('${turmaId}','${tema.id}','a2')" style="padding:10px 8px;border-radius:12px;background:${a2Done?'var(--gl)':'var(--bg3)'};border:${a2Done?'2px solid var(--g)':'1px solid var(--bo)'};color:${a2Done?'var(--g)':'var(--t2)'};font-size:12px;font-weight:700;cursor:pointer;text-align:center">${a2Done?'✅':'⬜'} Aula 2</button>
+        </div>
       </div>`;
     }).join('')}
+    ${tudo_feito ? `<div style="background:var(--gl);border:2px solid var(--g);border-radius:16px;padding:16px;margin-bottom:12px;text-align:center">
+      <div style="font-size:22px;margin-bottom:6px">🎉</div>
+      <div style="font-size:14px;font-weight:800;color:var(--g);margin-bottom:4px">Caracol Concluído!</div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:12px">Todos os temas foram trabalhados.</div>
+      ${cal.caracois[caracolIdx+1] ? `<button onclick="avancarCaracol('${turmaId}',${caracolIdx+1})" style="width:100%;padding:12px;border-radius:12px;background:var(--g);border:none;color:#fff;font-size:14px;font-weight:700;cursor:pointer">Iniciar Caracol ${caracolIdx+2} — ${cal.caracois[caracolIdx+1].nivel} →</button>` : `<div style="font-size:12px;font-weight:700;color:var(--g)">🏆 Nível máximo alcançado!</div>`}
+      <button onclick="avancarCaracol('${turmaId}',${caracolIdx})" style="width:100%;margin-top:8px;padding:10px;border-radius:12px;background:var(--bg3);border:1px solid var(--bo);color:var(--t2);font-size:13px;font-weight:600;cursor:pointer">🔄 Repetir este caracol</button>
+    </div>` : ''}
+    ${caracolIdx > 0 ? `<button onclick="avancarCaracol('${turmaId}',${caracolIdx-1})" style="width:100%;padding:10px;border-radius:12px;background:var(--bg3);border:1px solid var(--bo);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer;margin-top:4px">← Voltar para Caracol ${caracolIdx}</button>` : ''}
   `;
 }
 
-// ── AVANÇAR DE CICLO (async) ──
-async function avancarCiclo(turmaId, novoCiclo) {
+// ── AVANÇAR CARACOL (async) ──
+async function avancarCaracol(turmaId, novoCaracol) {
   const prog = await getCalProg(turmaId);
-  const voltando = novoCiclo < prog.ciclo;
-  if (!confirm(voltando ? 'Voltar para o ciclo anterior?' : 'Avançar para o próximo ciclo?')) return;
-  prog.ciclo = novoCiclo;
+  const atual = prog.caracol || 0;
+  const voltando = novoCaracol < atual;
+  const repetindo = novoCaracol === atual;
+  const msg = voltando ? 'Voltar para o caracol anterior?' : repetindo ? 'Reiniciar este caracol? O progresso será zerado.' : 'Avançar para o próximo caracol?';
+  if (!confirm(msg)) return;
+  prog.caracol = novoCaracol;
+  if (repetindo || voltando) prog.sessoes = {};
   await saveCalProg(turmaId, prog);
-  toast(voltando ? 'Voltou para ciclo anterior ✓' : 'Ciclo avançado ✓');
+  toast(voltando ? 'Voltou ao caracol anterior ✓' : repetindo ? 'Caracol reiniciado ✓' : 'Avançou para o próximo caracol ✓');
   openCalPedTurma(turmaId);
 }
 
-// ── ABRIR PLANO DE AULA (async) ──
-async function openPlanoAula(turmaId, cicloId, aulaId) {
+// ── MARCAR / DESMARCAR SESSÃO (async) ──
+async function marcarSessao(turmaId, temaId, sessao) {
+  const prog = await getCalProg(turmaId);
+  const key = temaId + '_' + sessao;
+  prog.sessoes[key] = !prog.sessoes[key];
+  await saveCalProg(turmaId, prog);
+  toast(prog.sessoes[key] ? 'Sessão marcada ✅' : 'Sessão desmarcada');
+  openCalPedTurma(turmaId);
+}
+
+// ── DETALHE DO TEMA (async) ──
+async function openTemaDetalhe(turmaId, temaId) {
   const t = tms.find(x => String(x.id) === String(turmaId));
   if (!t) return;
   const calKey = PULS_CAL_MAP[t.pulseira] || t.pulseira;
   const cal = CAL_PED[calKey];
   if (!cal) return;
-  const ciclo = cal.ciclos.find(c => c.id === cicloId);
-  if (!ciclo) return;
-  const aula = ciclo.aulas.find(a => a.id === aulaId);
-  if (!aula) return;
-
-  document.getElementById('plano-title').textContent = aula.nums + ' · ' + aula.tema;
-  document.getElementById('plano-body').innerHTML = `<div style="text-align:center;padding:40px"><div class="spin"></div></div>`;
-  opnM('m-plano');
-
-  const [prog, notes] = await Promise.all([getCalProg(turmaId), getCalNotes(turmaId, aulaId)]);
-  const status = prog.aulas[aulaId] || 'pending';
-  if (status === 'pending') { prog.aulas[aulaId] = 'progress'; await saveCalProg(turmaId, prog); }
-
+  const prog = await getCalProg(turmaId);
+  const caracol = cal.caracois[prog.caracol || 0];
+  if (!caracol) return;
+  const tema = caracol.temas.find(x => x.id === temaId);
+  if (!tema) return;
+  const a1Done = !!prog.sessoes[temaId+'_a1'];
+  const a2Done = !!prog.sessoes[temaId+'_a2'];
   const focoColor = { Olho:'#2563eb', Mão:'#d97706', Pé:'#059669' };
-  const fc = focoColor[aula.foco] || 'var(--t3)';
-
+  const fc = focoColor[tema.foco] || 'var(--t3)';
+  document.getElementById('plano-title').textContent = tema.emoji + ' ' + tema.nome;
   document.getElementById('plano-body').innerHTML = `
     <div style="background:linear-gradient(135deg,${t.cor}18,${t.cor}08);border:1px solid ${t.cor}30;border-radius:16px;padding:16px;margin-bottom:16px">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-        <div style="font-size:24px">${cal.ball}</div>
-        <div><div style="font-size:14px;font-weight:800;color:var(--t)">${t.label} · ${aula.nums}</div><div style="font-size:12px;color:var(--t2)">${cal.quadra}</div></div>
-        <div style="margin-left:auto;background:${fc}15;border:1px solid ${fc}30;border-radius:10px;padding:4px 10px;font-size:11px;font-weight:700;color:${fc}">Foco: ${aula.foco}</div>
+        <div style="font-size:28px">${tema.emoji}</div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:800;color:var(--t)">${tema.nome}</div><div style="font-size:12px;color:var(--t2)">${cal.quadra}</div></div>
+        <div style="background:${fc}15;border:1px solid ${fc}30;border-radius:10px;padding:4px 10px;font-size:11px;font-weight:700;color:${fc}">Foco: ${tema.foco}</div>
       </div>
-      <div style="font-size:15px;font-weight:700;color:var(--t)">${aula.tema}</div>
-      <div style="font-size:13px;color:var(--t2);margin-top:2px">${aula.sub}</div>
+      <div style="font-size:13px;font-weight:600;color:var(--t2)">🎯 ${tema.obj}</div>
     </div>
-
-    <div style="background:var(--card);border:1px solid var(--bo);border-radius:14px;padding:16px;margin-bottom:12px">
-      <div style="font-size:12px;font-weight:700;color:#2563eb;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">🎾 Aula 1 — Técnica e Construção</div>
-      <div style="margin-bottom:12px">
-        <div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:4px">AQUECIMENTO · 10 min</div>
-        <div style="font-size:13px;color:var(--t)">Ativação motora livre com foco no tema da semana.</div>
-        <div id="aq1-edit-${aulaId}" style="display:none"><textarea id="aq1-txt-${aulaId}" style="width:100%;margin-top:6px;padding:8px;border-radius:8px;border:1px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-family:inherit;resize:vertical" rows="2">${notes.aq1||''}</textarea></div>
-        <button onclick="toggleEdit('aq1-edit-${aulaId}','aq1-txt-${aulaId}','aq1_${turmaId}_${aulaId}')" style="margin-top:6px;font-size:11px;color:var(--g);background:none;border:none;cursor:pointer;font-weight:600">✏️ Editar</button>
+    <div style="background:var(--card);border:${a1Done?'2px solid var(--g)':'1px solid var(--bo)'};border-radius:14px;padding:16px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-size:12px;font-weight:700;color:#2563eb;text-transform:uppercase;letter-spacing:.06em">🎾 Aula 1 — Técnica</div>
+        <span style="font-size:16px">${a1Done?'✅':'⬜'}</span>
       </div>
-      <div style="margin-bottom:12px">
-        <div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:4px">TÉCNICA FECHADA · 15 min</div>
-        <div style="font-size:13px;color:var(--t)">Exercício com foco direto no tema <strong>${aula.sub}</strong>.</div>
-        <div style="background:var(--gl);border-radius:8px;padding:8px 10px;margin-top:6px;font-size:12px;color:var(--g);font-weight:600">Cue: "${aula.sub.split('+')[0].trim()}"</div>
-        <div id="tf1-edit-${aulaId}" style="display:none"><textarea id="tf1-txt-${aulaId}" style="width:100%;margin-top:6px;padding:8px;border-radius:8px;border:1px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-family:inherit;resize:vertical" rows="2">${notes.tf1||''}</textarea></div>
-        <button onclick="toggleEdit('tf1-edit-${aulaId}','tf1-txt-${aulaId}','tf1_${turmaId}_${aulaId}')" style="margin-top:6px;font-size:11px;color:var(--g);background:none;border:none;cursor:pointer;font-weight:600">✏️ Editar</button>
-      </div>
-      <div>
-        <div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:4px">TÉCNICA SEMI-ABERTA · 15 min</div>
-        <div style="font-size:13px;color:var(--t)">Aluno inicia o ponto com variáveis de direção e profundidade.</div>
-        <div id="ts1-edit-${aulaId}" style="display:none"><textarea id="ts1-txt-${aulaId}" style="width:100%;margin-top:6px;padding:8px;border-radius:8px;border:1px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-family:inherit;resize:vertical" rows="2">${notes.ts1||''}</textarea></div>
-        <button onclick="toggleEdit('ts1-edit-${aulaId}','ts1-txt-${aulaId}','ts1_${turmaId}_${aulaId}')" style="margin-top:6px;font-size:11px;color:var(--g);background:none;border:none;cursor:pointer;font-weight:600">✏️ Editar</button>
-      </div>
+      ${tema.a1.split('·').map(s=>s.trim()).filter(Boolean).map(s=>`<div style="padding:7px 0;border-bottom:1px solid var(--bo);font-size:13px;color:var(--t)">${s}</div>`).join('')}
+      <button onclick="marcarSessao('${turmaId}','${temaId}','a1');clsM('m-plano');setTimeout(()=>openCalPedTurma('${turmaId}'),150)" style="width:100%;margin-top:12px;padding:12px;border-radius:12px;background:${a1Done?'var(--gl)':'var(--bg3)'};border:${a1Done?'2px solid var(--g)':'1px solid var(--bo)'};color:${a1Done?'var(--g)':'var(--t)'};font-size:13px;font-weight:700;cursor:pointer">${a1Done?'✅ Concluída — Desmarcar':'⬜ Marcar como concluída'}</button>
     </div>
-
-    <div style="background:var(--card);border:1px solid var(--bo);border-radius:14px;padding:16px;margin-bottom:12px">
-      <div style="font-size:12px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">🧠 Aula 2 — Aplicação e Jogo</div>
-      <div style="margin-bottom:12px">
-        <div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:4px">AQUECIMENTO · 10 min</div>
-        <div style="font-size:13px;color:var(--t)">Retomar o tema com percepção da situação tática.</div>
-        <div id="aq2-edit-${aulaId}" style="display:none"><textarea id="aq2-txt-${aulaId}" style="width:100%;margin-top:6px;padding:8px;border-radius:8px;border:1px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-family:inherit;resize:vertical" rows="2">${notes.aq2||''}</textarea></div>
-        <button onclick="toggleEdit('aq2-edit-${aulaId}','aq2-txt-${aulaId}','aq2_${turmaId}_${aulaId}')" style="margin-top:6px;font-size:11px;color:var(--g);background:none;border:none;cursor:pointer;font-weight:600">✏️ Editar</button>
+    <div style="background:var(--card);border:${a2Done?'2px solid var(--g)':'1px solid var(--bo)'};border-radius:14px;padding:16px;margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-size:12px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:.06em">🧠 Aula 2 — Volume + Jogos</div>
+        <span style="font-size:16px">${a2Done?'✅':'⬜'}</span>
       </div>
-      <div style="margin-bottom:12px">
-        <div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:4px">SEMI-ABERTO COM TÁTICA · 15 min</div>
-        <div style="font-size:13px;color:var(--t)">Tema + decisão tática com adversário real.</div>
-        <div style="background:#FEF9EE;border-radius:8px;padding:8px 10px;margin-top:6px;font-size:12px;color:#d97706;font-weight:600">Cue tático: "Quando usar ${aula.tema.toLowerCase()}?"</div>
-        <div id="st2-edit-${aulaId}" style="display:none"><textarea id="st2-txt-${aulaId}" style="width:100%;margin-top:6px;padding:8px;border-radius:8px;border:1px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-family:inherit;resize:vertical" rows="2">${notes.st2||''}</textarea></div>
-        <button onclick="toggleEdit('st2-edit-${aulaId}','st2-txt-${aulaId}','st2_${turmaId}_${aulaId}')" style="margin-top:6px;font-size:11px;color:var(--g);background:none;border:none;cursor:pointer;font-weight:600">✏️ Editar</button>
-      </div>
-      <div>
-        <div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:4px">JOGO DIRIGIDO · 15 min</div>
-        <div style="font-size:13px;color:var(--t)">Partida com regra adaptada ao tema. Fechar com feedback rápido.</div>
-        <div id="jd2-edit-${aulaId}" style="display:none"><textarea id="jd2-txt-${aulaId}" style="width:100%;margin-top:6px;padding:8px;border-radius:8px;border:1px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-family:inherit;resize:vertical" rows="2">${notes.jd2||''}</textarea></div>
-        <button onclick="toggleEdit('jd2-edit-${aulaId}','jd2-txt-${aulaId}','jd2_${turmaId}_${aulaId}')" style="margin-top:6px;font-size:11px;color:var(--g);background:none;border:none;cursor:pointer;font-weight:600">✏️ Editar</button>
-      </div>
-    </div>
-
-    <div style="background:var(--card);border:1px solid var(--bo);border-radius:14px;padding:16px;margin-bottom:16px">
-      <div style="font-size:12px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">📝 Feedback pós-aula</div>
-      <textarea id="feedback-${aulaId}" placeholder="Observações sobre a aula..." style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-family:inherit;resize:vertical" rows="3">${notes.nota||''}</textarea>
-      <button onclick="saveFeedback('${turmaId}','${aulaId}')" style="width:100%;margin-top:8px;padding:10px;border-radius:10px;background:var(--bg3);border:1px solid var(--bo);color:var(--t);font-size:13px;font-weight:600;cursor:pointer">💾 Salvar observações</button>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <button onclick="setAulaStatus('${turmaId}','${aulaId}','progress')" style="padding:14px;border-radius:14px;background:${status==='progress'?'#EEF4FF':'var(--bg3)'};border:${status==='progress'?'2px solid #2563eb':'1px solid var(--bo)'};color:${status==='progress'?'#2563eb':'var(--t2)'};font-size:13px;font-weight:700;cursor:pointer">🔵 Em andamento</button>
-      <button onclick="setAulaStatus('${turmaId}','${aulaId}','done')" style="padding:14px;border-radius:14px;background:${status==='done'?'var(--gl)':'var(--bg3)'};border:${status==='done'?'2px solid var(--g)':'1px solid var(--bo)'};color:${status==='done'?'var(--g)':'var(--t2)'};font-size:13px;font-weight:700;cursor:pointer">✅ Concluída</button>
+      ${tema.a2.split('·').map(s=>s.trim()).filter(Boolean).map(s=>`<div style="padding:7px 0;border-bottom:1px solid var(--bo);font-size:13px;color:var(--t)">${s}</div>`).join('')}
+      <div style="font-size:11px;color:var(--t3);margin-top:8px;font-style:italic">Técnica fica a critério do treinador, se necessário.</div>
+      <button onclick="marcarSessao('${turmaId}','${temaId}','a2');clsM('m-plano');setTimeout(()=>openCalPedTurma('${turmaId}'),150)" style="width:100%;margin-top:12px;padding:12px;border-radius:12px;background:${a2Done?'var(--gl)':'var(--bg3)'};border:${a2Done?'2px solid var(--g)':'1px solid var(--bo)'};color:${a2Done?'var(--g)':'var(--t)'};font-size:13px;font-weight:700;cursor:pointer">${a2Done?'✅ Concluída — Desmarcar':'⬜ Marcar como concluída'}</button>
     </div>
   `;
+  opnM('m-plano');
 }
 
 // ── TOGGLE EDIÇÃO (async) ──
@@ -1203,14 +1452,6 @@ async function saveFeedback(turmaId, aulaId) {
   toast('Observações salvas ✓');
 }
 
-// ── MARCAR STATUS DA AULA (async) ──
-async function setAulaStatus(turmaId, aulaId, status) {
-  const prog = await getCalProg(turmaId);
-  prog.aulas[aulaId] = status;
-  await saveCalProg(turmaId, prog);
-  toast(status === 'done' ? 'Aula concluída ✅' : 'Em andamento 🔵');
-  openCalPedTurma(turmaId);
-}
 
 
 // ── CARREGAR COACHES DO BANCO ──
@@ -2001,12 +2242,14 @@ async function gerarPassportPDF(alunoId) {
   _pdfSectionTitle(doc,'PRÓXIMOS OBJETIVOS',ML,y,CW); y+=10;
   const calKey=PULS_CAL_MAP[s.pulseira]||s.pulseira;
   const cal=CAL_PED[calKey];
-  if (cal) cal.ciclos.slice(0,3).forEach((c,i) => {
-    doc.setFillColor(220,252,231); doc.roundedRect(ML,y,CW,10,2,2,'F');
-    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(0,135,90); doc.text(`C${i+1}`,ML+3,y+6.5);
-    doc.setFont('helvetica','normal'); doc.setTextColor(15,31,23); doc.text(c.obj,ML+14,y+6.5);
-    y+=13;
-  });
+  if (cal && cal.caracois && cal.caracois[0]) {
+    cal.caracois[0].temas.slice(0,3).forEach((tema,i) => {
+      doc.setFillColor(220,252,231); doc.roundedRect(ML,y,CW,10,2,2,'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(0,135,90); doc.text(`T${i+1}`,ML+3,y+6.5);
+      doc.setFont('helvetica','normal'); doc.setTextColor(15,31,23); doc.text(tema.obj,ML+14,y+6.5);
+      y+=13;
+    });
+  }
 
   // RODAPÉ
   for (let i=1;i<=doc.getNumberOfPages();i++) {
@@ -2123,11 +2366,6 @@ async function gerarPassportPDF(alunoId) {
     <div class="qa-title">Calendário Pedagógico</div>
     <div class="qa-sub">Ciclos e progresso por turma</div>
   </button>
-  <a href="planejador.html" class="qa-card" style="text-decoration:none;color:inherit">
-    <div class="qa-icon">🗓️</div>
-    <div class="qa-title">Planejador de Treino</div>
-    <div class="qa-sub">Planos de aula detalhados e drills</div>
-  </a>
 </div>
 
 <!-- COACHES -->
@@ -2938,49 +3176,26 @@ async function loadPlanoHoje(turmaId) {
   const el = document.getElementById('td-plano');
   if (!el) return;
   try {
+    const t = tms.find(x => String(x.id) === String(turmaId));
+    if (!t) { el.innerHTML = ''; return; }
+    const calKey = PULS_CAL_MAP[t.pulseira] || t.pulseira;
+    const cal = CAL_PED[calKey];
+    if (!cal || !cal.caracois) { el.innerHTML = ''; return; }
     const prog = await getCalProg(turmaId);
-    const aj = prog.aulas || {};
-    // aulas_json stored by planejador contains next lesson metadata
-    const tema   = aj.tema   || '';
-    const obj    = aj.obj    || '';
-    const ciclo  = aj.ciclo  || '';
-    const semana = aj.semana || '';
-    const foco   = aj.foco   || '';
-    const cat    = aj.cat    || '';
-    const pIdx   = aj.planner_idx ?? prog.ciclo ?? null;
-    if (aj.concluido) {
-      el.innerHTML = `<div style="background:var(--gl);border:1.5px solid var(--g);border-radius:16px;padding:16px;display:flex;align-items:center;gap:12px">
-        <span style="font-size:24px">🏆</span>
-        <div><div style="font-size:13px;font-weight:700;color:var(--g)">Calendário concluído!</div>
-        <div style="font-size:12px;color:var(--t2);margin-top:3px">Todos os ciclos desta turma foram finalizados.</div></div>
-      </div>`;
-      return;
-    }
-    if (!tema && !obj) {
-      el.innerHTML = `<div style="background:var(--card);border:1px solid var(--bo);border-radius:16px;padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px">
-        <div style="flex:1">
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3);margin-bottom:6px">🗓️ Plano de Hoje</div>
-          <div style="font-size:13px;color:var(--t2)">Sem progresso registrado. Acesse o Planejador para iniciar.</div>
-        </div>
-        <a href="planejador.html" style="flex-shrink:0;padding:8px 14px;background:var(--g);color:#fff;border-radius:10px;font-size:12px;font-weight:700;text-decoration:none">Abrir →</a>
-      </div>`;
-      return;
-    }
-    const semNome = {S1:'Semana 1 — Introdução',S2:'Semana 2 — Construção',S3:'Semana 3 — Aplicação',S4:'Semana 4 — Avaliação'}[semana] || semana;
-    el.innerHTML = `<div style="background:linear-gradient(135deg,var(--gl)08,var(--card));border:1.5px solid var(--g);border-radius:16px;padding:16px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--g)">🗓️ Plano de Hoje</div>
-        <div style="display:flex;gap:6px">
-          ${ciclo  ? `<span style="font-size:10px;font-weight:700;background:var(--bg3);border-radius:6px;padding:3px 8px;color:var(--t2)">${ciclo}</span>` : ''}
-          ${semana ? `<span style="font-size:10px;font-weight:700;background:var(--bg3);border-radius:6px;padding:3px 8px;color:var(--t2)">${semana}</span>` : ''}
-          ${foco   ? `<span style="font-size:10px;font-weight:600;background:var(--g);border-radius:6px;padding:3px 8px;color:#fff">👁 ${foco}</span>` : ''}
-        </div>
+    const caracol = cal.caracois[prog.caracol || 0];
+    if (!caracol) { el.innerHTML = ''; return; }
+    const totalSessoes = caracol.temas.length * 2;
+    const concluidas = caracol.temas.reduce((n,tema) => n + (prog.sessoes[tema.id+'_a1']?1:0) + (prog.sessoes[tema.id+'_a2']?1:0), 0);
+    const pct = Math.round((concluidas/totalSessoes)*100);
+    const temaAtual = caracol.temas.find(tema => !prog.sessoes[tema.id+'_a1'] || !prog.sessoes[tema.id+'_a2']);
+    el.innerHTML = `<div style="background:var(--card);border:1.5px solid ${t.cor}40;border-radius:16px;padding:14px;cursor:pointer;margin-bottom:16px" onclick="openCalPedTurma('${turmaId}')">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3)">🐌 Calendário Pedagógico</div>
+        <div style="font-size:12px;font-weight:700;color:${t.cor}">${pct}%</div>
       </div>
-      <div style="font-size:15px;font-weight:800;color:var(--t);margin-bottom:4px">${tema}${cat ? ` <span style="font-size:11px;font-weight:500;color:var(--t2)">· ${cat}</span>` : ''}</div>
-      <div style="font-size:12px;color:var(--t2);line-height:1.5;margin-bottom:12px;background:var(--bg3);border-radius:10px;padding:9px 12px">${obj}</div>
-      <div style="display:flex;gap:8px">
-        <a href="planejador.html" style="flex:1;text-align:center;padding:9px;background:var(--g);color:#fff;border-radius:10px;font-size:12px;font-weight:700;text-decoration:none">📋 Ver plano completo</a>
-      </div>
+      <div style="font-size:13px;font-weight:700;color:var(--t);margin-bottom:4px">${caracol.nome} · ${caracol.nivel}</div>
+      ${temaAtual ? `<div style="font-size:12px;color:var(--t2)">Próximo: ${temaAtual.emoji} ${temaAtual.nome}</div>` : `<div style="font-size:12px;color:var(--g);font-weight:700">🎉 Caracol concluído!</div>`}
+      <div style="height:4px;background:var(--bg3);border-radius:2px;margin-top:8px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${t.cor};border-radius:2px"></div></div>
     </div>`;
   } catch(e) {
     console.error('loadPlanoHoje:', e);
