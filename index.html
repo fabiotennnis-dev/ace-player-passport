@@ -382,7 +382,7 @@ async function saveAlunoSupabase(aluno) {
         nome:              aluno.nome,
         data_nascimento:   aluno.nasc || null,
         // genero omitido — constraint no banco
-        pulseira:          aluno.pulseira || 'laranja',
+        bola:          aluno.bola || 'laranja',
         turma_id:          aluno.turma || null,
         coach_nome:        aluno.coach || '',
         horario:           aluno.horario || '',
@@ -438,7 +438,7 @@ async function loadAlunos() {
         nome:        r.nome || '',
         nasc:        r.data_nascimento || '',
         gen:         r.gen || '',
-        pulseira:    r.pulseira || 'laranja',
+        bola:    r.bola || 'laranja',
         turma:       r.turma_id || '',
         horario:     r.horario  || '',
         dias:        r.dias     || '',
@@ -482,7 +482,7 @@ async function loadTurmas() {
     if (!data || !data.length) return;
 
     tms = data.map(r => {
-      const p = gP(r.pulseira || 'laranja');
+      const p = gP(r.bola || 'laranja');
       return {
         id:        r.id,
         label:     r.label || r.nome || '',
@@ -490,8 +490,8 @@ async function loadTurmas() {
         horario:   r.horario || '',
         coach:     r.coach_nome || '',
         cor:       r.cor || p.color || '#00a862',
-        pulseira:  r.pulseira || 'laranja',
-        pulseiras: r.pulseiras || [r.pulseira || 'laranja'],
+        bola:  r.bola || 'laranja',
+        bolas: r.bolas || [r.bola || 'laranja'],
         quadra:    r.quadra || ''
       };
     });
@@ -511,7 +511,7 @@ async function updateAlunoSupabase(aluno) {
         reveal_pct:   aluno.reveal || 0,
         xp_total:     aluno.xp || 0,
         apto:         aluno.apto || false,
-        pulseira:     aluno.pulseira,
+        bola:     aluno.bola,
         fundamentos:  aluno.fundamentos || {tecnico:0,tatico:0,fisico:0,mental:0}
       })
       .eq('id', aluno.id);
@@ -537,7 +537,7 @@ async function saveTurmaSupabase(turma) {
         dias:        Array.isArray(turma.dias) ? turma.dias : [],
         horario:     turma.horario,
         coach_nome:  turma.coach,
-        pulseira:    turma.pulseira,
+        bola:    turma.bola,
         cor:         turma.cor || '#00a862',
         quadra:      turma.quadra || '',
         ativo:       true
@@ -567,7 +567,7 @@ async function saveTurmaSupabase(turma) {
 
 let calPedTurmaId = null;
 
-// ── Nova estrutura: caracois → temas → a1/a2 por pulseira ──
+// ── Nova estrutura: caracois → temas → a1/a2 por bola ──
 const CAL_PED = {
   roxa: {
     label: "Roxa / Verm-Branca", ball: "🟣", quadra: "10×6m · Sem rede",
@@ -1047,7 +1047,7 @@ const CAL_PED = {
   },
 };
 
-// Mapa de pulseira para chave do CAL_PED (mantido para compatibilidade)
+// Mapa de bola para chave do CAL_PED (mantido para compatibilidade)
 // LEGADO: o campo 'ciclos' não existe mais — substituído por 'caracois'
 const CAL_PED_LEGACY = {
   roxa: {
@@ -1316,7 +1316,7 @@ const CAL_PED_LEGACY = {
   },
 };
 
-const PULS_CAL_MAP = {
+const BOLA_CAL_MAP = {
   roxa: 'roxa', azul: 'roxa',
   verm_branca: 'roxa', vermelha_branca: 'roxa',
   verm_verm: 'verm_verm', vermelha_vermelha: 'verm_verm',
@@ -1363,7 +1363,7 @@ function openCalPed() {
       if (!coachTurmas.length) return '';
       const isMe = coachName === coachNome;
       const totalAulas = coachTurmas.reduce((sum, t) => {
-        const calKey = PULS_CAL_MAP[t.pulseira] || t.pulseira;
+        const calKey = BOLA_CAL_MAP[t.bola] || t.bola;
         const cal = CAL_PED[calKey];
         const prog = getCalProgLocal(t.id);
         return sum + Object.values(prog.sessoes||{}).filter(Boolean).length;
@@ -1489,7 +1489,7 @@ async function openCalPedCoach(coachName) {
     <div style="font-size:16px;font-weight:800;color:var(--t);margin-bottom:4px">${coachName}</div>
     <div style="font-size:13px;color:var(--t2);margin-bottom:16px">${coachTurmas.length} turma${coachTurmas.length !== 1 ? 's' : ''}</div>
     ${(await Promise.all(coachTurmas.map(async t => {
-      const calKey = PULS_CAL_MAP[t.pulseira] || t.pulseira;
+      const calKey = BOLA_CAL_MAP[t.bola] || t.bola;
       const cal = CAL_PED[calKey];
       const prog = await getCalProg(t.id);
       const caracolAtual = cal ? cal.caracois[prog.caracol || 0] : null;
@@ -1502,7 +1502,7 @@ async function openCalPedCoach(coachName) {
           <div style="flex:1">
             <div style="font-size:15px;font-weight:700;color:var(--t)">${t.label}</div>
             <div style="font-size:12px;color:var(--t2)">${t.horario||''} ${t.quadra ? '· ' + t.quadra : ''}</div>
-            <div style="font-size:11px;color:var(--t3);margin-top:1px">${cal ? cal.label + ' · ' + cal.quadra : t.pulseira}</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:1px">${cal ? cal.label + ' · ' + cal.quadra : t.bola}</div>
           </div>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3)"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
@@ -1517,9 +1517,9 @@ async function openCalPedTurma(turmaId) {
   calPedTurmaId = turmaId;
   const t = tms.find(x => String(x.id) === String(turmaId));
   if (!t) return;
-  const calKey = PULS_CAL_MAP[t.pulseira] || t.pulseira;
+  const calKey = BOLA_CAL_MAP[t.bola] || t.bola;
   const cal = CAL_PED[calKey];
-  if (!cal) { toast('Conteúdo pedagógico não encontrado para esta pulseira'); return; }
+  if (!cal) { toast('Conteúdo pedagógico não encontrado para esta bola'); return; }
   const el = document.getElementById('calped-body');
   el.innerHTML = `<div style="text-align:center;padding:40px"><div class="spin"></div></div>`;
   const prog = await getCalProg(turmaId);
@@ -1611,7 +1611,7 @@ async function marcarSessao(turmaId, temaId, sessao) {
 async function openTemaDetalhe(turmaId, temaId) {
   const t = tms.find(x => String(x.id) === String(turmaId));
   if (!t) return;
-  const calKey = PULS_CAL_MAP[t.pulseira] || t.pulseira;
+  const calKey = BOLA_CAL_MAP[t.bola] || t.bola;
   const cal = CAL_PED[calKey];
   if (!cal) return;
   const prog = await getCalProg(turmaId);
@@ -1719,12 +1719,12 @@ function openEditAluno(alunoId) {
 
   // Build turma options
   const tOpts = tms.map(t => {
-    const p = gP(t.pulseira);
+    const p = gP(t.bola);
     return `<option value="${t.id}" ${String(s.turma)===String(t.id)?'selected':''}>${t.label} — ${Array.isArray(t.dias)?t.dias.join('/'):t.dias} — ${t.horario} — ${p.ball}${t.quadra?' — '+t.quadra:''}</option>`;
   }).join('');
 
-  const pOpts = D.pulseiras.map(p =>
-    `<option value="${p.id}" ${s.pulseira===p.id?'selected':''}>${p.ball} ${p.label}</option>`
+  const pOpts = D.bolas.map(p =>
+    `<option value="${p.id}" ${s.bola===p.id?'selected':''}>${p.ball} ${p.label}</option>`
   ).join('');
 
   const cOpts = coaches.map(c =>
@@ -1779,7 +1779,7 @@ function eaFillTurma(turmaId) {
   if (!t || !info) return;
   info.style.display = 'block';
   info.textContent = (Array.isArray(t.dias)?t.dias.join('/'):t.dias) + (t.horario?' · '+t.horario:'') + (t.quadra?' · '+t.quadra:'');
-  if (bolaSelect) bolaSelect.value = t.pulseira || '';
+  if (bolaSelect) bolaSelect.value = t.bola || '';
   if (coachSelect) coachSelect.value = t.coach || '';
 }
 
@@ -1788,15 +1788,15 @@ async function saveEditAluno(alunoId) {
   if (!s) return;
 
   const turmaId  = document.getElementById('ea-turma')?.value || '';
-  const pulseira = document.getElementById('ea-bola')?.value || s.pulseira;
+  const bola = document.getElementById('ea-bola')?.value || s.bola;
   const coach    = document.getElementById('ea-coach')?.value || '';
 
   // Update turma info
   const t = tms.find(x => String(x.id) === String(turmaId));
   s.turma    = turmaId || s.turma;
-  s.pulseira = pulseira;
+  s.bola = bola;
   s.coach    = coach;
-  s.cor      = gP(pulseira).color || s.cor;
+  s.cor      = gP(bola).color || s.cor;
   if (t) {
     s.horario = t.horario;
     s.dias    = Array.isArray(t.dias) ? t.dias.join('/') : t.dias;
@@ -1807,7 +1807,7 @@ async function saveEditAluno(alunoId) {
   if (currentUser && currentAcademia) {
     try {
       const { error } = await getDb().from('alunos').update({
-        pulseira,
+        bola,
         turma_id:   turmaId || null,
         coach_nome: coach,
         horario:    s.horario || '',
@@ -1894,7 +1894,7 @@ function openEditTurma(turmaId) {
   const diasSemana = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
   const turDias = Array.isArray(t.dias) ? t.dias : (t.dias||'').split('/').filter(Boolean);
   const coachOpts = coaches.map(c=>`<option value="${c.nome}" ${t.coach===c.nome?'selected':''}>${c.nome}</option>`).join('');
-  const pulsOpts = D.pulseiras.map(p=>`<option value="${p.id}" ${t.pulseira===p.id?'selected':''}>${p.ball} ${p.label}</option>`).join('');
+  const pulsOpts = D.bolas.map(p=>`<option value="${p.id}" ${t.bola===p.id?'selected':''}>${p.ball} ${p.label}</option>`).join('');
   const quadOpts = ['','Quadra 5','Quadra 6','Quadra 7','Quadra 8','Quadra 9','Quadra 10','Quadra 11'].map(q=>`<option value="${q}" ${t.quadra===q?'selected':''}>${q||'— Sem quadra —'}</option>`).join('');
   const horaIni = t.horario ? t.horario.split(' – ')[0] : '';
   const horaFim = t.horario ? (t.horario.split(' – ')[1]||'') : '';
@@ -1964,7 +1964,7 @@ async function saveEditTurma(turmaId) {
 
   const nome   = document.getElementById('et-nome')?.value?.trim();
   const coach  = document.getElementById('et-coach')?.value || '';
-  const bola   = document.getElementById('et-bola')?.value || t.pulseira;
+  const bola   = document.getElementById('et-bola')?.value || t.bola;
   const quadra = document.getElementById('et-quadra')?.value || '';
   const hIni   = document.getElementById('et-hora-ini')?.value || '';
   const hFim   = document.getElementById('et-hora-fim')?.value || '';
@@ -1981,7 +1981,7 @@ async function saveEditTurma(turmaId) {
   // Update local
   t.label   = nome;
   t.coach   = coach;
-  t.pulseira = bola;
+  t.bola = bola;
   t.cor     = p.color || t.cor;
   t.quadra  = quadra;
   t.horario = horario;
@@ -1993,7 +1993,7 @@ async function saveEditTurma(turmaId) {
       const { error } = await getDb().from('turmas').update({
         label:      nome,
         coach_nome: coach,
-        pulseira:   bola,
+        bola:   bola,
         cor:        p.color || t.cor,
         quadra,
         horario,
@@ -2071,9 +2071,9 @@ function c3_onTurma(turmaId) {
   cd.turma    = t.id;
   cd.coach    = t.coach   || '';
   cd.quadra   = t.quadra  || '';
-  cd.pulseira = t.pulseira || '';
-  cp = t.pulseira;
-  const p = gP(t.pulseira);
+  cd.bola = t.bola || '';
+  cp = t.bola;
+  const p = gP(t.bola);
   if (info) {
     info.style.display = 'block';
     info.innerHTML = p.ball + ' <b>' + t.label + '</b> · 👤 ' + (t.coach||'—') + (t.quadra ? ' · 🏟️ ' + t.quadra : '');
@@ -2112,11 +2112,11 @@ function c3_findTurma() {
 
   // Find turma matching all 3 (case-insensitive)
   const t = tms.find(x =>
-    x.pulseira === bola &&
+    x.bola === bola &&
     x.quadra   === quadra &&
     (x.coach||'').toLowerCase() === coach.toLowerCase()
   );
-  console.log('c3_findTurma:', {bola, quadra, coach, found: t?.label, tms_sample: tms.slice(0,3).map(x=>({p:x.pulseira,q:x.quadra,c:x.coach}))});
+  console.log('c3_findTurma:', {bola, quadra, coach, found: t?.label, tms_sample: tms.slice(0,3).map(x=>({p:x.bola,q:x.quadra,c:x.coach}))});
 
   if (!t) {
     if (infoBox)  infoBox.style.display  = 'none';
@@ -2130,7 +2130,7 @@ function c3_findTurma() {
   cd.turma   = t.id;
   cd.coach   = t.coach;
   cd.quadra  = t.quadra;
-  cp = t.pulseira;
+  cp = t.bola;
 
   if (noTurma)  noTurma.style.display  = 'none';
   if (infoBox)  {
@@ -2202,24 +2202,24 @@ function c3_dia(el) {
   lbl.style.color       = el.checked ? 'var(--g)' : 'var(--t)';
 }
 
-async function findOrCreateTurma(coach, pulseira, quadra, horario) {
+async function findOrCreateTurma(coach, bola, quadra, horario) {
   // 1. Check existing turmas
   const existing = tms.find(t =>
     (t.coach||'').toLowerCase() === coach.toLowerCase() &&
-    t.pulseira === pulseira &&
+    t.bola === bola &&
     (t.quadra||'').toLowerCase() === quadra.toLowerCase()
   );
   if (existing) return existing.id;
 
   // 2. Create new turma
-  const p = gP(pulseira);
+  const p = gP(bola);
   const label = coach.split(' ')[0] + ' ' + quadra.replace('Quadra ','Q') + ' ' + p.label;
   const novaTurma = {
     id:       't_' + Date.now(),
     label,
     coach,
     quadra,
-    pulseira,
+    bola,
     cor:      p.color || '#00a862',
     horario:  horario || '',
     dias:     [],
@@ -2234,7 +2234,7 @@ async function findOrCreateTurma(coach, pulseira, quadra, horario) {
         label,
         coach_nome:  coach,
         quadra,
-        pulseira,
+        bola,
         cor:         p.color || '#00a862',
         horario:     horario || '',
         dias:        [],
@@ -2281,7 +2281,7 @@ async function saveFichaAndClose(studentId) {
   const s = gSt(studentId);
   if (!s) { toast('Avaliação salva ✓'); clsM('m-eval'); return; }
 
-  const evalKey = PULS_EVAL_MAP[s.pulseira];
+  const evalKey = BOLA_EVAL_MAP[s.bola];
   const ficha = evalKey ? D.eval[evalKey] : null;
   const pontosPossiveis = ficha ? ficha.provas.reduce((a,p) => a + p.total, 0) : 0;
   const minNecessario   = ficha ? ficha.provas.reduce((a,p) => a + p.min, 0) : 0;
@@ -2340,7 +2340,7 @@ async function saveAvaliacaoRapida(studentId, tipo, fundScores) {
           academia_id:      currentAcademia.id,
           coach_id:         currentUser.id,
           tipo:             tipo,
-          pulseira:         s.pulseira,
+          bola:         s.bola,
           pontos_obtidos:   0,
           pontos_possiveis: 0,
           aprovado:         false,
@@ -2371,7 +2371,7 @@ window.addEventListener('load', initApp);
 // FRENTE 3 — GERADOR DE PDF DO PASSPORT
 // ══════════════════════════════════════════════════════════════════
 
-const PULS_PDF_INFO = {
+const BOLA_PDF_INFO = {
   roxa:          { label:'Roxa',             color:[107,33,168] },
   verm_branca:   { label:'Vermelha-Branca',  color:[220,38,38]  },
   verm_verm:     { label:'Vermelha',         color:[220,38,38]  },
@@ -2407,7 +2407,7 @@ async function gerarPassportPDF(alunoId) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
   const PW=210, PH=297, ML=20, MR=20, CW=PW-ML-MR;
-  const pInfo = PULS_PDF_INFO[s.pulseira] || PULS_PDF_INFO['laranja'];
+  const pInfo = BOLA_PDF_INFO[s.bola] || BOLA_PDF_INFO['laranja'];
   const today = new Date().toLocaleDateString('pt-BR');
   let y = 0;
 
@@ -2417,7 +2417,7 @@ async function gerarPassportPDF(alunoId) {
   doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.text('ACE PLAYER PASSPORT',ML,23);
   doc.setFillColor(...pInfo.color); doc.roundedRect(PW-ML-44,7,44,22,4,4,'F');
   doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(9);
-  doc.text(pInfo.label.toUpperCase(),PW-ML-42,16); doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.text('Pulseira atual',PW-ML-42,23);
+  doc.text(pInfo.label.toUpperCase(),PW-ML-42,16); doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.text('Bola atual',PW-ML-42,23);
   y=50;
 
   // DADOS DO ALUNO
@@ -2471,7 +2471,7 @@ async function gerarPassportPDF(alunoId) {
   // PRÓXIMOS OBJETIVOS
   if (y>PH-60) { doc.addPage(); y=20; }
   _pdfSectionTitle(doc,'PRÓXIMOS OBJETIVOS',ML,y,CW); y+=10;
-  const calKey=PULS_CAL_MAP[s.pulseira]||s.pulseira;
+  const calKey=BOLA_CAL_MAP[s.bola]||s.bola;
   const cal=CAL_PED[calKey];
   if (cal && cal.caracois && cal.caracois[0]) {
     cal.caracois[0].temas.slice(0,3).forEach((tema,i) => {
@@ -2763,7 +2763,7 @@ async function gerarPassportPDF(alunoId) {
 const D={
   students:[],
   turmas:[],
-  pulseiras:[{"id": "roxa", "label": "Roxa", "ball": "🟣", "age": "3-5 anos", "color": "#7c3aed"}, {"id": "verm_branca", "label": "Verm-Branca", "ball": "🔴", "age": "5-6 anos", "color": "#dc2626"}, {"id": "verm_verm", "label": "Verm-Verm", "ball": "🔴🔴", "age": "6-7 anos", "color": "#b91c1c"}, {"id": "verm_laranja", "label": "Verm-Laranja", "ball": "🔴🟠", "age": "7-8 anos", "color": "#ea580c"}, {"id": "laranja", "label": "Laranja", "ball": "🟠", "age": "8-10 anos", "color": "#d97706"}, {"id": "laranja_verde", "label": "Laranja-Verde", "ball": "🟠🟢", "age": "10-11 anos", "color": "#65a30d"}, {"id": "verde", "label": "Verde", "ball": "🟢", "age": "11-12 anos", "color": "#059669"}, {"id": "verde_amarela", "label": "Verde-Amarela", "ball": "🟢🟡", "age": "12+ anos", "color": "#ca8a04"}, {"id": "amarela", "label": "Amarela", "ball": "🟡", "age": "12+ avançado", "color": "#b45309"}],
+  bolas:[{"id": "roxa", "label": "Roxa", "ball": "🟣", "age": "3-5 anos", "color": "#7c3aed"}, {"id": "verm_branca", "label": "Verm-Branca", "ball": "🔴", "age": "5-6 anos", "color": "#dc2626"}, {"id": "verm_verm", "label": "Verm-Verm", "ball": "🔴🔴", "age": "6-7 anos", "color": "#b91c1c"}, {"id": "verm_laranja", "label": "Verm-Laranja", "ball": "🔴🟠", "age": "7-8 anos", "color": "#ea580c"}, {"id": "laranja", "label": "Laranja", "ball": "🟠", "age": "8-10 anos", "color": "#d97706"}, {"id": "laranja_verde", "label": "Laranja-Verde", "ball": "🟠🟢", "age": "10-11 anos", "color": "#65a30d"}, {"id": "verde", "label": "Verde", "ball": "🟢", "age": "11-12 anos", "color": "#059669"}, {"id": "verde_amarela", "label": "Verde-Amarela", "ball": "🟢🟡", "age": "12+ anos", "color": "#ca8a04"}, {"id": "amarela", "label": "Amarela", "ball": "🟡", "age": "12+ avançado", "color": "#b45309"}],
   coaches:['Fábio','Ana','Carlos'],
   dias:['Seg','Ter','Qua','Qui','Sex','Sáb'],
   horarios:['07:00','08:00','09:00','10:00','11:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'],
@@ -2777,12 +2777,12 @@ let sid=null,gs='',gf={p:'',t:'',c:'',h:''},fo=false;
 let cst=1,cd={},cp=null,coachSearch='',rb='laranja',qa2='',ql='orange',qq=[],qi=0,qx=0,qc=0,pa='8a10',pc='velocidade';
 const ini=n=>n.split(' ').slice(0,2).map(x=>x[0]).join('').toUpperCase();
 const ageF=n=>Math.floor((Date.now()-new Date(n))/(1000*60*60*24*365.25));
-const gP=id=>D.pulseiras.find(p=>p.id===id)||D.pulseiras[4];
+const gP=id=>D.bolas.find(p=>p.id===id)||D.bolas[4];
 const gT=id=>tms.find(t=>t.id===id);
 const gSt=id=>sts.find(s=>s.id===id||s.id==id||String(s.id)===String(id));
 const sC=p=>p>=90?'full':p>=60?'green':p>=35?'amber':'dark';
 
-function filt(){return sts.filter(s=>{const q=!gs||s.nome.toLowerCase().includes(gs.toLowerCase());const p=!gf.p||s.pulseira===gf.p;const t=!gf.t||s.turma===gf.t;const c=!gf.c||s.coach===gf.c;const h=!gf.h||(()=>{const td=gT(s.turma);return td&&td.horario===gf.h})();return q&&p&&t&&c&&h;});}
+function filt(){return sts.filter(s=>{const q=!gs||s.nome.toLowerCase().includes(gs.toLowerCase());const p=!gf.p||s.bola===gf.p;const t=!gf.t||s.turma===gf.t;const c=!gf.c||s.coach===gf.c;const h=!gf.h||(()=>{const td=gT(s.turma);return td&&td.horario===gf.h})();return q&&p&&t&&c&&h;});}
 
 function goS(id){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.ni').forEach(b=>b.classList.remove('on'));document.getElementById('s-'+id).classList.add('on');document.getElementById('n-'+id).classList.add('on');if(id==='alunos')rAL();if(id==='coach')rCo();if(id==='eval')rEvalList();if(id==='academy')rAc();if(id==='torneios')rTorneios();}
 function opn(id){document.getElementById(id).classList.add('open')}
@@ -2790,7 +2790,7 @@ function cls(id){document.getElementById(id).classList.remove('open')}
 function opnM(id){document.getElementById(id).classList.add('open')}
 function clsM(id){document.getElementById(id).classList.remove('open')}
 
-function sRow(s){const p=gP(s.pulseira);const td=gT(s.turma);const cb=s.comportamento??1;const st=presMarkings[s.id];const pIcon=st===true?'✅':st===false?'❌':'📋';const pBg=st===true?'#dcfce7':st===false?'#fee2e2':'var(--bg3)';const pBc=st===true?'#16a34a':st===false?'#ef4444':'var(--b2)';const h=(s.horario||'').replace(/'/g,"\\'");const co=(s.coach||'').replace(/'/g,"\\'");return `<div class="row" onclick="openAS('${s.id}')"><div class="rav" style="background:${s.cor}">${ini(s.nome)}<div class="rb2">${p.ball}</div></div><div class="ri"><div class="rn">${s.nome}</div><div class="rm">${p.label}${td?' · '+td.horario:''}</div></div><div style="display:flex;gap:5px;flex-shrink:0;align-items:center" onclick="event.stopPropagation()"><button data-pres="${s.id}" onclick="presToggleHoje('${s.id}','${s.turma}','${h}','${co}',event)" style="width:32px;height:32px;border-radius:9px;border:1.5px solid ${pBc};background:${pBg};cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">${pIcon}</button>${CB.map((x,i)=>`<button data-cb-idx="${s.id}-${i}" onclick="setComportamento('${s.id}',${i})" style="width:32px;height:32px;border-radius:9px;border:2px solid ${cb===i?x.border:'var(--bo)'};background:${cb===i?x.bg:'var(--bg3)'};cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">${x.icon}</button>`).join('')}</div></div>`;}
+function sRow(s){const p=gP(s.bola);const td=gT(s.turma);const cb=s.comportamento??1;const st=presMarkings[s.id];const pIcon=st===true?'✅':st===false?'❌':'📋';const pBg=st===true?'#dcfce7':st===false?'#fee2e2':'var(--bg3)';const pBc=st===true?'#16a34a':st===false?'#ef4444':'var(--b2)';const h=(s.horario||'').replace(/'/g,"\\'");const co=(s.coach||'').replace(/'/g,"\\'");return `<div class="row" onclick="openAS('${s.id}')"><div class="rav" style="background:${s.cor}">${ini(s.nome)}<div class="rb2">${p.ball}</div></div><div class="ri"><div class="rn">${s.nome}</div><div class="rm">${p.label}${td?' · '+td.horario:''}</div></div><div style="display:flex;gap:5px;flex-shrink:0;align-items:center" onclick="event.stopPropagation()"><button data-pres="${s.id}" onclick="presToggleHoje('${s.id}','${s.turma}','${h}','${co}',event)" style="width:32px;height:32px;border-radius:9px;border:1.5px solid ${pBc};background:${pBg};cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">${pIcon}</button>${CB.map((x,i)=>`<button data-cb-idx="${s.id}-${i}" onclick="setComportamento('${s.id}',${i})" style="width:32px;height:32px;border-radius:9px;border:2px solid ${cb===i?x.border:'var(--bo)'};background:${cb===i?x.bg:'var(--bg3)'};cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">${x.icon}</button>`).join('')}</div></div>`;}
 
 function rAL(){
   const list=filt();
@@ -2802,14 +2802,14 @@ function rAL(){
   bChips();
 }
 
-function bChips(){document.getElementById('fp').innerHTML=D.pulseiras.map(p=>`<button class="fc ${gf.p===p.id?'on':''}" onclick="sf('p','${p.id}')">${p.ball} ${p.label}</button>`).join('');document.getElementById('ft').innerHTML=tms.map(t=>`<button class="fc ${gf.t===t.id?'on':''}" onclick="sf('t','${t.id}')">${t.label}</button>`).join('');document.getElementById('fc').innerHTML=D.coaches.map(c=>`<button class="fc ${gf.c===c?'on':''}" onclick="sf('c','${c}')">${c}</button>`).join('');const hs=[...new Set(tms.map(t=>t.horario))];document.getElementById('fh').innerHTML=hs.map(h=>`<button class="fc ${gf.h===h?'on':''}" onclick="sf('h','${h}')">${h}</button>`).join('');}
+function bChips(){document.getElementById('fp').innerHTML=D.bolas.map(p=>`<button class="fc ${gf.p===p.id?'on':''}" onclick="sf('p','${p.id}')">${p.ball} ${p.label}</button>`).join('');document.getElementById('ft').innerHTML=tms.map(t=>`<button class="fc ${gf.t===t.id?'on':''}" onclick="sf('t','${t.id}')">${t.label}</button>`).join('');document.getElementById('fc').innerHTML=D.coaches.map(c=>`<button class="fc ${gf.c===c?'on':''}" onclick="sf('c','${c}')">${c}</button>`).join('');const hs=[...new Set(tms.map(t=>t.horario))];document.getElementById('fh').innerHTML=hs.map(h=>`<button class="fc ${gf.h===h?'on':''}" onclick="sf('h','${h}')">${h}</button>`).join('');}
 
 function doS(q){gs=q;rAL()}
 function sf(k,v){gf[k]=gf[k]===v?'':v;rAL()}
 function clrF(){gf={p:'',t:'',c:'',h:''};gs='';document.getElementById('ms').value='';rAL()}
 function togFP(){fo=!fo;document.getElementById('fpn').classList.toggle('open',fo);document.getElementById('fbt').classList.toggle('on',fo);}
 
-function openAS(id){sid=id;const s=gSt(id);const p=gP(s.pulseira);const td=gT(s.turma);document.getElementById('shav').style.background=s.cor;document.getElementById('shav').textContent=ini(s.nome);document.getElementById('shn').textContent=s.nome;document.getElementById('shm').textContent=p.ball+' '+p.label+(td?' · '+td.label:'');opn('aov');}
+function openAS(id){sid=id;const s=gSt(id);const p=gP(s.bola);const td=gT(s.turma);document.getElementById('shav').style.background=s.cor;document.getElementById('shav').textContent=ini(s.nome);document.getElementById('shn').textContent=s.nome;document.getElementById('shm').textContent=p.ball+' '+p.label+(td?' · '+td.label:'');opn('aov');}
 function sa(a){cls('aov');if(a==='profile')opPro();else if(a==='eval')opEv();else if(a==='quiz')opQz();else if(a==='fisico')opFis();}
 
 function rCo(){
@@ -2822,10 +2822,10 @@ function rCo(){
     : '<div style="text-align:center;padding:30px;color:var(--t3)">Nenhum aluno encontrado</div>';
 }
 function rWG(){document.getElementById('wg').innerHTML=D.dias.map(d=>{const sl=tms.filter(t=>{const dias=Array.isArray(t.dias)?t.dias:(t.dias||'').split('/').filter(Boolean);return dias.some(x=>x.trim()===d);});return `<div class="dc"><div class="dn">${d}</div>${sl.map(t=>`<div class="ds" style="background:${t.cor};border-color:${t.cor};color:#fff" onclick="opTD('${t.id}')">${t.label.split(' ')[0]}<br><span style="font-weight:500;font-size:7px;opacity:.85">${t.coach?t.coach.split(' ')[0]:'—'}</span><br><span style="font-weight:600;font-size:7px;opacity:.9">${t.horario.split(' – ')[0]||t.horario.split(' ')[0]}</span></div>`).join('')}${!sl.length?'<div class="de"></div>':''}</div>`;}).join('');}
-function rAlt(){const rdy=sts.filter(s=>s.reveal>=100);document.getElementById('altl').textContent=`Prontos para evoluir (${rdy.length})`;document.getElementById('altd').innerHTML=rdy.length?rdy.map(s=>{const p=gP(s.pulseira);return `<div class="row" onclick="openAS('${s.id}')"><div class="rav" style="background:${s.cor}">${ini(s.nome)}<div class="rb2">${p.ball}</div></div><div class="ri"><div class="rn">${s.nome}</div><div class="rm">${p.label} → próximo nível</div></div><span class="pill pg">✓ Pronto</span></div>`;}).join(''):'<div style="font-size:13px;color:var(--t3);padding:8px 0 14px">Nenhum aluno pronto ainda</div>';}
+function rAlt(){const rdy=sts.filter(s=>s.reveal>=100);document.getElementById('altl').textContent=`Prontos para evoluir (${rdy.length})`;document.getElementById('altd').innerHTML=rdy.length?rdy.map(s=>{const p=gP(s.bola);return `<div class="row" onclick="openAS('${s.id}')"><div class="rav" style="background:${s.cor}">${ini(s.nome)}<div class="rb2">${p.ball}</div></div><div class="ri"><div class="rn">${s.nome}</div><div class="rm">${p.label} → próximo nível</div></div><span class="pill pg">✓ Pronto</span></div>`;}).join(''):'<div style="font-size:13px;color:var(--t3);padding:8px 0 14px">Nenhum aluno pronto ainda</div>';}
 
 function sRowEval(s){
-  const p=gP(s.pulseira);const td=gT(s.turma);
+  const p=gP(s.bola);const td=gT(s.turma);
   return `<div class="row" onclick="sid='${s.id}';opEv()">
     <div class="rav" style="background:${s.cor}">${ini(s.nome)}<div class="rb2">${p.ball}</div></div>
     <div class="ri">
@@ -2857,7 +2857,7 @@ function rEvalList(){
 function rAc(){
   const ativos=sts.filter(s=>!s.inativo).length;
   document.getElementById('act').textContent=ativos;
-  const dist={};sts.forEach(s=>{dist[s.pulseira]=(dist[s.pulseira]||0)+1});
+  const dist={};sts.forEach(s=>{dist[s.bola]=(dist[s.bola]||0)+1});
   renderCoachListAc();
   document.getElementById('distl').innerHTML=Object.entries(dist).map(([pid,cnt])=>{const p=gP(pid);const pct=Math.round(cnt/sts.length*100);return `<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><div style="font-size:20px;width:26px">${p.ball}</div><div style="flex:1"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:13px;font-weight:500;color:var(--t2)">${p.label}</span><span style="font-size:13px;font-weight:700;color:var(--t)">${cnt} aluno${cnt!==1?'s':''}</span></div><div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${p.color};border-radius:3px"></div></div></div></div>`;}).join('');
   // Plano card
@@ -2890,7 +2890,7 @@ function rAc(){
   }
 }
 
-function opPro(){clsM('m-coach');const s=gSt(sid);if(!s)return;const p=gP(s.pulseira);const td=gT(s.turma);const sk=sC(s.reveal);document.getElementById('pb').innerHTML=`
+function opPro(){clsM('m-coach');const s=gSt(sid);if(!s)return;const p=gP(s.bola);const td=gT(s.turma);const sk=sC(s.reveal);document.getElementById('pb').innerHTML=`
 <div style="background:linear-gradient(135deg,${s.cor}18,${s.cor}08);border:1px solid ${s.cor}30;border-radius:20px;padding:20px;margin-bottom:16px">
   <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
     <div style="width:60px;height:60px;border-radius:50%;background:${s.cor};display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#fff;flex-shrink:0;box-shadow:0 4px 12px ${s.cor}40">${ini(s.nome)}</div>
@@ -3011,12 +3011,12 @@ loadTournamentEvals(sid);}
 function confirmarAvancoBola(studentId) {
   const s = gSt(studentId);
   if (!s) return;
-  const p = gP(s.pulseira);
-  const PULS_ORDER = ['roxa','verm_branca','verm_verm','verm_laranja','laranja','laranja_verde','verde','verde_amarela','amarela'];
-  const idx = PULS_ORDER.indexOf(s.pulseira);
-  const proxPuls = idx < PULS_ORDER.length - 1 ? PULS_ORDER[idx + 1] : null;
-  if (!proxPuls) { toast('Já está na bola mais alta! 🏆'); return; }
-  const proxP = gP(proxPuls);
+  const p = gP(s.bola);
+  const BOLA_ORDER = ['roxa','verm_branca','verm_verm','verm_laranja','laranja','laranja_verde','verde','verde_amarela','amarela'];
+  const idx = BOLA_ORDER.indexOf(s.bola);
+  const proxBola = idx < BOLA_ORDER.length - 1 ? BOLA_ORDER[idx + 1] : null;
+  if (!proxBola) { toast('Já está na bola mais alta! 🏆'); return; }
+  const proxP = gP(proxBola);
 
   // Confirmar com o coach
   const ok = confirm(s.nome + ' vai avançar de ' + p.ball + ' ' + p.label + ' para ' + proxP.ball + ' ' + proxP.label + '. Confirmar avanco?');
@@ -3025,8 +3025,8 @@ function confirmarAvancoBola(studentId) {
   // Registrar no histórico
   const hist = {
     data: new Date().toLocaleDateString('pt-BR'),
-    pulseira_antes: s.pulseira,
-    pulseira_depois: proxPuls
+    bola_antes: s.bola,
+    bola_depois: proxBola
   };
   s.historico = s.historico || [];
   s.historico.push(hist);
@@ -3037,17 +3037,17 @@ function confirmarAvancoBola(studentId) {
       academia_id:     currentAcademia.id,
       aluno_id:        null,
       coach_id:        currentUser.id,
-      pulseira_antes:  s.pulseira,
-      pulseira_depois: proxPuls
+      bola_antes:  s.bola,
+      bola_depois: proxBola
     }).then(({error}) => { if(error) console.error(error); });
   }
 
   // Limpar scores da ficha antiga
-  const evalKey = PULS_EVAL_MAP[s.pulseira];
+  const evalKey = BOLA_EVAL_MAP[s.bola];
   if (evalKey) clearScoresLocal(s.id, evalKey);
 
-  // Avançar pulseira e zerar boneco + componentes
-  s.pulseira   = proxPuls;
+  // Avançar bola e zerar boneco + componentes
+  s.bola   = proxBola;
   s.reveal     = 0;
   s.score_av    = 0;
   s.score_req   = 0;
@@ -3065,8 +3065,8 @@ function confirmarAvancoBola(studentId) {
 }
 
 
-// ════ PULSEIRA → FICHA MAP ════
-const PULS_EVAL_MAP = {"roxa": "roxa", "verm_branca": "vermelha_branca", "verm_verm": "vermelha_vermelha", "verm_laranja": "vermelha_laranja", "laranja": "laranja_laranja", "laranja_verde": "laranja_verde", "verde": "verde_verde", "verde_amarela": "verde_amarela"};
+// ════ BOLA → FICHA MAP ════
+const BOLA_EVAL_MAP = {"roxa": "roxa", "verm_branca": "vermelha_branca", "verm_verm": "vermelha_vermelha", "verm_laranja": "vermelha_laranja", "laranja": "laranja_laranja", "laranja_verde": "laranja_verde", "verde": "verde_verde", "verde_amarela": "verde_amarela"};
 
 function pauseEval() {
   // Scores already auto-saved to localStorage via setCritScore
@@ -3077,7 +3077,7 @@ function pauseEval() {
 
 function opEv(){
   const s=gSt(sid);if(!s)return;
-  const p=gP(s.pulseira);
+  const p=gP(s.bola);
   document.getElementById('etit').textContent='Avaliar — '+s.nome.split(' ')[0];
   // Show ficha first
   renderFichaEval(s, p);
@@ -3085,7 +3085,7 @@ function opEv(){
 }
 
 function renderFichaEval(s, p) {
-  const evalKey = PULS_EVAL_MAP[s.pulseira];
+  const evalKey = BOLA_EVAL_MAP[s.bola];
   // Limpar scores em memória e carregar salvos
   Object.keys(provaScores).forEach(k => delete provaScores[k]);
   const hasSaved = loadScoresLocal(s.id, evalKey || 'sem_ficha');
@@ -3261,7 +3261,7 @@ function setCritScore(provaId, critIdx, val, maxVal, btn) {
   provaScores[provaId][critIdx] = val;
   // Salvar localmente após cada marcação
   const alunoId = sid;
-  const evalKey = PULS_EVAL_MAP[gSt(sid)?.pulseira] || 'sem_ficha';
+  const evalKey = BOLA_EVAL_MAP[gSt(sid)?.bola] || 'sem_ficha';
   saveScoresLocal(alunoId, evalKey);
   // highlight buttons in this crit
   btn.closest('div').querySelectorAll('button').forEach(b => {
@@ -3300,10 +3300,10 @@ function updateGrandTotal(provaId) {
   const grandTotal = allScores.reduce((a,b)=>a+b,0);
   const maxTxt = grandEl.textContent.split('/')[1]?.trim()||'';
   grandEl.textContent = grandTotal + ' / ' + maxTxt;
-  // Get min from current student pulseira
+  // Get min from current student bola
   const s = gSt(sid);
   if (s && statusEl) {
-    const evalKey = PULS_EVAL_MAP[s.pulseira];
+    const evalKey = BOLA_EVAL_MAP[s.bola];
     const ficha = evalKey ? D.eval[evalKey] : null;
     if (ficha) {
       const minTotal = ficha.provas.reduce((a,pr)=>a+pr.min,0);
@@ -3357,13 +3357,13 @@ function bQAluno(){
     <select onchange="sid=this.value;rQHeader();document.getElementById('qb').innerHTML=(this.value?bQS():bQAluno())"
       style="width:100%;padding:12px 14px;border-radius:var(--rs);border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:14px;font-weight:600;outline:none">
       <option value="">— Selecionar aluno —</option>
-      ${sts.map(s=>`<option value="${s.id}">${s.nome} · ${gP(s.pulseira).ball} ${gP(s.pulseira).label}</option>`).join('')}
+      ${sts.map(s=>`<option value="${s.id}">${s.nome} · ${gP(s.bola).ball} ${gP(s.bola).label}</option>`).join('')}
     </select>
   </div>`;
 }
 function bQS(){
   const s=sid?gSt(sid):null;
-  const alunoTag=s?`<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:10px 12px;background:var(--gl);border:1.5px solid var(--gb);border-radius:var(--rs)"><span style="font-size:13px;font-weight:700;color:var(--g);flex:1">👤 ${s.nome} · ${gP(s.pulseira).ball}</span><button onclick="sid=null;rQHeader();document.getElementById('qb').innerHTML=bQAluno()" style="border:none;background:none;font-size:12px;color:var(--t3);cursor:pointer">trocar</button></div>`:'';
+  const alunoTag=s?`<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:10px 12px;background:var(--gl);border:1.5px solid var(--gb);border-radius:var(--rs)"><span style="font-size:13px;font-weight:700;color:var(--g);flex:1">👤 ${s.nome} · ${gP(s.bola).ball}</span><button onclick="sid=null;rQHeader();document.getElementById('qb').innerHTML=bQAluno()" style="border:none;background:none;font-size:12px;color:var(--t3);cursor:pointer">trocar</button></div>`:'';
   return alunoTag+`<div class="lbl">Dificuldade</div><div style="display:flex;gap:7px;margin-bottom:18px;overflow-x:auto">${[['orange','🟠 Laranja'],['green','🟢 Verde'],['yellow','🟡 Amarela']].map(([v,l])=>`<button style="padding:7px 16px;border-radius:20px;border:1.5px solid ${ql===v?'var(--g)':'var(--bo)'};background:${ql===v?'var(--gl)':'var(--bg3)'};color:${ql===v?'var(--g)':'var(--t2)'};font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0" onclick="ql='${v}';document.getElementById('qb').innerHTML=bQS()">${l}</button>`).join('')}</div><div class="lbl">Categoria</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${Object.entries(CATS).map(([k,v])=>`<button onclick="stQ('${k}')" style="padding:16px 14px;border-radius:var(--rs);border:1px solid var(--bo);background:var(--card);cursor:pointer;text-align:left;box-shadow:var(--shadow);transition:all .15s"><div style="font-size:24px;margin-bottom:6px">${v.split(' ')[0]}</div><div style="font-size:13px;font-weight:700;color:var(--t)">${v.split(' ').slice(1).join(' ')}</div></button>`).join('')}</div>`;
 }
 
@@ -3399,7 +3399,7 @@ function openTurmas(){
   try { rTL('list'); } catch(e) { console.error('rTL error:', e); }
   opnM('m-turmas');
 }
-async function opTD(id){const t=tms.find(x=>String(x.id)===String(id));if(!t)return;const als=sts.filter(s=>String(s.turma)===String(id));document.getElementById('tmt').textContent=t.label;document.getElementById('tmb').innerHTML=`<button class="bg" style="margin-bottom:16px;font-size:14px" onclick="rTL('list')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> Todas as turmas</button><div style="background:${t.cor}12;border:1.5px solid ${t.cor}30;border-radius:20px;padding:18px;margin-bottom:18px"><div style="font-size:20px;font-weight:800;color:var(--t);margin-bottom:14px">${t.label}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${[['Coach','👤 '+t.coach],['Horário','🕐 '+t.horario],['Dias','📅 '+t.dias.join(' · ')],['Bolas','🎾 '+t.pulseiras.join(', ')],['Quadra','🎾 '+(t.quadra||'—')]].map(([l,v])=>`<div style="background:rgba(255,255,255,.8);border-radius:10px;padding:11px;box-shadow:var(--shadow)"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);margin-bottom:4px">${l}</div><div style="font-size:13px;font-weight:700;color:var(--t)">${v}</div></div>`).join('')}</div></div><div id="td-plano" style="margin-bottom:16px"></div><div class="lbl">Alunos (${als.length})</div><div style="background:var(--card);border:1px solid var(--bo);border-radius:var(--rs);padding:0 16px;box-shadow:var(--shadow)">${als.length?als.map(a=>{const p=gP(a.pulseira);const cb2=a.comportamento??1;const st2=presMarkings[a.id];const pI=st2===true?'✅':st2===false?'❌':'📋';const pBg2=st2===true?'#dcfce7':st2===false?'#fee2e2':'var(--bg3)';const pBc2=st2===true?'#16a34a':st2===false?'#ef4444':'var(--b2)';const ah=(t.horario||'').replace(/'/g,"\\'");const ac=(t.coach||'').replace(/'/g,"\\'");return `<div onclick="sid='${a.id}';clsM('m-turmas');openAS('${a.id}')" style="display:flex;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid var(--bo);cursor:pointer"><div class="rav" style="background:${a.cor};width:38px;height:38px;font-size:12px">${ini(a.nome)}<div class="rb2">${p.ball}</div></div><div class="ri" style="flex:1"><div class="rn">${a.nome}</div><div class="rm">${p.label} · ${ageF(a.nasc)} anos</div></div><div style="display:flex;gap:5px;flex-shrink:0;align-items:center" onclick="event.stopPropagation()"><button data-pres="${a.id}" onclick="presToggleHoje('${a.id}','${t.id}','${ah}','${ac}',event)" style="width:32px;height:32px;border-radius:9px;border:1.5px solid ${pBc2};background:${pBg2};cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">${pI}</button>${CB.map((x,i)=>`<button data-cb-idx="${a.id}-${i}" onclick="setComportamento('${a.id}',${i})" style="width:32px;height:32px;border-radius:9px;border:2px solid ${cb2===i?x.border:'var(--bo)'};background:${cb2===i?x.bg:'var(--bg3)'};cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">${x.icon}</button>`).join('')}</div></div>`;}).join(''):'<div style="padding:22px 0;text-align:center;color:var(--t3);font-size:14px">Nenhum aluno nesta turma</div>'}</div><button onclick="rTL('new')" class="bp" style="margin-top:16px">+ Nova turma</button>
+async function opTD(id){const t=tms.find(x=>String(x.id)===String(id));if(!t)return;const als=sts.filter(s=>String(s.turma)===String(id));document.getElementById('tmt').textContent=t.label;document.getElementById('tmb').innerHTML=`<button class="bg" style="margin-bottom:16px;font-size:14px" onclick="rTL('list')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> Todas as turmas</button><div style="background:${t.cor}12;border:1.5px solid ${t.cor}30;border-radius:20px;padding:18px;margin-bottom:18px"><div style="font-size:20px;font-weight:800;color:var(--t);margin-bottom:14px">${t.label}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${[['Coach','👤 '+t.coach],['Horário','🕐 '+t.horario],['Dias','📅 '+t.dias.join(' · ')],['Bolas','🎾 '+t.bolas.join(', ')],['Quadra','🎾 '+(t.quadra||'—')]].map(([l,v])=>`<div style="background:rgba(255,255,255,.8);border-radius:10px;padding:11px;box-shadow:var(--shadow)"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);margin-bottom:4px">${l}</div><div style="font-size:13px;font-weight:700;color:var(--t)">${v}</div></div>`).join('')}</div></div><div id="td-plano" style="margin-bottom:16px"></div><div class="lbl">Alunos (${als.length})</div><div style="background:var(--card);border:1px solid var(--bo);border-radius:var(--rs);padding:0 16px;box-shadow:var(--shadow)">${als.length?als.map(a=>{const p=gP(a.bola);const cb2=a.comportamento??1;const st2=presMarkings[a.id];const pI=st2===true?'✅':st2===false?'❌':'📋';const pBg2=st2===true?'#dcfce7':st2===false?'#fee2e2':'var(--bg3)';const pBc2=st2===true?'#16a34a':st2===false?'#ef4444':'var(--b2)';const ah=(t.horario||'').replace(/'/g,"\\'");const ac=(t.coach||'').replace(/'/g,"\\'");return `<div onclick="sid='${a.id}';clsM('m-turmas');openAS('${a.id}')" style="display:flex;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid var(--bo);cursor:pointer"><div class="rav" style="background:${a.cor};width:38px;height:38px;font-size:12px">${ini(a.nome)}<div class="rb2">${p.ball}</div></div><div class="ri" style="flex:1"><div class="rn">${a.nome}</div><div class="rm">${p.label} · ${ageF(a.nasc)} anos</div></div><div style="display:flex;gap:5px;flex-shrink:0;align-items:center" onclick="event.stopPropagation()"><button data-pres="${a.id}" onclick="presToggleHoje('${a.id}','${t.id}','${ah}','${ac}',event)" style="width:32px;height:32px;border-radius:9px;border:1.5px solid ${pBc2};background:${pBg2};cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">${pI}</button>${CB.map((x,i)=>`<button data-cb-idx="${a.id}-${i}" onclick="setComportamento('${a.id}',${i})" style="width:32px;height:32px;border-radius:9px;border:2px solid ${cb2===i?x.border:'var(--bo)'};background:${cb2===i?x.bg:'var(--bg3)'};cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">${x.icon}</button>`).join('')}</div></div>`;}).join(''):'<div style="padding:22px 0;text-align:center;color:var(--t3);font-size:14px">Nenhum aluno nesta turma</div>'}</div><button onclick="rTL('new')" class="bp" style="margin-top:16px">+ Nova turma</button>
 <button onclick="openEditTurma('${t.id}')" style="width:100%;padding:12px;border-radius:var(--rs);border:1px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-weight:600;cursor:pointer;margin-top:8px">✏️ Editar turma</button>
 <button onclick="deleteTurma('${t.id}')" style="width:100%;padding:12px;border-radius:var(--rs);border:1px solid var(--r);background:var(--rl);color:var(--r);font-size:13px;font-weight:600;cursor:pointer;margin-top:8px">🗑️ Remover turma</button>`; loadPlanoHoje(id); };
 
@@ -3409,7 +3409,7 @@ async function loadPlanoHoje(turmaId) {
   try {
     const t = tms.find(x => String(x.id) === String(turmaId));
     if (!t) { el.innerHTML = ''; return; }
-    const calKey = PULS_CAL_MAP[t.pulseira] || t.pulseira;
+    const calKey = BOLA_CAL_MAP[t.bola] || t.bola;
     const cal = CAL_PED[calKey];
     if (!cal || !cal.caracois) { el.innerHTML = ''; return; }
     const prog = await getCalProg(turmaId);
@@ -3434,7 +3434,7 @@ async function loadPlanoHoje(turmaId) {
   }
 }
 
-function rTL(mode){const ti=document.getElementById('tmt'),tb=document.getElementById('tmb');if(mode==='list'){ti.textContent='Turmas & Calendário';const wk=`<div class="lbl">Semana</div><div class="wg">${D.dias.map(d=>{const sl=tms.filter(t=>{const td=Array.isArray(t.dias)?t.dias:(t.dias||'').split('/').filter(Boolean);return td.some(x=>x.trim()===d);});return `<div class="dc"><div class="dn">${d}</div>${sl.map(t=>`<div class="ds" style="background:${t.cor};border-color:${t.cor};color:#fff" onclick="opTD('${t.id}')">${t.label.split(' ')[0]}<br><span style="font-weight:500;font-size:7px;opacity:.85">${t.coach?t.coach.split(' ')[0]:'—'}</span><br><span style="font-weight:600;font-size:7px;opacity:.9">${t.horario.split(' – ')[0]||t.horario.split(' ')[0]}</span></div>`).join('')}${!sl.length?'<div class="de"></div>':''}</div>`;}).join('')}</div>`;const lst=tms.map(t=>{const al=sts.filter(s=>String(s.turma)===String(t.id)).length;return `<div onclick="opTD('${t.id}')" style="background:var(--card);border:1px solid var(--bo);border-radius:var(--rs);padding:14px;margin-bottom:8px;cursor:pointer;box-shadow:var(--shadow);transition:all .15s" onmouseover="this.style.borderColor='${t.cor}'" onmouseout="this.style.borderColor='var(--bo)'"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:36px;height:36px;border-radius:10px;background:${t.cor}18;border:1.5px solid ${t.cor}40;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🎾</div><div style="flex:1"><div style="font-size:14px;font-weight:700;color:var(--t)">${t.label}</div><div style="font-size:12px;color:var(--t2);margin-top:2px;font-weight:500">Coach ${t.coach} · ${al} aluno${al!==1?'s':''}</div></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3)"><polyline points="9 18 15 12 9 6"/></svg></div><div style="display:flex;flex-wrap:wrap;gap:6px"><span style="font-size:11px;font-weight:500;background:var(--bg3);border-radius:6px;padding:4px 9px;color:var(--t2)">📅 ${Array.isArray(t.dias)?t.dias.join('/'):t.dias||'—'}</span><span style="font-size:11px;font-weight:500;background:var(--bg3);border-radius:6px;padding:4px 9px;color:var(--t2)">🕐 ${t.horario||'—'}</span><span style="font-size:11px;font-weight:600;background:${t.cor}15;border-radius:6px;padding:4px 9px;color:${t.cor}">${Array.isArray(t.pulseiras)?t.pulseiras.join(' · '):(t.pulseira||'—')}</span>${t.quadra?`<span style="font-size:11px;font-weight:500;background:var(--bg3);border-radius:6px;padding:4px 9px;color:var(--t2)">🏟️ ${t.quadra}</span>`:''}</div></div>`;}).join('');tb.innerHTML=wk+`<div class="lbl">Todas as turmas</div>`+lst+`<button onclick="rTL('new')" class="bp" style="margin-top:6px">+ Nova turma</button>`;}else{ti.textContent='Nova turma';tb.innerHTML=`<div class="fi"><label>Nome *</label><input id="nt" type="text" placeholder="Ex: Kids Tarde"></div><div class="fi"><label>Coach *</label><select id="nc">${D.coaches.map(c=>`<option>${c}</option>`).join('')}</select></div><div class="fi"><label>Dias *</label><div style="display:flex;gap:7px;flex-wrap:wrap">${D.dias.map(d=>`<button onclick="this.classList.toggle('on');this.style.background=this.classList.contains('on')?'var(--gl)':'var(--bg3)';this.style.borderColor=this.classList.contains('on')?'var(--g)':'var(--bo)';this.style.color=this.classList.contains('on')?'var(--g)':'var(--t2)'" style="padding:8px 12px;border-radius:10px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t2);font-size:13px;font-weight:500;cursor:pointer">${d}</button>`).join('')}</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="fi"><label>Início</label><select id="ni">${D.horarios.map(h=>`<option>${h}</option>`).join('')}</select></div><div class="fi"><label>Fim</label><select id="nf">${D.horarios.map(h=>`<option ${h==='09:00'?'selected':''}>${h}</option>`).join('')}</select></div></div><div class="fi"><label>Quadra</label><select id="nq" style="width:100%;padding:10px 12px;border-radius:12px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:14px;font-family:inherit;outline:none"><option value="">— Sem quadra definida —</option><option value="Quadra 5">Quadra 5</option><option value="Quadra 6">Quadra 6</option><option value="Quadra 7">Quadra 7</option><option value="Quadra 8">Quadra 8</option><option value="Quadra 9">Quadra 9</option><option value="Quadra 10">Quadra 10</option><option value="Quadra 11">Quadra 11</option></select></div><div class="fi"><label>Cor da bola</label><select id="np" style="width:100%;padding:10px 12px;border-radius:12px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:14px;font-family:inherit;outline:none">${D.pulseiras.map(p=>'<option value="'+p.id+'">'+p.ball+' '+p.label+' · '+p.age+'</option>').join('')}</select></div><div style="display:flex;gap:10px;margin-top:10px"><button onclick="rTL('list')" class="bs" style="flex:1">Cancelar</button><button onclick="savT()" class="bp" style="flex:2">Criar turma</button></div>`;}}
+function rTL(mode){const ti=document.getElementById('tmt'),tb=document.getElementById('tmb');if(mode==='list'){ti.textContent='Turmas & Calendário';const wk=`<div class="lbl">Semana</div><div class="wg">${D.dias.map(d=>{const sl=tms.filter(t=>{const td=Array.isArray(t.dias)?t.dias:(t.dias||'').split('/').filter(Boolean);return td.some(x=>x.trim()===d);});return `<div class="dc"><div class="dn">${d}</div>${sl.map(t=>`<div class="ds" style="background:${t.cor};border-color:${t.cor};color:#fff" onclick="opTD('${t.id}')">${t.label.split(' ')[0]}<br><span style="font-weight:500;font-size:7px;opacity:.85">${t.coach?t.coach.split(' ')[0]:'—'}</span><br><span style="font-weight:600;font-size:7px;opacity:.9">${t.horario.split(' – ')[0]||t.horario.split(' ')[0]}</span></div>`).join('')}${!sl.length?'<div class="de"></div>':''}</div>`;}).join('')}</div>`;const lst=tms.map(t=>{const al=sts.filter(s=>String(s.turma)===String(t.id)).length;return `<div onclick="opTD('${t.id}')" style="background:var(--card);border:1px solid var(--bo);border-radius:var(--rs);padding:14px;margin-bottom:8px;cursor:pointer;box-shadow:var(--shadow);transition:all .15s" onmouseover="this.style.borderColor='${t.cor}'" onmouseout="this.style.borderColor='var(--bo)'"><div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><div style="width:36px;height:36px;border-radius:10px;background:${t.cor}18;border:1.5px solid ${t.cor}40;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🎾</div><div style="flex:1"><div style="font-size:14px;font-weight:700;color:var(--t)">${t.label}</div><div style="font-size:12px;color:var(--t2);margin-top:2px;font-weight:500">Coach ${t.coach} · ${al} aluno${al!==1?'s':''}</div></div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3)"><polyline points="9 18 15 12 9 6"/></svg></div><div style="display:flex;flex-wrap:wrap;gap:6px"><span style="font-size:11px;font-weight:500;background:var(--bg3);border-radius:6px;padding:4px 9px;color:var(--t2)">📅 ${Array.isArray(t.dias)?t.dias.join('/'):t.dias||'—'}</span><span style="font-size:11px;font-weight:500;background:var(--bg3);border-radius:6px;padding:4px 9px;color:var(--t2)">🕐 ${t.horario||'—'}</span><span style="font-size:11px;font-weight:600;background:${t.cor}15;border-radius:6px;padding:4px 9px;color:${t.cor}">${Array.isArray(t.bolas)?t.bolas.join(' · '):(t.bola||'—')}</span>${t.quadra?`<span style="font-size:11px;font-weight:500;background:var(--bg3);border-radius:6px;padding:4px 9px;color:var(--t2)">🏟️ ${t.quadra}</span>`:''}</div></div>`;}).join('');tb.innerHTML=wk+`<div class="lbl">Todas as turmas</div>`+lst+`<button onclick="rTL('new')" class="bp" style="margin-top:6px">+ Nova turma</button>`;}else{ti.textContent='Nova turma';tb.innerHTML=`<div class="fi"><label>Nome *</label><input id="nt" type="text" placeholder="Ex: Kids Tarde"></div><div class="fi"><label>Coach *</label><select id="nc">${D.coaches.map(c=>`<option>${c}</option>`).join('')}</select></div><div class="fi"><label>Dias *</label><div style="display:flex;gap:7px;flex-wrap:wrap">${D.dias.map(d=>`<button onclick="this.classList.toggle('on');this.style.background=this.classList.contains('on')?'var(--gl)':'var(--bg3)';this.style.borderColor=this.classList.contains('on')?'var(--g)':'var(--bo)';this.style.color=this.classList.contains('on')?'var(--g)':'var(--t2)'" style="padding:8px 12px;border-radius:10px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t2);font-size:13px;font-weight:500;cursor:pointer">${d}</button>`).join('')}</div></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="fi"><label>Início</label><select id="ni">${D.horarios.map(h=>`<option>${h}</option>`).join('')}</select></div><div class="fi"><label>Fim</label><select id="nf">${D.horarios.map(h=>`<option ${h==='09:00'?'selected':''}>${h}</option>`).join('')}</select></div></div><div class="fi"><label>Quadra</label><select id="nq" style="width:100%;padding:10px 12px;border-radius:12px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:14px;font-family:inherit;outline:none"><option value="">— Sem quadra definida —</option><option value="Quadra 5">Quadra 5</option><option value="Quadra 6">Quadra 6</option><option value="Quadra 7">Quadra 7</option><option value="Quadra 8">Quadra 8</option><option value="Quadra 9">Quadra 9</option><option value="Quadra 10">Quadra 10</option><option value="Quadra 11">Quadra 11</option></select></div><div class="fi"><label>Cor da bola</label><select id="np" style="width:100%;padding:10px 12px;border-radius:12px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:14px;font-family:inherit;outline:none">${D.bolas.map(p=>'<option value="'+p.id+'">'+p.ball+' '+p.label+' · '+p.age+'</option>').join('')}</select></div><div style="display:flex;gap:10px;margin-top:10px"><button onclick="rTL('list')" class="bs" style="flex:1">Cancelar</button><button onclick="savT()" class="bp" style="flex:2">Criar turma</button></div>`;}}
 
 function savT(){
   const nm     = document.getElementById('nt')?.value?.trim();
@@ -3454,8 +3454,8 @@ function savT(){
     label:    nm,
     coach:    coach,
     quadra:   quadra,
-    pulseira: turmaCP,
-    pulseiras:[turmaCP],
+    bola: turmaCP,
+    bolas:[turmaCP],
     cor:      pulsObj.color || '#00a862',
     horario:  horario,
     dias:     [],
@@ -3501,7 +3501,7 @@ const alunoSelector = sts.length > 0 ? `
     </div>
     <select onchange="reqAlunoId=this.value;rRB()" style="width:100%;padding:9px 12px;border-radius:9px;border:1.5px solid var(--gb);background:#fff;font-size:14px;font-weight:600;color:var(--t);outline:none">
       <option value="">— Selecionar aluno —</option>
-      ${sts.map(s=>`<option value="${s.id}" ${reqAlunoId===s.id?'selected':''}>${s.nome} · ${gP(s.pulseira).ball} ${gP(s.pulseira).label}</option>`).join('')}
+      ${sts.map(s=>`<option value="${s.id}" ${reqAlunoId===s.id?'selected':''}>${s.nome} · ${gP(s.bola).ball} ${gP(s.bola).label}</option>`).join('')}
     </select>
   </div>` : '';
 document.getElementById('rb').innerHTML = alunoSelector + h;}
@@ -3528,7 +3528,7 @@ else if(cst===3){
     </div>
     <div class="fi"><label>Cor da bola *</label>
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px" id="c3-bolas">
-        ${D.pulseiras.map(p => `<button type="button" data-pid="${p.id}"
+        ${D.bolas.map(p => `<button type="button" data-pid="${p.id}"
           onclick="c3_selBola('${p.id}')"
           style="display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:12px;border:2px solid ${cp===p.id?p.color:'var(--bo)'};background:${cp===p.id?p.color+'25':'var(--bg3)'};cursor:pointer;font-size:13px;font-weight:700;color:${cp===p.id?p.color:'var(--t)'}">
           <span style="font-size:18px">${p.ball}</span>${p.label}
@@ -3583,14 +3583,14 @@ async function cN(){if(cst===1){
   if (!c3hora)        { toast('Informe o horário ⚠️'); return; }
 
   cd.coach    = c3coach;
-  cd.pulseira = cp;
+  cd.bola = cp;
   cd.quadra   = c3quadra;
   cd.dias     = c3dias.join('/');
   cd.horario  = c3hora;
 
   // Encontra ou cria turma automaticamente
   cd.turma = await findOrCreateTurma(c3coach, cp, c3quadra, c3hora);
-  const cors=['#00a862','#d4820a','#1a5fa8','#6a1a8a','#7a4a10','#1a6060'];const novoAluno = {id:sts.length+1,nome:cd.nome,nasc:cd.nasc,pulseira:cd.pulseira,turma:cd.turma||'',horario:cd.horario||'',dias:cd.dias||'',coach:cd.coach,quadra:cd.quadra||'',responsavel:cd.resp,contato:cd.tel,cor:cors[sts.length%cors.length],reveal:0,xp:0};
+  const cors=['#00a862','#d4820a','#1a5fa8','#6a1a8a','#7a4a10','#1a6060'];const novoAluno = {id:sts.length+1,nome:cd.nome,nasc:cd.nasc,bola:cd.bola,turma:cd.turma||'',horario:cd.horario||'',dias:cd.dias||'',coach:cd.coach,quadra:cd.quadra||'',responsavel:cd.resp,contato:cd.tel,cor:cors[sts.length%cors.length],reveal:0,xp:0};
 // Auto-fill horario from turma if not set
 if (novoAluno.turma && !novoAluno.horario) {
   const t = gT(novoAluno.turma);
@@ -3610,11 +3610,11 @@ function aFT(id){
   const t = tms.find(x => String(x.id) === String(id));
   const b = document.getElementById('tib');
   if (!t || !b) return;
-  const p = gP(t.pulseira);
+  const p = gP(t.bola);
   const turDias = Array.isArray(t.dias) ? t.dias : (t.dias||'').split('/').filter(Boolean);
 
-  // Auto-set pulseira from turma
-  cp = t.pulseira || cp;
+  // Auto-set bola from turma
+  cp = t.bola || cp;
 
   // Store in cd
   cd.turma   = t.id;
@@ -3640,7 +3640,7 @@ function aFT(id){
     <div id="tib-dias-sel" style="font-size:12px;color:var(--t3);margin-top:8px"></div>
   `;
 
-  // Re-render to update pulseira buttons
+  // Re-render to update bola buttons
   rCS();
 }
 
@@ -3890,7 +3890,7 @@ function saveReqLocal(alunoId, ball, cat, itemIdx, val) {
       s.fundamentos[cat] = Math.max(0, (s.fundamentos[cat]||0) - 1);
   }
 
-  // Recalcular score_req: itens marcados / total de itens da pulseira
+  // Recalcular score_req: itens marcados / total de itens da bola
   const reqData = D.reqs[ball] || D.reqs.laranja;
   const reqCats = ['tecnico','tatico','fisico','mental'];
   let totalItems = 0, checkedItems = 0;
@@ -4000,7 +4000,7 @@ function viewCoachProfile(coachNome) {
     <div style="padding:16px">
       <div class="lbl">Turmas</div>
       ${coachTurmas.length ? coachTurmas.map(t => {
-        const p = gP(t.pulseira);
+        const p = gP(t.bola);
         const als = sts.filter(s => String(s.turma) === String(t.id));
         return `<div class="row" data-turma-id="${t.id}" style="cursor:pointer">
           <div style="width:40px;height:40px;border-radius:10px;background:${t.cor};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${p.ball}</div>
@@ -4025,7 +4025,7 @@ function viewCoachProfile(coachNome) {
       const t = tms.find(x => String(x.id) === String(id));
       if (!t) return;
       const als = sts.filter(s => String(s.turma) === String(id));
-      const p = gP(t.pulseira);
+      const p = gP(t.bola);
       const dias = Array.isArray(t.dias) ? t.dias.join(' · ') : (t.dias||'—');
       body.innerHTML = `
         <button onclick="viewCoachProfile('${t.coach||''}')" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--g);font-size:13px;font-weight:700;cursor:pointer;padding:16px 16px 8px">
@@ -4668,7 +4668,7 @@ function filterCodigos(q) {
 }
 function renderCodigos(list) {
   document.getElementById('codigos-list').innerHTML = list.length ? list.map(s => {
-    const p = gP(s.pulseira);
+    const p = gP(s.bola);
     const link = getAppBase() + '?code=' + (s.access_code || '—');
     return `<div style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--bo)">
       <div class="rav" style="background:${s.cor};width:36px;height:36px;font-size:11px;flex-shrink:0">${ini(s.nome)}<div class="rb2">${p.ball}</div></div>
@@ -4815,7 +4815,7 @@ async function lookupStudentByName(nome) {
       matches.innerHTML = data.map(row => `
         <div onclick="selectPortalStudent(${JSON.stringify(row).replace(/"/g,'&quot;')})" style="padding:10px 14px;border:1.5px solid var(--bo);border-radius:12px;margin-bottom:8px;cursor:pointer;background:var(--bg3)">
           <div style="font-size:14px;font-weight:700;color:var(--t)">${row.student_name}</div>
-          <div style="font-size:12px;color:var(--t2);margin-top:2px">🎾 ${row.pulseira||''}</div>
+          <div style="font-size:12px;color:var(--t2);margin-top:2px">🎾 ${row.bola||''}</div>
         </div>`).join('');
       portalRegisterStudent = null;
     }
@@ -4825,13 +4825,13 @@ async function lookupStudentByName(nome) {
 }
 
 function selectPortalStudent(row) {
-  const pb = (typeof gP === 'function') ? gP(row.pulseira) : { ball:'🎾', label: row.pulseira };
+  const pb = (typeof gP === 'function') ? gP(row.bola) : { ball:'🎾', label: row.bola };
   document.getElementById('pr-nome-status').innerHTML = '<span style="color:var(--g)">✓ Aluno encontrado</span>';
   document.getElementById('pr-student-name').textContent = row.student_name;
-  document.getElementById('pr-student-detail').textContent = (pb.ball||'🎾') + ' ' + (pb.label||row.pulseira||'');
+  document.getElementById('pr-student-detail').textContent = (pb.ball||'🎾') + ' ' + (pb.label||row.bola||'');
   document.getElementById('pr-student-info').style.display = 'block';
   document.getElementById('pr-student-matches').style.display = 'none';
-  portalRegisterStudent = { id: row.student_id, nome: row.student_name, pulseira: row.pulseira, academia_id: row.academia_id };
+  portalRegisterStudent = { id: row.student_id, nome: row.student_name, bola: row.bola, academia_id: row.academia_id };
 }
 
 async function doPortalRegister() {
@@ -4903,7 +4903,7 @@ async function renderPortalBody(studentId, role) {
     }
     // Parent messages history
     const { data: pmsgs } = await getDb().from('parent_messages').select('*').eq('student_id', studentId).order('created_at', { ascending: false });
-    const pb = (typeof gP === 'function') ? gP(s.pulseira) : { ball:'🎾', label: s.pulseira };
+    const pb = (typeof gP === 'function') ? gP(s.bola) : { ball:'🎾', label: s.bola };
     const nasc = s.data_nascimento ? new Date(s.data_nascimento) : null;
     const age = nasc ? (new Date().getFullYear() - nasc.getFullYear()) : '—';
     const nascFmt = nasc ? nasc.toLocaleDateString('pt-BR') : '—';
