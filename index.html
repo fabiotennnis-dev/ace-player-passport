@@ -5297,6 +5297,7 @@ async function salvarNovoTorneio() {
     pix_chave:             f.pix_chave,
     pix_nome:              f.pix_nome || currentAcademia.nome,
     pix_cnpj:              f.pix_cnpj || null,
+    ativo:                 true,
   }).select().single();
 
   if (tErr) { toast('Erro: '+tErr.message); btn.disabled=false; btn.textContent='Criar Torneio →'; return; }

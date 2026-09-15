@@ -305,10 +305,10 @@ body { font-family: -apple-system,'DM Sans',system-ui,sans-serif; background: #f
       .from('torneios')
       .select('*, categorias_torneio(*)')
       .eq('id', torneioId)
-      .eq('ativo', true)
       .single();
 
-    if (error || !t) { showError('Torneio não encontrado ou encerrado.'); return; }
+    if (error || !t) { showError('Torneio não encontrado.'); return; }
+    if (t.ativo === false) { showError('Este torneio está encerrado.'); return; }
 
     torneioData = t;
     categorias  = (t.categorias_torneio || []).sort((a,b) => a.valor - b.valor);
