@@ -1165,12 +1165,12 @@ const _calCache   = {};
 const _notesCache = {};
 
 async function getCalProg(turmaId) {
-  if (_calCache[turmaId]) return _calCache[turmaId];
+  const cached = _calCache[turmaId];
+  if (cached && cached.sessoes !== undefined) return cached;
   try {
     const { data, error } = await getDb().from('cal_progress').select('ciclo_index, aulas_json').eq('turma_id', turmaId).single();
     if (!error && data) {
       const aj = data.aulas_json || {};
-      // novo formato: aulas_json tem campo 'sessoes'
       const prog = { caracol: data.ciclo_index || 0, sessoes: aj.sessoes || {} };
       _calCache[turmaId] = prog; return prog;
     }
@@ -1217,7 +1217,10 @@ async function preloadCalProgress() {
   if (!tms.length) return;
   try {
     const { data } = await getDb().from('cal_progress').select('turma_id,ciclo_index,aulas_json').in('turma_id', tms.map(t => t.id));
-    if (data) data.forEach(r => { _calCache[r.turma_id] = { ciclo: r.ciclo_index, aulas: r.aulas_json || {} }; });
+    if (data) data.forEach(r => {
+      const aj = r.aulas_json || {};
+      _calCache[r.turma_id] = { caracol: r.ciclo_index || 0, sessoes: aj.sessoes || {} };
+    });
   } catch(e) {}
 }
 
