@@ -567,751 +567,623 @@ async function saveTurmaSupabase(turma) {
 
 let calPedTurmaId = null;
 
-// ── Nova estrutura: caracois → temas → a1/a2 por bola ──
+// ── CAL_PED: Periodização Caracol — ciclos[].semanas[].aulas[] ──
+// ── CAL_PED: Periodização Caracol — ciclos[].semanas[].aulas[] ──
 const CAL_PED = {
   roxa: {
     label: "Roxa / Verm-Branca", ball: "🟣", quadra: "10×6m · Sem rede",
-    caracois: [
-      { id:"rx_c1", nome:"Caracol 1", nivel:"Iniciação",
-        meta:"Trocar bolas em parceria numa quadra 10×6 sem rede (gol a gol) — 1 arremesso + 3 devoluções com bola rolando",
-        temas:[
-          { id:"rx_c1_s1", nome:"Introdução", foco:"Posição Base", emoji:"🎾",
-            obj:"Posição início jogo, reconhecer Fora/Dentro, posição arranque",
-            a1:"Posição inicial + reconhecer Fora/Dentro · Base neutra · Joelhos flexionados",
-            a2:"Gol a gol cooperativo · Percepção de zonas" },
-          { id:"rx_c1_s2", nome:"Construção", foco:"Arranque", emoji:"⚡",
-            obj:"Arranque estrela, base neutra arremesso, SAQ semi-aberta FH",
-            a1:"Arranque estrela · Base neutra arremesso · SAQ semi-aberta FH",
-            a2:"Gol a gol com arranque · 1 arremesso + 3 devoluções" },
-          { id:"rx_c1_s3", nome:"Aplicação", foco:"Contato", emoji:"🤲",
-            obj:"Pegada almofadinha, mão livre coração, percepção alvos/zonas",
-            a1:"Pegada almofadinha · Mão livre no coração · Contato frente",
-            a2:"Jogo percepção de alvos e zonas · Cooperativo gol a gol" },
-          { id:"rx_c1_s4", nome:"Avaliação", foco:"Formativa", emoji:"📋",
-            obj:"Jogo gol a gol, avaliação formativa circuito psicomotor",
-            a1:"Circuito psicomotor formativo · Revisão de conteúdos",
-            a2:"Torneio gol a gol autônomo · Avaliação formativa" }
+    ciclos: [
+      { id:"rx_c1", nome:"Ciclo 1", nivel:"Iniciação",
+        meta:"Trocar bolas em parceria numa quadra 10×6 sem rede — 1 arremesso + 3 devoluções",
+        semanas: [
+          { id:"rx_c1s1", nome:"Semana 1", tipo:"Introdução", desc:"Exercício fechado. Apresentação do tema.",
+            aulas: [
+              { id:"rx_c1.1", num:"C1.1", cat:"Tático", foco:"Olho", tema:"Tática e arbitragem", obj:'Reconhecer "Fora" e "Dentro" + anunciar para colega' },
+              { id:"rx_c1.2", num:"C1.2", cat:"Tático", foco:"Olho", tema:"Tática e arbitragem", obj:"Posição de arranque antes do sinal sonoro + anunciar" },
+              { id:"rx_c1.3", num:"C1.3", cat:"FDQ",    foco:"Pé",   tema:"Fundo de Quadra",    obj:"Posição no início do jogo — quadra sem rede" }
+            ]},
+          { id:"rx_c1s2", nome:"Semana 2", tipo:"Construção", desc:"Consolidar o gesto técnico. Correção precisa.",
+            aulas: [
+              { id:"rx_c1.4", num:"C1.4", cat:"FDQ", foco:"Pé",   tema:"Fundo de Quadra", obj:"Arranque estrela — reagir ao sinal sonoro + base ½ aberta" },
+              { id:"rx_c1.5", num:"C1.5", cat:"FDQ", foco:"Pé",   tema:"Fundo de Quadra", obj:"Arranque estrela + base neutra no arremesso + SAQ semi-aberta FH" },
+              { id:"rx_c1.6", num:"C1.6", cat:"FDQ", foco:"Olho", tema:"Fundo de Quadra", obj:'Percepção de zonas — bola "fora" e "dentro" da área de jogo' }
+            ]},
+          { id:"rx_c1s3", nome:"Semana 3", tipo:"Aplicação", desc:"Aluno aplica o tema com autonomia crescente.",
+            aulas: [
+              { id:"rx_c1.7", num:"C1.7", cat:"FDQ", foco:"Mão",  tema:"Fundo de Quadra", obj:"Pegada almofadinha + mão livre coração + contato frente" },
+              { id:"rx_c1.8", num:"C1.8", cat:"FDQ", foco:"Mão",  tema:"Fundo de Quadra", obj:"Pegada almofadinha + ponto de contato frente — gol a gol cooperativo" },
+              { id:"rx_c1.9", num:"C1.9", cat:"FDQ", foco:"Olho", tema:"Fundo de Quadra", obj:"Percepção de alvos e zonas — gol a gol" }
+            ]},
+          { id:"rx_c1s4", nome:"Semana 4", tipo:"Avaliação", desc:"Revisão dos objetivos. Torneio interno ou simulação.",
+            aulas: [
+              { id:"rx_c1.10", num:"C1.10", cat:"Jogo", foco:"Olho", tema:"Pré-evento",  obj:"Situação de jogo gol a gol + anunciar fora/dentro" },
+              { id:"rx_c1.11", num:"C1.11", cat:"Jogo", foco:"Olho", tema:"Pré-evento",  obj:"Torneio gol a gol autônomo + arbitragem" },
+              { id:"rx_c1.12", num:"C1.12", cat:"Jogo", foco:"Olho", tema:"Avaliação C1", obj:"Avaliação formativa circuito psicomotor + gol a gol" }
+            ]}
         ]
       },
-      { id:"rx_c2", nome:"Caracol 2", nivel:"Fundamental",
-        meta:"FDQ com adversidade — perceber trajetória, manter equilíbrio e ponto de contato na frente do corpo",
-        temas:[
-          { id:"rx_c2_s1", nome:"Introdução", foco:"Giro de Ombros", emoji:"🔄",
-            obj:"Apoio neutro (arremesso), pés dinâmicos (devolução), giro dos ombros BH",
-            a1:"Apoio neutro · Pés dinâmicos · Giro de ombros BH",
-            a2:"Trocas FDQ com pés dinâmicos · Gol a gol" },
-          { id:"rx_c2_s2", nome:"Construção", foco:"Ponto de Contato", emoji:"🎯",
-            obj:"Giro ombros ponto contato identificado frente, equilíbrio base",
-            a1:"Ponto de contato à frente do corpo · Equilíbrio base",
-            a2:"Trocas com equilíbrio base · Situações de adversidade" },
-          { id:"rx_c2_s3", nome:"Aplicação", foco:"Arbitragem", emoji:"📣",
-            obj:"Equilíbrio base durante golpe, precisão alvo, anunciar fora/dentro",
-            a1:"Equilíbrio + precisão de alvo · Anunciar fora/dentro",
-            a2:"Jogo anunciando fora/dentro · Arbitragem autônoma" },
-          { id:"rx_c2_s4", nome:"Avaliação", foco:"Adversidade", emoji:"⚔️",
-            obj:"Jogo com adversidade arbitragem autônoma",
-            a1:"Situações de adversidade FDQ · Revisão conteúdos",
-            a2:"Torneio com arbitragem autônoma · Avaliação formativa" }
+      { id:"rx_c2", nome:"Ciclo 2", nivel:"FDQ c/ Adversidade",
+        meta:"FDQ com adversidade — perceber trajetória, manter equilíbrio e ponto de contato na frente",
+        semanas: [
+          { id:"rx_c2s1", nome:"Semana 1", tipo:"Introdução", desc:"Exercício fechado. Apresentação do tema.",
+            aulas: [
+              { id:"rx_c2.1", num:"C2.1", cat:"FDQ", foco:"Pé",   tema:"FDQ c/ adversidade", obj:"Apoio neutro (arremesso) + pés dinâmicos (devolução)" },
+              { id:"rx_c2.2", num:"C2.2", cat:"FDQ", foco:"Pé",   tema:"FDQ c/ adversidade", obj:"Pés dinâmicos + giro dos ombros BH" },
+              { id:"rx_c2.3", num:"C2.3", cat:"FDQ", foco:"Olho", tema:"FDQ c/ adversidade", obj:"Percepção trajetória da bola — variações de quique" }
+            ]},
+          { id:"rx_c2s2", nome:"Semana 2", tipo:"Construção", desc:"Consolidar o gesto técnico. Correção precisa.",
+            aulas: [
+              { id:"rx_c2.4", num:"C2.4", cat:"FDQ", foco:"Olho", tema:"FDQ c/ adversidade", obj:"Ponto de contato à frente do corpo" },
+              { id:"rx_c2.5", num:"C2.5", cat:"FDQ", foco:"Mão",  tema:"FDQ c/ adversidade", obj:"Equilíbrio base + ponto de contato FH/BH" },
+              { id:"rx_c2.6", num:"C2.6", cat:"FDQ", foco:"Mão",  tema:"FDQ c/ adversidade", obj:"Giro ombros + ponto de contato identificado na frente + equilíbrio base" }
+            ]},
+          { id:"rx_c2s3", nome:"Semana 3", tipo:"Aplicação", desc:"Aluno aplica o tema com autonomia crescente.",
+            aulas: [
+              { id:"rx_c2.7", num:"C2.7", cat:"FDQ",  foco:"Pé",   tema:"FDQ c/ adversidade", obj:"Equilíbrio da base durante o golpe + precisão para alvo" },
+              { id:"rx_c2.8", num:"C2.8", cat:"FDQ",  foco:"Pé",   tema:"FDQ c/ adversidade", obj:"Equilíbrio + precisão + iniciar contagem simples (1, 2, 3)" },
+              { id:"rx_c2.9", num:"C2.9", cat:"Jogo",  foco:"Olho", tema:"Pré-evento",          obj:'Anunciar "fora/dentro" + anunciar placar para colega' }
+            ]},
+          { id:"rx_c2s4", nome:"Semana 4", tipo:"Avaliação", desc:"Revisão dos objetivos. Torneio interno ou simulação.",
+            aulas: [
+              { id:"rx_c2.10", num:"C2.10", cat:"Jogo", foco:"Olho", tema:"Pré-evento — Avaliação", obj:"Jogo com adversidade + arbitragem autônoma" }
+            ]}
         ]
       },
-      { id:"rx_c3", nome:"Caracol 3", nivel:"Técnico",
-        meta:"Conseguir sacar na quadra (base semi-aberta, toss controlado, ponto de contato acima da cabeça)",
-        temas:[
-          { id:"rx_c3_s1", nome:"Introdução", foco:"Saque Base", emoji:"🏆",
-            obj:"Dominar espaço acima cabeça — troféu, saque base semi-aberta",
-            a1:"Troféu + saque base semi-aberta · Dominar espaço acima da cabeça",
-            a2:"Jogar com saque introdutório · Gol a gol com saque" },
-          { id:"rx_c3_s2", nome:"Construção", foco:"Toss", emoji:"🎾",
-            obj:"Base semi-aberta subida junta dos braços, empunhadura correta, toss controlado",
-            a1:"Empunhadura correta · Subida junta dos braços · Toss controlado",
-            a2:"Saque para gol cooperativo · 1+2 com saque" },
-          { id:"rx_c3_s3", nome:"Aplicação", foco:"Contato Acima", emoji:"☝️",
-            obj:"Toss ponto contato acima cabeça, sacar para gol, recuperar conteúdos",
-            a1:"Ponto de contato acima da cabeça · Sacar para gol",
-            a2:"Recuperar conteúdos · Jogo com saque + rally" },
-          { id:"rx_c3_s4", nome:"Avaliação", foco:"Somativa", emoji:"🏅",
-            obj:"Torneio interno gols arbitragem autônoma avaliação somativa",
-            a1:"Avaliação somativa saque + rally · Revisão geral",
-            a2:"Torneio interno gols autônomo · Avaliação somativa" }
+      { id:"rx_c3", nome:"Ciclo 3", nivel:"Saque",
+        meta:"Conseguir sacar na quadra (base semi-aberta + toss controlado + ponto de contato acima da cabeça)",
+        semanas: [
+          { id:"rx_c3s1", nome:"Semana 1", tipo:"Introdução", desc:"Exercício fechado. Apresentação do tema.",
+            aulas: [
+              { id:"rx_c3.1", num:"C3.1", cat:"Saque", foco:"Olho", tema:"Conseguir sacar", obj:"Conhecer e dominar espaço acima da cabeça — troféu" },
+              { id:"rx_c3.2", num:"C3.2", cat:"Saque", foco:"Olho", tema:"Conseguir sacar", obj:"Dominar espaço acima da cabeça + apresentar a bola" },
+              { id:"rx_c3.3", num:"C3.3", cat:"Saque", foco:"Pé",   tema:"Conseguir sacar", obj:"Saque com base semi-aberta — equilíbrio durante o golpe" }
+            ]},
+          { id:"rx_c3s2", nome:"Semana 2", tipo:"Construção", desc:"Consolidar o gesto técnico. Correção precisa.",
+            aulas: [
+              { id:"rx_c3.4", num:"C3.4", cat:"Saque", foco:"Pé",  tema:"Conseguir sacar", obj:"Base semi-aberta + subida junta dos braços (fase organizacional)" },
+              { id:"rx_c3.5", num:"C3.5", cat:"Saque", foco:"Mão", tema:"Conseguir sacar", obj:"Saque segurando raquete no fim do cabo — eminência hipotenar" },
+              { id:"rx_c3.6", num:"C3.6", cat:"Saque", foco:"Mão", tema:"Conseguir sacar", obj:"Empunhadura correta + toss controlado para manter equilíbrio" }
+            ]},
+          { id:"rx_c3s3", nome:"Semana 3", tipo:"Aplicação", desc:"Aluno aplica o tema com autonomia crescente.",
+            aulas: [
+              { id:"rx_c3.7", num:"C3.7", cat:"Saque", foco:"Mão",  tema:"Conseguir sacar", obj:"Toss + ponto de contato acima da cabeça com equilíbrio total" },
+              { id:"rx_c3.8", num:"C3.8", cat:"Jogo",  foco:"Olho", tema:"Pré-evento",       obj:"Sacar para o gol + partida com regra adaptada (3 gols ou 5 min)" },
+              { id:"rx_c3.9", num:"C3.9", cat:"Jogo",  foco:"Olho", tema:"Pré-evento",       obj:"Recuperar conteúdos + autonomia na arbitragem" }
+            ]},
+          { id:"rx_c3s4", nome:"Semana 4", tipo:"Avaliação", desc:"Revisão dos objetivos. Torneio interno ou simulação.",
+            aulas: [
+              { id:"rx_c3.10", num:"C3.10", cat:"Jogo", foco:"Olho", tema:"Avaliação de Fim de Semestre", obj:"Torneio interno: 3 gols · arbitragem autônoma · avaliação somativa" }
+            ]}
         ]
       }
     ]
   },
   verm_verm: {
     label: "Vermelho-Vermelho", ball: "🔴", quadra: "12×8m · Rede 0,80m",
-    caracois: [
-      { id:"vmvm_c1", nome:"Caracol 1", nivel:"FDQ Base",
-        meta:"Realizar 1 arremesso + 2 trocas — quadra 12×8×0,80m",
-        temas:[
-          { id:"vmvm_c1_s1", nome:"Introdução", foco:"Empunhadura", emoji:"✋",
-            obj:"Empunhadura almofadinha + posição base",
-            a1:"Empunhadura almofadinha · Posição base FDQ",
-            a2:"Trocas cooperativas 1+2 · Gol a gol" },
-          { id:"vmvm_c1_s2", nome:"Construção", foco:"TIC-TAC", emoji:"🎵",
-            obj:"TIC-TAC dominar 1º quique",
-            a1:"TIC-TAC · Dominar 1º quique · Timing",
-            a2:"Jogo fundo de quadra · 1+2 com TIC-TAC" },
-          { id:"vmvm_c1_s3", nome:"Aplicação", foco:"Distância", emoji:"📏",
-            obj:"Percepção distanciar da bola",
-            a1:"Percepção + distanciar da bola · Ajuste corporal",
-            a2:"Jogo 1 arremesso + 2 trocas · FDQ" },
-          { id:"vmvm_c1_s4", nome:"Avaliação", foco:"Formativa", emoji:"📋",
-            obj:"Avaliação formativa FDQ quadra vermelha",
-            a1:"Circuito FDQ avaliação formativa · Revisão",
-            a2:"Torneio 1+2 quadra vermelha · Formativo" }
+    ciclos: [
+      { id:"vmvm_c1", nome:"Ciclo 1", nivel:"FDQ Base",
+        meta:"Realizar 1 arremesso + 2 trocas de FH — quadra 12×8×0,80m",
+        semanas: [
+          { id:"vmvm_c1s1", nome:"Semana 1", tipo:"Introdução", desc:"Exercício fechado. Apresentação do tema.",
+            aulas: [
+              { id:"vmvm_c1.1", num:"C1.1", cat:"FDQ", foco:"Pé",  tema:"Fundo de Quadra", obj:'Posição "0" dinâmica (joelhos dist.) · Arr: ½ aberto · SAQ: ½ aberto' },
+              { id:"vmvm_c1.2", num:"C1.2", cat:"FDQ", foco:"Pé",  tema:"Fundo de Quadra", obj:'Posição "0" + bases semi-abertas nas bolas laterais' },
+              { id:"vmvm_c1.3", num:"C1.3", cat:"FDQ", foco:"Mão", tema:"Fundo de Quadra", obj:"Empunhadura ½ fechada FH + pegada almofadinha na raquete" }
+            ]},
+          { id:"vmvm_c1s2", nome:"Semana 2", tipo:"Construção", desc:"Consolidar o gesto técnico. Correção precisa.",
+            aulas: [
+              { id:"vmvm_c1.4", num:"C1.4", cat:"FDQ", foco:"Mão",  tema:"Fundo de Quadra",  obj:'Empunhadura ½ fechada FH/BH + posição "0" organizada' },
+              { id:"vmvm_c1.5", num:"C1.5", cat:"FDQ", foco:"Olho", tema:"FDQ: 1+2 FH",      obj:'Percepção TIC-TAC + avaliar precisão do "Toss"' },
+              { id:"vmvm_c1.6", num:"C1.6", cat:"FDQ", foco:"Olho", tema:"FDQ: 1+2 FH",      obj:"Percepção TIC-TAC + dominar 1º quique antes de bater" }
+            ]},
+          { id:"vmvm_c1s3", nome:"Semana 3", tipo:"Aplicação", desc:"Aluno aplica o tema com autonomia crescente.",
+            aulas: [
+              { id:"vmvm_c1.7", num:"C1.7", cat:"FDQ", foco:"Mão",  tema:"FDQ: 1+2 FH", obj:"Giro equilibrado c/ mão livre: FH/BH + SAQ posição \"0\"" },
+              { id:"vmvm_c1.8", num:"C1.8", cat:"FDQ", foco:"Mão",  tema:"FDQ: 1+2 FH", obj:'Giro equilibrado + posição "0" c/ bola no coração da raquete' },
+              { id:"vmvm_c1.9", num:"C1.9", cat:"FDQ", foco:"Olho", tema:"Fundo de Quadra", obj:"Percepção: dominar e distanciar-se do 1º quique + alvos" }
+            ]},
+          { id:"vmvm_c1s4", nome:"Semana 4", tipo:"Avaliação", desc:"Revisão dos objetivos. Torneio interno ou simulação.",
+            aulas: [
+              { id:"vmvm_c1.10", num:"C1.10", cat:"Tático", foco:"Olho", tema:"Pré-evento",  obj:"Reconhecer situação favorável/desfavorável + jogo c/ contagem" },
+              { id:"vmvm_c1.11", num:"C1.11", cat:"Jogo",   foco:"Olho", tema:"Pré-evento",  obj:"1+2 FH · jogo com contagem 1/2 e 2/1" },
+              { id:"vmvm_c1.12", num:"C1.12", cat:"Jogo",   foco:"Olho", tema:"Avaliação C1", obj:"Avaliação formativa: 1+2 FH · SAQ · circuito · arbitragem" }
+            ]}
         ]
       },
-      { id:"vmvm_c2", nome:"Caracol 2", nivel:"Rede",
-        meta:"Jogo de rede — 1 arremesso + approach + interceptar com voleio",
-        temas:[
-          { id:"vmvm_c2_s1", nome:"Introdução", foco:"Voleio", emoji:"🤝",
-            obj:"Mão livre coração voleio · empunhadura",
-            a1:"Voleio empunhadura · Mão livre no coração · Posição base rede",
-            a2:"Aproximação e voleio · Cooperativo" },
-          { id:"vmvm_c2_s2", nome:"Construção", foco:"Smash", emoji:"💥",
-            obj:"Smash apontar troféu",
-            a1:"Smash + apontar troféu · Posição na rede",
-            a2:"Jogo approach + interceptar · Smash" },
-          { id:"vmvm_c2_s3", nome:"Aplicação", foco:"Interceptar", emoji:"🎯",
-            obj:"1 arremesso + interceptar na rede",
-            a1:"Situação 1 + interceptar na rede · Approach",
-            a2:"Jogo de rede com approach · Smash situacional" },
-          { id:"vmvm_c2_s4", nome:"Avaliação", foco:"Rede", emoji:"📋",
-            obj:"Avaliação formativa rede/voleio",
-            a1:"Avaliação formativa rede/voleio · Revisão",
-            a2:"Torneio approach + rede · Formativo" }
+      { id:"vmvm_c2", nome:"Ciclo 2", nivel:"Jogo na Rede",
+        meta:"Jogo na rede — 1 arremesso approach + interceptar com voleio",
+        semanas: [
+          { id:"vmvm_c2s1", nome:"Semana 1", tipo:"Introdução", desc:"Exercício fechado. Apresentação do tema.",
+            aulas: [
+              { id:"vmvm_c2.1", num:"C2.1", cat:"Rede", foco:"Pé",  tema:"Voleio: 1+interceptar", obj:'Arremesso + joelhos flexionados "0" + SAQ: base ½ aberta' },
+              { id:"vmvm_c2.2", num:"C2.2", cat:"Rede", foco:"Pé",  tema:"Voleio: 1+interceptar", obj:'Posição "0" + arrancar para interceptar + base ½ aberta SAQ' },
+              { id:"vmvm_c2.3", num:"C2.3", cat:"Rede", foco:"Mão", tema:"Jogo na rede: 1+1",     obj:"Mão livre no coração + empunhadura FH-BH no voleio" }
+            ]},
+          { id:"vmvm_c2s2", nome:"Semana 2", tipo:"Construção", desc:"Consolidar o gesto técnico. Correção precisa.",
+            aulas: [
+              { id:"vmvm_c2.4", num:"C2.4", cat:"Rede", foco:"Mão",  tema:"Jogo na rede: 1+1", obj:"Mão livre + empunhadura + preparação curta no voleio (escudo)" },
+              { id:"vmvm_c2.5", num:"C2.5", cat:"Rede", foco:"Olho", tema:"Jogo na rede: 1+1", obj:"Percepção lateral FH/BH + apontar bola no smash" },
+              { id:"vmvm_c2.6", num:"C2.6", cat:"Rede", foco:"Olho", tema:"Jogo na rede: 1+1", obj:"Smash: apontar bola + troféu + movimentação lateral" }
+            ]},
+          { id:"vmvm_c2s3", nome:"Semana 3", tipo:"Aplicação", desc:"Aluno aplica o tema com autonomia crescente.",
+            aulas: [
+              { id:"vmvm_c2.7", num:"C2.7", cat:"Rede",   foco:"Mão",  tema:"Voleio: 1+interceptar", obj:"Preparação curta no voleio + troféu no smash" },
+              { id:"vmvm_c2.8", num:"C2.8", cat:"Tático", foco:"Olho", tema:"Pré-evento",             obj:"Decisão: atacar ou defender. Contagem e ordem de pontuação" },
+              { id:"vmvm_c2.9", num:"C2.9", cat:"Jogo",   foco:"Olho", tema:"Pré-evento",             obj:"1+interceptar rede · jogo reinado na rede" }
+            ]},
+          { id:"vmvm_c2s4", nome:"Semana 4", tipo:"Avaliação", desc:"Revisão dos objetivos. Torneio interno ou simulação.",
+            aulas: [
+              { id:"vmvm_c2.10", num:"C2.10", cat:"Jogo", foco:"Olho", tema:"Avaliação C2", obj:"Avaliação: voleio · smash · posição na rede · contagem" }
+            ]}
         ]
       },
-      { id:"vmvm_c3", nome:"Caracol 3", nivel:"Construção+Saque",
-        meta:"1 arremesso + 2 trocas FH/BH + tie-break simples quadra vermelha",
-        temas:[
-          { id:"vmvm_c3_s1", nome:"Introdução", foco:"Eastern+Spin", emoji:"🌀",
-            obj:"Empunhadura Eastern escovar spin",
-            a1:"Empunhadura Eastern · Escovar bola com spin · FH/BH",
-            a2:"Trocas FH/BH com spin · 1+2" },
-          { id:"vmvm_c3_s2", nome:"Construção", foco:"Ponto Contato", emoji:"⚡",
-            obj:"Ponto contato FH/BH + saque",
-            a1:"Ponto de contato FH/BH · Saque base vermelha",
-            a2:"Jogo construção FH/BH · Com saque" },
-          { id:"vmvm_c3_s3", nome:"Aplicação", foco:"Tie-break", emoji:"🏁",
-            obj:"Tie-break contagem simples",
-            a1:"Contagem tie-break · Estratégia de pontos",
-            a2:"Tie-break simples · Quadra vermelha" },
-          { id:"vmvm_c3_s4", nome:"Avaliação", foco:"Somativa", emoji:"🏅",
-            obj:"Torneio tie-break quadra vermelha",
-            a1:"Avaliação somativa construção · Revisão geral",
-            a2:"Torneio tie-break quadra vermelha · Somativo" }
+      { id:"vmvm_c3", nome:"Ciclo 3", nivel:"Construção FH e BH",
+        meta:"1 arremesso + 2 trocas FH/BH · tie-break de simples na quadra vermelha",
+        semanas: [
+          { id:"vmvm_c3s1", nome:"Semana 1", tipo:"Introdução", desc:"Exercício fechado. Apresentação do tema.",
+            aulas: [
+              { id:"vmvm_c3.1", num:"C3.1", cat:"FDQ", foco:"Olho", tema:"Construir ponto FDQ", obj:'Percepção e decisão de usar "vazios" da quadra' },
+              { id:"vmvm_c3.2", num:"C3.2", cat:"FDQ", foco:"Olho", tema:"Construir ponto FDQ", obj:"Usar os vazios + trajetórias variadas (cruzada/paralela)" },
+              { id:"vmvm_c3.3", num:"C3.3", cat:"FDQ", foco:"Mão",  tema:"Construir ponto FDQ", obj:"Empunhadura Eastern FH + escovar bola (efeito spin)" }
+            ]},
+          { id:"vmvm_c3s2", nome:"Semana 2", tipo:"Construção", desc:"Consolidar o gesto técnico. Correção precisa.",
+            aulas: [
+              { id:"vmvm_c3.4", num:"C3.4", cat:"FDQ",   foco:"Mão",  tema:"Construir ponto FDQ", obj:"Eastern FH + escovar para controle · Eastern BH iniciando" },
+              { id:"vmvm_c3.5", num:"C3.5", cat:"FDQ",   foco:"Mão",  tema:"Construir ponto FDQ", obj:"Empunhadura Eastern BH + escovar para controle da bola" },
+              { id:"vmvm_c3.6", num:"C3.6", cat:"Saque",  foco:"Olho", tema:"Saque e FDQ",         obj:"Ponto de contato na frente FH/BH + saque acima da cabeça" }
+            ]},
+          { id:"vmvm_c3s3", nome:"Semana 3", tipo:"Aplicação", desc:"Aluno aplica o tema com autonomia crescente.",
+            aulas: [
+              { id:"vmvm_c3.7", num:"C3.7", cat:"Saque", foco:"Olho", tema:"Saque",      obj:"Toss + ponto de contato acima da cabeça equilibrado + empunhadura" },
+              { id:"vmvm_c3.8", num:"C3.8", cat:"Jogo",  foco:"Olho", tema:"Pré-evento", obj:"Trajetórias diferentes + contagem e rodízio do tie-break" },
+              { id:"vmvm_c3.9", num:"C3.9", cat:"Jogo",  foco:"Olho", tema:"Pré-evento", obj:"Tie-break: contagem, sacador, autonomia + regras básicas da dupla" }
+            ]},
+          { id:"vmvm_c3s4", nome:"Semana 4", tipo:"Avaliação", desc:"Revisão dos objetivos. Torneio interno ou simulação.",
+            aulas: [
+              { id:"vmvm_c3.10", num:"C3.10", cat:"Jogo", foco:"Olho", tema:"Avaliação de Fim de Semestre", obj:"Torneio tie-break · arbitragem autônoma · avaliação somativa" }
+            ]}
         ]
       }
     ]
   },
   verm_tang: {
-    label: "Vermelho-Tangerina", ball: "🟠", quadra: "12,8×5,5m",
-    caracois: [
-      { id:"vmtg_c1", nome:"Caracol 1", nivel:"Saque Org.",
+    label: "Vermelho-Tangerina", ball: "🟠", quadra: "12,80×5,50m · Rede regulamentar",
+    ciclos: [
+      { id:"vmtg_c1", nome:"Ciclo 1", nivel:"FDQ Base",
         meta:"Saque: dominar fase organizacional até fim do toss — quadra 12,80×5,50m",
-        temas:[
-          { id:"vmtg_c1_s1", nome:"Introdução", foco:"Rotina Saque", emoji:"📐",
-            obj:"Fase organizacional do saque",
-            a1:"Rotina + fase organizacional saque · Posição base saque",
-            a2:"Jogo com saque fase organizacional · Rally" },
-          { id:"vmtg_c1_s2", nome:"Construção", foco:"Toss", emoji:"🎾",
-            obj:"Toss controlado até soltar a bola",
-            a1:"Toss + soltar a bola controlado · Subida conjunta",
-            a2:"Saque em jogo semi-aberto · 1+saque" },
-          { id:"vmtg_c1_s3", nome:"Aplicação", foco:"Consistência", emoji:"✅",
-            obj:"Consistência saque + rally",
-            a1:"Consistência saque na quadra · Fase dinâmica",
-            a2:"Jogo ponto com saque · Rally pós-saque" },
-          { id:"vmtg_c1_s4", nome:"Avaliação", foco:"Formativa", emoji:"📋",
-            obj:"Avaliação formativa saque",
-            a1:"Avaliação saque + recuperação conteúdo · Revisão",
-            a2:"Torneio com saque autônomo · Formativo" }
+        semanas: [
+          { id:"vmtg_c1s1", nome:"Semana 1", tipo:"Introdução", desc:"Exercício fechado. Apresentação do tema.",
+            aulas: [
+              { id:"vmtg_c1.1", num:"C1.1", cat:"FDQ", foco:"Pé",   tema:"Fundo de Quadra", obj:'Posição "0" dinâmica (joelhos) / ½ aberto no arremesso e SAQ' },
+              { id:"vmtg_c1.2", num:"C1.2", cat:"FDQ", foco:"Pé",   tema:"Fundo de Quadra", obj:'Posição "0" + bases semi-abertas + percepção profundidade' },
+              { id:"vmtg_c1.3", num:"C1.3", cat:"FDQ", foco:"Olho", tema:"Fundo de Quadra", obj:"Percepção profundidade nas cruzadas (precisão de alvo)" }
+            ]},
+          { id:"vmtg_c1s2", nome:"Semana 2", tipo:"Construção", desc:"Consolidar o gesto técnico. Correção precisa.",
+            aulas: [
+              { id:"vmtg_c1.4", num:"C1.4", cat:"FDQ", foco:"Olho", tema:"Fundo de Quadra",        obj:"Percepção profundidade + SAQUE: contato acima da cabeça" },
+              { id:"vmtg_c1.5", num:"C1.5", cat:"FDQ", foco:"Mão",  tema:"Construção precisa FDQ", obj:'Mão livre no coração (Posição 0) antes do TAC + 1º giro' },
+              { id:"vmtg_c1.6", num:"C1.6", cat:"FDQ", foco:"Mão",  tema:"Construção precisa FDQ", obj:"Posição 0 + 1º giro + subida fase organizacional saque" }
+            ]},
+          { id:"vmtg_c1s3", nome:"Semana 3", tipo:"Aplicação", desc:"Aluno aplica o tema com autonomia crescente.",
+            aulas: [
+              { id:"vmtg_c1.7", num:"C1.7", cat:"FDQ", foco:"Pé",  tema:"Construção precisa FDQ", obj:"Tac-Tac-Hop (TTH) na movimentação + equilíbrio saque" },
+              { id:"vmtg_c1.8", num:"C1.8", cat:"FDQ", foco:"Pé",  tema:"Construção precisa FDQ", obj:"TTH na movimentação + frear/alinhar + saque equilibrado" },
+              { id:"vmtg_c1.9", num:"C1.9", cat:"FDQ", foco:"Mão", tema:"Construção precisa FDQ", obj:'Golpes FdQ com preparação "troféu" (verticalidade)' }
+            ]},
+          { id:"vmtg_c1s4", nome:"Semana 4", tipo:"Avaliação", desc:"Revisão dos objetivos. Torneio interno ou simulação.",
+            aulas: [
+              { id:"vmtg_c1.10", num:"C1.10", cat:"Tático", foco:"Olho", tema:"Pré-evento",  obj:"Reconhecer situação favorável e desfavorável · padrões simples" },
+              { id:"vmtg_c1.11", num:"C1.11", cat:"Jogo",   foco:"Olho", tema:"Pré-evento",  obj:"Construção precisa: jogo dirigido com alvos nas cruzadas" },
+              { id:"vmtg_c1.12", num:"C1.12", cat:"Jogo",   foco:"Olho", tema:"Avaliação C1", obj:"Avaliação: TTH · troféu · SAQ organizacional · arbitragem" }
+            ]}
         ]
       },
-      { id:"vmtg_c2", nome:"Caracol 2", nivel:"Rede+Smash",
-        meta:"Subir para rede quando a situação tática acontecer + smash",
-        temas:[
-          { id:"vmtg_c2_s1", nome:"Introdução", foco:"Leitura Tática", emoji:"👁️",
-            obj:"Identificar momento subir à rede",
-            a1:"Leitura de jogo + quando subir à rede · Approach",
-            a2:"Jogo approach situacional · Semi-aberto" },
-          { id:"vmtg_c2_s2", nome:"Construção", foco:"Voleio+Smash", emoji:"💥",
-            obj:"Voleio de approach + smash básico",
-            a1:"Voleio approach + smash apontar troféu",
-            a2:"Jogo rede smash · Approach situacional" },
-          { id:"vmtg_c2_s3", nome:"Aplicação", foco:"Finalização", emoji:"🎯",
-            obj:"Finalizar na rede com direcionamento",
-            a1:"Finalização na rede + direcionamento · Timing",
-            a2:"Jogo ponto rede + smash · Situacional" },
-          { id:"vmtg_c2_s4", nome:"Avaliação", foco:"Tática Rede", emoji:"📋",
-            obj:"Avaliação táticas de rede",
-            a1:"Avaliação situacional rede · Revisão conteúdos",
-            a2:"Torneio approach + rede + smash · Formativo" }
+      { id:"vmtg_c2", nome:"Ciclo 2", nivel:"Jogo na Rede",
+        meta:"Subir para a rede quando a situação tática acontecer · smash",
+        semanas: [
+          { id:"vmtg_c2s1", nome:"Semana 1", tipo:"Introdução", desc:"Exercício fechado. Apresentação do tema.",
+            aulas: [
+              { id:"vmtg_c2.1", num:"C2.1", cat:"FDQ",  foco:"Mão",  tema:"Construção precisa FDQ", obj:'Troféu na preparação (verticalidade da raquete)' },
+              { id:"vmtg_c2.2", num:"C2.2", cat:"FDQ",  foco:"Mão",  tema:"Construção precisa FDQ", obj:"Troféu FdQ e saque · soltar raquete após posição" },
+              { id:"vmtg_c2.3", num:"C2.3", cat:"Rede",  foco:"Olho", tema:"Jogo na rede",           obj:"Posição na rede / subir e ir para posição de jogo" }
+            ]},
+          { id:"vmtg_c2s2", nome:"Semana 2", tipo:"Construção", desc:"Consolidar o gesto técnico. Correção precisa.",
+            aulas: [
+              { id:"vmtg_c2.4", num:"C2.4", cat:"Rede", foco:"Olho", tema:"Jogo na rede", obj:"Identificar posição na rede + approach e corrida até rede" },
+              { id:"vmtg_c2.5", num:"C2.5", cat:"Rede", foco:"Mão",  tema:"Jogo na rede", obj:"Expectativa: mão livre no coração + empunhadura continental" },
+              { id:"vmtg_c2.6", num:"C2.6", cat:"Rede", foco:"Mão",  tema:"Jogo na rede", obj:"Continental + preparação curta no voleio (escudo/bloqueio)" }
+            ]},
+          { id:"vmtg_c2s3", nome:"Semana 3", tipo:"Aplicação", desc:"Aluno aplica o tema com autonomia crescente.",
+            aulas: [
+              { id:"vmtg_c2.7", num:"C2.7", cat:"Rede",   foco:"Pé",   tema:"Jogo na rede", obj:"Smash: movimentação lateral + posicionamento + equilíbrio saque" },
+              { id:"vmtg_c2.8", num:"C2.8", cat:"Tático", foco:"Olho", tema:"Pré-evento",   obj:"Decisão: atacar ou defender + contagem e ordem de pontuação" },
+              { id:"vmtg_c2.9", num:"C2.9", cat:"Jogo",   foco:"Olho", tema:"Pré-evento",   obj:"Subir para a rede em situação tática · reinado na rede" }
+            ]},
+          { id:"vmtg_c2s4", nome:"Semana 4", tipo:"Avaliação", desc:"Revisão dos objetivos. Torneio interno ou simulação.",
+            aulas: [
+              { id:"vmtg_c2.10", num:"C2.10", cat:"Jogo", foco:"Olho", tema:"Avaliação C2", obj:"Avaliação: subida rede · voleio · smash · decisão tática" }
+            ]}
         ]
       },
-      { id:"vmtg_c3", nome:"Caracol 3", nivel:"Construção+Autonomia",
-        meta:"Construir ponto e jogar nos 'vazios' + autonomia + tie-break + regras dupla",
-        temas:[
-          { id:"vmtg_c3_s1", nome:"Introdução", foco:"Vazios", emoji:"🗺️",
-            obj:"Jogar nos vazios do adversário",
-            a1:"Direcionamento + jogar nos vazios · FH/BH direcional",
-            a2:"Jogo construindo nos vazios · Cross/paralela" },
-          { id:"vmtg_c3_s2", nome:"Construção", foco:"Tie-break+Dupla", emoji:"🤜",
-            obj:"Tie-break + regras de dupla",
-            a1:"Contagem tie-break + posições de dupla",
-            a2:"Tie-break com dupla · Posição rede/base" },
-          { id:"vmtg_c3_s3", nome:"Aplicação", foco:"Autonomia", emoji:"🧠",
-            obj:"Autonomia no ponto + estratégia",
-            a1:"Estratégia ponto + autonomia · Gestão erros",
-            a2:"Jogo autônomo tie-break · Dupla" },
-          { id:"vmtg_c3_s4", nome:"Avaliação", foco:"Somativa", emoji:"🏅",
-            obj:"Torneio dupla autonomia tie-break",
-            a1:"Avaliação somativa construção ponto · Revisão",
-            a2:"Torneio dupla tie-break autônomo · Somativo" }
+      { id:"vmtg_c3", nome:"Ciclo 3", nivel:"Construção e Tie-Break",
+        meta:'Construir o ponto ao jogar nos "vazios" · autonomia no tie-break e regras da dupla',
+        semanas: [
+          { id:"vmtg_c3s1", nome:"Semana 1", tipo:"Introdução", desc:"Exercício fechado. Apresentação do tema.",
+            aulas: [
+              { id:"vmtg_c3.1", num:"C3.1", cat:"FDQ", foco:"Pé",  tema:"FDQ: 1+2 FH/BH", obj:"Técnica de movimentação: frear e alinhar-se para golpear" },
+              { id:"vmtg_c3.2", num:"C3.2", cat:"FDQ", foco:"Pé",  tema:"FDQ: 1+2 FH/BH", obj:"Frear/alinhar + diferenciar empunhaduras FH e BH" },
+              { id:"vmtg_c3.3", num:"C3.3", cat:"FDQ", foco:"Mão", tema:"FDQ: 1+2 FH/BH", obj:"Diferenciar empunhaduras FH e BH · percepção lateral" }
+            ]},
+          { id:"vmtg_c3s2", nome:"Semana 2", tipo:"Construção", desc:"Consolidar o gesto técnico. Correção precisa.",
+            aulas: [
+              { id:"vmtg_c3.4", num:"C3.4", cat:"FDQ", foco:"Mão",  tema:"FDQ: 1+2 FH/BH",   obj:"Empunhaduras + base ½ aberta e neutra nos golpes" },
+              { id:"vmtg_c3.5", num:"C3.5", cat:"FDQ", foco:"Olho", tema:"Construir ponto FdQ", obj:"Percepção lateral FH/BH e tempo de percepção (1º voo)" },
+              { id:"vmtg_c3.6", num:"C3.6", cat:"FDQ", foco:"Pé",   tema:"Construir ponto FdQ", obj:'Base ½ aberta/neutra + DEV: "tac-tac / Hop-no-toss"' }
+            ]},
+          { id:"vmtg_c3s3", nome:"Semana 3", tipo:"Aplicação", desc:"Aluno aplica o tema com autonomia crescente.",
+            aulas: [
+              { id:"vmtg_c3.7", num:"C3.7", cat:"Jogo", foco:"Olho", tema:"Jogo e arbitragem", obj:"Tática posições: estar, ir/voltar à casa · tie-break · sacador" },
+              { id:"vmtg_c3.8", num:"C3.8", cat:"Jogo", foco:"Olho", tema:"Pré-evento",        obj:"Tie-break + regras básicas da dupla: posição e sacador" },
+              { id:"vmtg_c3.9", num:"C3.9", cat:"Jogo", foco:"Olho", tema:"Pré-evento",        obj:'FH acelerando cabeça da raquete + construção nos "vazios"' }
+            ]},
+          { id:"vmtg_c3s4", nome:"Semana 4", tipo:"Avaliação", desc:"Revisão dos objetivos. Torneio interno ou simulação.",
+            aulas: [
+              { id:"vmtg_c3.10", num:"C3.10", cat:"Jogo", foco:"Olho", tema:"Avaliação de Fim de Semestre", obj:"Torneio tie-break duplas · autonomia completa · avaliação somativa" }
+            ]}
         ]
       }
     ]
   },
   laranja: {
-    label: "Laranja-Laranja", ball: "🟠", quadra: "18×8m · Rede 0,80m",
-    caracois: [
-      { id:"lrlr_c1", nome:"Caracol 1", nivel:"FDQ Empunhadura",
-        meta:"Trocar FDQ respeitando empunhaduras — quadra 18×8×0,80m",
-        temas:[
-          { id:"lrlr_c1_s1", nome:"Introdução", foco:"Empunhadura", emoji:"✋",
-            obj:"Empunhaduras corretas FH/BH · Continental/Eastern",
-            a1:"Empunhadura continental/eastern · Grip change FH↔BH",
-            a2:"Trocas FDQ com empunhadura correta · Cooperativo" },
-          { id:"lrlr_c1_s2", nome:"Construção", foco:"Recuperação", emoji:"🏃",
-            obj:"Recuperação base central após golpe",
-            a1:"Split step + recuperação centro quadra · Timing",
-            a2:"Jogo FDQ recuperação base · 18m" },
-          { id:"lrlr_c1_s3", nome:"Aplicação", foco:"Direcionamento", emoji:"🎯",
-            obj:"Direcionamento cross/paralela FH/BH",
-            a1:"Cross × paralela FH/BH · Intenção direcional",
-            a2:"Jogo direcionamento FDQ 18m · Games" },
-          { id:"lrlr_c1_s4", nome:"Avaliação", foco:"Formativa", emoji:"📋",
-            obj:"Avaliação formativa FDQ 18m",
-            a1:"Circuito formativo FDQ 18m · Revisão empunhadura",
-            a2:"Torneio FDQ 18m · Formativo" }
+    label: "Laranja-Laranja", ball: "🟠🟠", quadra: "18×8m · Rede 0,80m",
+    ciclos: [
+      { id:"lr_c1", nome:"Ciclo 1", nivel:"FDQ Base 18m",
+        meta:"Trocar de FDQ respeitando empunhaduras — quadra 18×8×0,80m",
+        semanas: [
+          { id:"lr_c1s1", nome:"Semana 1", tipo:"Introdução", desc:"Exercício fechado. Apresentação do tema.",
+            aulas: [
+              { id:"lr_c1.1", num:"C1.1", cat:"FDQ", foco:"Olho", tema:"OBS + FDQ", obj:"Percepção lateral rápida + posição sacador simples/dupla" },
+              { id:"lr_c1.2", num:"C1.2", cat:"FDQ", foco:"Olho", tema:"OBS + FDQ", obj:"Leitura rápida + empunhadura FH/BH na expectativa" },
+              { id:"lr_c1.3", num:"C1.3", cat:"FDQ", foco:"Mão",  tema:"Fundo de Quadra", obj:"Empunhadura FH/BH + mão livre no coração (expectativa)" }
+            ]},
+          { id:"lr_c1s2", nome:"Semana 2", tipo:"Construção", desc:"Consolidar o gesto técnico. Correção precisa.",
+            aulas: [
+              { id:"lr_c1.4", num:"C1.4", cat:"FDQ", foco:"Mão", tema:"Fundo de Quadra",      obj:"Empunhadura Continental + mão livre + giro ombros" },
+              { id:"lr_c1.5", num:"C1.5", cat:"FDQ", foco:"Pé",  tema:"FDQ: trocar no 18m",  obj:"Passos laterais + SAQ: equilíbrio pé esquerdo na base" },
+              { id:"lr_c1.6", num:"C1.6", cat:"FDQ", foco:"Pé",  tema:"FDQ: trocar no 18m",  obj:"Passos laterais + respeitando o X em função da profundidade" }
+            ]},
+          { id:"lr_c1s3", nome:"Semana 3", tipo:"Aplicação", desc:"Aluno aplica o tema com autonomia crescente.",
+            aulas: [
+              { id:"lr_c1.7", num:"C1.7", cat:"FDQ", foco:"Mão",  tema:"FDQ: trocar no 18m", obj:'Giro + "troféu" FH/BH + SAQ: subida junta dos braços' },
+              { id:"lr_c1.8", num:"C1.8", cat:"FDQ", foco:"Mão",  tema:"FDQ: trocar no 18m", obj:"Giro + troféu + amplitude da preparação (cabeça acima da mão)" },
+              { id:"lr_c1.9", num:"C1.9", cat:"FDQ", foco:"Olho", tema:"FDQ: trocar no 18m", obj:"3 T (tempos) após quique + SAQ: 2 toss diferenciados" }
+            ]},
+          { id:"lr_c1s4", nome:"Semana 4", tipo:"Avaliação", desc:"Revisão dos objetivos. Torneio interno ou simulação.",
+            aulas: [
+              { id:"lr_c1.10", num:"C1.10", cat:"Tático", foco:"Olho", tema:"Pré-evento",  obj:"Reconhecer situação favorável e desfavorável · TAT básica" },
+              { id:"lr_c1.11", num:"C1.11", cat:"Jogo",   foco:"Olho", tema:"Pré-evento",  obj:"Jogo 18m · passos laterais · giro · troféu · contagem game" },
+              { id:"lr_c1.12", num:"C1.12", cat:"Jogo",   foco:"Olho", tema:"Avaliação C1", obj:"Avaliação: trocar 18m · empunhaduras · SAQ organizacional" }
+            ]}
         ]
       },
-      { id:"lrlr_c2", nome:"Caracol 2", nivel:"Direcionamento+Saque",
-        meta:"Direcionar jogadas 18m + fase dinâmica saque com efeito",
-        temas:[
-          { id:"lrlr_c2_s1", nome:"Introdução", foco:"Profundidade", emoji:"📏",
-            obj:"Profundidade e direcionamento FDQ 18m",
-            a1:"Profundidade + direcionamento rally · Zonas FDQ",
-            a2:"Jogo construção profundidade 18m · Games" },
-          { id:"lrlr_c2_s2", nome:"Construção", foco:"Saque Efeito", emoji:"🌀",
-            obj:"Saque com efeito kick/slice",
-            a1:"Saque com efeito fase dinâmica · Kick e slice",
-            a2:"Jogo com saque efeito · Rally pós-saque" },
-          { id:"lrlr_c2_s3", nome:"Aplicação", foco:"Construção", emoji:"🧱",
-            obj:"Construção ponto FDQ 18m + oportunidade ataque",
-            a1:"Construção + identificar oportunidade ataque",
-            a2:"Games FDQ 18m · Construção situacional" },
-          { id:"lrlr_c2_s4", nome:"Avaliação", foco:"Construção", emoji:"📋",
-            obj:"Avaliação formativa construção 18m",
-            a1:"Avaliação formativa rally construção · Revisão",
-            a2:"Torneio games 18m · Formativo" }
+      { id:"lr_c2", nome:"Ciclo 2", nivel:"Direcionar e Saque",
+        meta:"Direcionar jogadas no 18m · fase dinâmica do saque com efeito",
+        semanas: [
+          { id:"lr_c2s1", nome:"Semana 1", tipo:"Introdução", desc:"Exercício fechado. Apresentação do tema.",
+            aulas: [
+              { id:"lr_c2.1", num:"C2.1", cat:"FDQ", foco:"Olho", tema:"FDQ: direcionar jogadas", obj:"Perceber profundidade da bola (1=curta/2=profunda) + S1 vs S2" },
+              { id:"lr_c2.2", num:"C2.2", cat:"FDQ", foco:"Olho", tema:"FDQ: direcionar jogadas", obj:"Profundidade + preparação elevada (troféu) + soltar" },
+              { id:"lr_c2.3", num:"C2.3", cat:"FDQ", foco:"Mão",  tema:"FDQ: direcionar jogadas", obj:"Preparação elevada (troféu) + soltar + direcionamento" }
+            ]},
+          { id:"lr_c2s2", nome:"Semana 2", tipo:"Construção", desc:"Consolidar o gesto técnico. Correção precisa.",
+            aulas: [
+              { id:"lr_c2.4", num:"C2.4", cat:"FDQ", foco:"Mão", tema:"FDQ: direcionar jogadas", obj:"Troféu + base ½ aberta para cruzar e paralela" },
+              { id:"lr_c2.5", num:"C2.5", cat:"FDQ", foco:"Pé",  tema:"FDQ: direcionar jogadas", obj:"Base ½ aberta para cruzar · base neutra para paralela" },
+              { id:"lr_c2.6", num:"C2.6", cat:"FDQ", foco:"Pé",  tema:"FDQ: direcionar jogadas", obj:"Base ½ aberta + ação mão no spin + ponto de contato frente" }
+            ]},
+          { id:"lr_c2s3", nome:"Semana 3", tipo:"Aplicação", desc:"Aluno aplica o tema com autonomia crescente.",
+            aulas: [
+              { id:"lr_c2.7", num:"C2.7", cat:"FDQ",       foco:"Mão",  tema:"FDQ: direcionar jogadas", obj:"Ação mão no spin + ponto de contato na frente + pronação SAQ" },
+              { id:"lr_c2.8", num:"C2.8", cat:"Devolução",  foco:"Olho", tema:"Devolução 2º saque",      obj:"D2: escolha (ponto fraco / acelerar paralela) + regra noAD" },
+              { id:"lr_c2.9", num:"C2.9", cat:"Jogo",       foco:"Olho", tema:"Pré-evento",              obj:"Jogo direcionado + 2 games contagem tradicional · sacador+1" }
+            ]},
+          { id:"lr_c2s4", nome:"Semana 4", tipo:"Avaliação", desc:"Revisão dos objetivos. Torneio interno ou simulação.",
+            aulas: [
+              { id:"lr_c2.10", num:"C2.10", cat:"Jogo", foco:"Olho", tema:"Avaliação C2", obj:"Avaliação: direcionar · spin · D2 · posição sacador+1" }
+            ]}
         ]
       },
-      { id:"lrlr_c3", nome:"Caracol 3", nivel:"Rede+Games",
-        meta:"Subir para rede + finalizar + games com contagem tradicional + noAD",
-        temas:[
-          { id:"lrlr_c3_s1", nome:"Introdução", foco:"Rede 18m", emoji:"🥅",
-            obj:"Approach + voleio + smash 18m",
-            a1:"Approach situacional + finalização rede 18m",
-            a2:"Jogo approach rede 18m · Smash" },
-          { id:"lrlr_c3_s2", nome:"Construção", foco:"noAD", emoji:"🏁",
-            obj:"Contagem tradicional + noAD",
-            a1:"Regras contagem tradicional + noAD · Gestão games",
-            a2:"Games noAD 18m · Autônomo" },
-          { id:"lrlr_c3_s3", nome:"Aplicação", foco:"Autonomia", emoji:"🧠",
-            obj:"Autonomia jogo 18m · Estratégia set",
-            a1:"Estratégia ponto + autonomia · Gestão erros",
-            a2:"Set curto noAD 18m · Autônomo" },
-          { id:"lrlr_c3_s4", nome:"Avaliação", foco:"Somativa", emoji:"🏅",
-            obj:"Torneio set curto 18m",
-            a1:"Avaliação somativa jogo completo 18m · Revisão",
-            a2:"Torneio set curto autônomo 18m · Somativo" }
+      { id:"lr_c3", nome:"Ciclo 3", nivel:"Rede e Jogo Completo",
+        meta:"Subir para a rede e finalizar · 2 games com contagem tradicional e noAD",
+        semanas: [
+          { id:"lr_c3s1", nome:"Semana 1", tipo:"Introdução", desc:"Exercício fechado. Apresentação do tema.",
+            aulas: [
+              { id:"lr_c3.1", num:"C3.1", cat:"FDQ",  foco:"Olho", tema:"FDQ: defender quadra",    obj:"Identificar e decidir na defesa extrema · split + passos cruzados" },
+              { id:"lr_c3.2", num:"C3.2", cat:"Rede",  foco:"Olho", tema:"Jogo de rede na dupla",   obj:"Identificar bola de smash vs bola de voleio" },
+              { id:"lr_c3.3", num:"C3.3", cat:"FDQ",  foco:"Pé",   tema:"FDQ: defender quadra",    obj:"Split + passos cruzados para defender bolas distantes" }
+            ]},
+          { id:"lr_c3s2", nome:"Semana 2", tipo:"Construção", desc:"Consolidar o gesto técnico. Correção precisa.",
+            aulas: [
+              { id:"lr_c3.4", num:"C3.4", cat:"Rede",  foco:"Pé",  tema:"Jogo de rede na dupla",  obj:"Split + avançar para jogador de rede + smash ajuste" },
+              { id:"lr_c3.5", num:"C3.5", cat:"FDQ",  foco:"Mão", tema:"FDQ: defender quadra",   obj:"Slice para frear a bola: empunhadura continental + contato" },
+              { id:"lr_c3.6", num:"C3.6", cat:"Rede",  foco:"Mão", tema:"Jogo de rede: finalizar", obj:"Voleio: preparação curta c/ cara da raquete aberta · 1º e 2º" }
+            ]},
+          { id:"lr_c3s3", nome:"Semana 3", tipo:"Aplicação", desc:"Aluno aplica o tema com autonomia crescente.",
+            aulas: [
+              { id:"lr_c3.7", num:"C3.7", cat:"Jogo", foco:"Olho", tema:"Jogo e arbitragem", obj:"Posição sacador +1 simples e dupla + contagem game autônoma" },
+              { id:"lr_c3.8", num:"C3.8", cat:"Jogo", foco:"Olho", tema:"Pré-evento",        obj:"Partida 2 games · approach · voleio · defense · regra noAD" },
+              { id:"lr_c3.9", num:"C3.9", cat:"Jogo", foco:"Olho", tema:"Pré-evento",        obj:"Jogo completo: simples e dupla · posição · contagem · regras" }
+            ]},
+          { id:"lr_c3s4", nome:"Semana 4", tipo:"Avaliação", desc:"Revisão dos objetivos. Torneio interno ou simulação.",
+            aulas: [
+              { id:"lr_c3.10", num:"C3.10", cat:"Jogo", foco:"Olho", tema:"Avaliação de Fim de Semestre", obj:"Torneio 2 games · simples/dupla · avaliação somativa" }
+            ]}
         ]
       }
     ]
   },
   laranja_verde: {
-    label: "Laranja-Limão", ball: "🍋", quadra: "18m",
-    caracois: [
-      { id:"lrlm_c1", nome:"Caracol 1", nivel:"Construção c/ Efeito",
-        meta:"Construir ponto com efeitos, profundidade e direcionamento — quadra 18m",
-        temas:[
-          { id:"lrlm_c1_s1", nome:"Introdução", foco:"Topspin+Slice", emoji:"🌀",
-            obj:"Spin FH/BH com efeito · Topspin e slice",
-            a1:"Topspin FH + slice BH efeito · Técnica de escovada",
-            a2:"Jogo trocas com efeito · Cooperativo 18m" },
-          { id:"lrlm_c1_s2", nome:"Construção", foco:"Profundidade", emoji:"📏",
-            obj:"Profundidade + direcionamento com efeito",
-            a1:"Profundidade + cross com efeito · Intenção",
-            a2:"Jogo construção efeito 18m · Cross/paralela" },
-          { id:"lrlm_c1_s3", nome:"Aplicação", foco:"Padrão", emoji:"🎯",
-            obj:"Padrão de ponto construção-finalização",
-            a1:"Padrão de pontos construção-finalização",
-            a2:"Games construção efeito 18m · Situacional" },
-          { id:"lrlm_c1_s4", nome:"Avaliação", foco:"Formativa", emoji:"📋",
-            obj:"Avaliação formativa construção efeito",
-            a1:"Circuito avaliação efeito + profundidade · Revisão",
-            a2:"Torneio games construção 18m · Formativo" }
+    label: "Laranja-Limão", ball: "🍋", quadra: "18m · Rede regulamentar",
+    ciclos: [
+      { id:"lrlm_c1", nome:"Ciclo 1", nivel:"Construção com Efeitos",
+        meta:"Construir o ponto com efeitos, profundidade e direcionamento — quadra 18m",
+        semanas: [
+          { id:"lrlm_c1s1", nome:"Semana 1", tipo:"Introdução", desc:"Exercício fechado. Apresentação do tema.",
+            aulas: [
+              { id:"lrlm_c1.1", num:"C1.1", cat:"FDQ", foco:"Pé",  tema:"OBS + FDQ", obj:'"tac,tac,HOP" — joelhos flexionados + SAQ base neutra' },
+              { id:"lrlm_c1.2", num:"C1.2", cat:"FDQ", foco:"Pé",  tema:"OBS + FDQ", obj:'tac,tac,HOP + joelhos + Posição 0 dinâmica' },
+              { id:"lrlm_c1.3", num:"C1.3", cat:"FDQ", foco:"Mão", tema:"OBS + FDQ", obj:'Expectativa "jedi solto" + reorganização mão no coração + SAQ' }
+            ]},
+          { id:"lrlm_c1s2", nome:"Semana 2", tipo:"Construção", desc:"Consolidar o gesto técnico. Correção precisa.",
+            aulas: [
+              { id:"lrlm_c1.4", num:"C1.4", cat:"FDQ", foco:"Mão",  tema:"OBS + FDQ",       obj:"Jedi solto + empunhadura FH/BH + giro no 1º voo" },
+              { id:"lrlm_c1.5", num:"C1.5", cat:"FDQ", foco:"Olho", tema:"Fundo de Quadra",  obj:'Percepção lateral + empunhadura + saque "torre alta"' },
+              { id:"lrlm_c1.6", num:"C1.6", cat:"FDQ", foco:"Olho", tema:"Fundo de Quadra",  obj:"Percepção lateral + torre alta + base flexionada avança" }
+            ]},
+          { id:"lrlm_c1s3", nome:"Semana 3", tipo:"Aplicação", desc:"Aluno aplica o tema com autonomia crescente.",
+            aulas: [
+              { id:"lrlm_c1.7", num:"C1.7", cat:"FDQ", foco:"Mão", tema:"OBS + FDQ",              obj:"Empunhadura FH/BH e giro no 1º voo (antes da bola passar da rede)" },
+              { id:"lrlm_c1.8", num:"C1.8", cat:"FDQ", foco:"Mão", tema:"OBS + FDQ",              obj:"Empunhadura + giro + base flexionada que avança nos golpes" },
+              { id:"lrlm_c1.9", num:"C1.9", cat:"FDQ", foco:"Pé",  tema:"FDQ: jogar com precisão", obj:"Base flexionada e que avança + SAQ: perna esq. transfere corpo" }
+            ]},
+          { id:"lrlm_c1s4", nome:"Semana 4", tipo:"Avaliação", desc:"Revisão dos objetivos. Torneio interno ou simulação.",
+            aulas: [
+              { id:"lrlm_c1.10", num:"C1.10", cat:"Tático", foco:"Olho", tema:"Pré-evento",  obj:"Identificar situação tática FDQ (favorável/neutra/desfavorável)" },
+              { id:"lrlm_c1.11", num:"C1.11", cat:"Jogo",   foco:"Olho", tema:"Pré-evento",  obj:"Jogo 18m com TTH + empunhadura + game completo" },
+              { id:"lrlm_c1.12", num:"C1.12", cat:"Jogo",   foco:"Olho", tema:"Avaliação C1", obj:"Avaliação: TTH · empunhadura · torre alta · SAQ · jogo" }
+            ]}
         ]
       },
-      { id:"lrlm_c2", nome:"Caracol 2", nivel:"Aceleração+1º Saque",
-        meta:"Construir e acelerar em situação favorável + 1º saque agressivo",
-        temas:[
-          { id:"lrlm_c2_s1", nome:"Introdução", foco:"Situação Favorável", emoji:"👁️",
-            obj:"Identificar situação favorável · bola curta/fraca",
-            a1:"Leitura de jogo + bola curta/fraca · Transição",
-            a2:"Jogo transição construção-ataque 18m" },
-          { id:"lrlm_c2_s2", nome:"Construção", foco:"1º Saque", emoji:"⚡",
-            obj:"1º saque flat/kick + posição após saque",
-            a1:"1º saque flat/kick + posição pós-saque",
-            a2:"Jogo com 1º saque · Rally construção" },
-          { id:"lrlm_c2_s3", nome:"Aplicação", foco:"Construir+Acelerar", emoji:"🚀",
-            obj:"Construir + acelerar + finalizar sequência",
-            a1:"Sequência construção-aceleração · Padrão",
-            a2:"Games construção aceleração 18m" },
-          { id:"lrlm_c2_s4", nome:"Avaliação", foco:"Formativa", emoji:"📋",
-            obj:"Avaliação construção aceleração",
-            a1:"Avaliação formativa construção + 1º saque · Revisão",
-            a2:"Torneio games 18m · Formativo" }
+      { id:"lrlm_c2", nome:"Ciclo 2", nivel:"Atacar e 1º Saque",
+        meta:"Construir e acelerar em situação favorável · 1º saque agressivo",
+        semanas: [
+          { id:"lrlm_c2s1", nome:"Semana 1", tipo:"Introdução", desc:"Exercício fechado. Apresentação do tema.",
+            aulas: [
+              { id:"lrlm_c2.1", num:"C2.1", cat:"FDQ", foco:"Pé",  tema:"FDQ: trocar no 18m", obj:"Passos laterais para entrar + SAQ: empurrar solo para bater no topo" },
+              { id:"lrlm_c2.2", num:"C2.2", cat:"FDQ", foco:"Pé",  tema:"FDQ: trocar no 18m", obj:"Passos laterais + empurrar solo + acelerar cabeça da raquete" },
+              { id:"lrlm_c2.3", num:"C2.3", cat:"FDQ", foco:"Mão", tema:"Atacar de FDQ",       obj:'TEC-TAC: posição "troféu" na preparação dos golpes de FdQ' }
+            ]},
+          { id:"lrlm_c2s2", nome:"Semana 2", tipo:"Construção", desc:"Consolidar o gesto técnico. Correção precisa.",
+            aulas: [
+              { id:"lrlm_c2.4", num:"C2.4", cat:"FDQ", foco:"Mão", tema:"Atacar de FDQ", obj:"Troféu FdQ + desenvolver S1 (1º saque com intenção)" },
+              { id:"lrlm_c2.5", num:"C2.5", cat:"FDQ", foco:"Mão", tema:"Atacar de FDQ", obj:"TEC-TAC: ação mão-antebraço no chicote da bola (lento→rápido)" },
+              { id:"lrlm_c2.6", num:"C2.6", cat:"FDQ", foco:"Mão", tema:"Atacar de FDQ", obj:"Chicote + base ½ aberta para cruzar e transferir peso" }
+            ]},
+          { id:"lrlm_c2s3", nome:"Semana 3", tipo:"Aplicação", desc:"Aluno aplica o tema com autonomia crescente.",
+            aulas: [
+              { id:"lrlm_c2.7", num:"C2.7", cat:"FDQ",       foco:"Pé",   tema:"Atacar de FDQ",        obj:"Base ½ aberta para cruzar + transferência de peso" },
+              { id:"lrlm_c2.8", num:"C2.8", cat:"Devolução",  foco:"Olho", tema:"Devolução 2º saque",   obj:"D2: escolha (ponto fraco / acelerar paralela) + regra noAD" },
+              { id:"lrlm_c2.9", num:"C2.9", cat:"Jogo",       foco:"Olho", tema:"Pré-evento",           obj:"Jogo atacando + D2 + posição sacador · 2 games noAD" }
+            ]},
+          { id:"lrlm_c2s4", nome:"Semana 4", tipo:"Avaliação", desc:"Revisão dos objetivos. Torneio interno ou simulação.",
+            aulas: [
+              { id:"lrlm_c2.10", num:"C2.10", cat:"Jogo", foco:"Olho", tema:"Avaliação C2", obj:"Avaliação: troféu · chicote · D2 · noAD · posição sacador" }
+            ]}
         ]
       },
-      { id:"lrlm_c3", nome:"Caracol 3", nivel:"Devolução+Autonomia",
-        meta:"Devolver 2º saque para comandar + autonomia partida + games",
-        temas:[
-          { id:"lrlm_c3_s1", nome:"Introdução", foco:"Dev 2º Saque", emoji:"↩️",
-            obj:"Devolução agressiva 2º saque + posição pós-devolução",
-            a1:"Devolução 2º saque + posição pós-devolução",
-            a2:"Jogo devolução → comando ponto 18m" },
-          { id:"lrlm_c3_s2", nome:"Construção", foco:"Autonomia", emoji:"🧠",
-            obj:"Autonomia partida + contagem games/set",
-            a1:"Gestão da partida + contagem games/set · Tática",
-            a2:"Set curto autônomo 18m · Games" },
-          { id:"lrlm_c3_s3", nome:"Aplicação", foco:"Set Curto", emoji:"🏁",
-            obj:"Games set curto autonomia · Gestão erros",
-            a1:"Estratégia set + gestão erros · Autonomia",
-            a2:"Set curto com contagem autônoma 18m" },
-          { id:"lrlm_c3_s4", nome:"Avaliação", foco:"Somativa", emoji:"🏅",
-            obj:"Torneio set curto 18m autonomia",
-            a1:"Avaliação somativa partida autônoma · Revisão",
-            a2:"Torneio set curto autônomo 18m · Somativo" }
+      { id:"lrlm_c3", nome:"Ciclo 3", nivel:"Rede e Defesa",
+        meta:"Devolver 2º saque para comandar · autonomia na partida de 2 games",
+        semanas: [
+          { id:"lrlm_c3s1", nome:"Semana 1", tipo:"Introdução", desc:"Exercício fechado. Apresentação do tema.",
+            aulas: [
+              { id:"lrlm_c3.1", num:"C3.1", cat:"Rede", foco:"Olho", tema:"Subir e finalizar na rede", obj:"Tática: identificar e utilizar ponto forte no approach" },
+              { id:"lrlm_c3.2", num:"C3.2", cat:"Rede", foco:"Olho", tema:"Subir e finalizar na rede", obj:"Ponto forte + golpear e correr p/ frente até split step" },
+              { id:"lrlm_c3.3", num:"C3.3", cat:"Rede", foco:"Pé",   tema:"Subir e finalizar na rede", obj:"Approach + correr + split step na posição de rede" }
+            ]},
+          { id:"lrlm_c3s2", nome:"Semana 2", tipo:"Construção", desc:"Consolidar o gesto técnico. Correção precisa.",
+            aulas: [
+              { id:"lrlm_c3.4", num:"C3.4", cat:"Rede",  foco:"Pé",  tema:"Subir e finalizar na rede", obj:"Approach + split + DEV avançada (toss/split sincronizado)" },
+              { id:"lrlm_c3.5", num:"C3.5", cat:"Rede",  foco:"Mão", tema:"Subir e finalizar na rede", obj:"Voleio: empunhaduras + contato com a bola na frente" },
+              { id:"lrlm_c3.6", num:"C3.6", cat:"FDQ",  foco:"Pé",  tema:"FDQ: Defender",             obj:"Defesa: passo cruzado + apoios abertos + slice BH/FH" }
+            ]},
+          { id:"lrlm_c3s3", nome:"Semana 3", tipo:"Aplicação", desc:"Aluno aplica o tema com autonomia crescente.",
+            aulas: [
+              { id:"lrlm_c3.7", num:"C3.7", cat:"Jogo", foco:"Olho", tema:"Jogo e arbitragem", obj:"Posição sacador +1 simples e dupla · ponto fraco adversário" },
+              { id:"lrlm_c3.8", num:"C3.8", cat:"Jogo", foco:"Olho", tema:"Pré-evento",        obj:"Jogo autônomo 2 games · gerir desacordo · mostrar marca" },
+              { id:"lrlm_c3.9", num:"C3.9", cat:"Jogo", foco:"Olho", tema:"Pré-evento",        obj:"D2 avançada + approach + rede + defense · 2 games completos" }
+            ]},
+          { id:"lrlm_c3s4", nome:"Semana 4", tipo:"Avaliação", desc:"Revisão dos objetivos. Torneio interno ou simulação.",
+            aulas: [
+              { id:"lrlm_c3.10", num:"C3.10", cat:"Jogo", foco:"Olho", tema:"Avaliação de Fim de Semestre", obj:"Torneio 2 games · approach/rede/defense · avaliação somativa" }
+            ]}
         ]
       }
     ]
   },
   verde_amarela: {
-    label: "Verde-Amarelo", ball: "🟡", quadra: "24m Oficial",
-    caracois: [
-      { id:"vdam_c1", nome:"Caracol 1", nivel:"Consistência FDQ",
-        meta:"Jogar com consistência situação neutra FDQ — quadra 24m",
-        temas:[
-          { id:"vdam_c1_s1", nome:"Introdução", foco:"FDQ 24m", emoji:"🎾",
-            obj:"Consistência FDQ quadra 24m · FH/BH",
-            a1:"Trocas consistentes FH/BH quadra 24m · Empunhadura",
-            a2:"Jogo cooperativo consistência 24m · Rally" },
-          { id:"vdam_c1_s2", nome:"Construção", foco:"Posicionamento", emoji:"🏃",
-            obj:"Posição base + recuperação após golpe 24m",
-            a1:"Split step + posição + recuperação central 24m",
-            a2:"Jogo FDQ posicionamento 24m · Games" },
-          { id:"vdam_c1_s3", nome:"Aplicação", foco:"Direcionamento", emoji:"🎯",
-            obj:"Profundidade + direcionamento FDQ 24m",
-            a1:"Profundidade × direcionamento FDQ 24m · Zonas",
-            a2:"Games FDQ 24m · Construção situacional" },
-          { id:"vdam_c1_s4", nome:"Avaliação", foco:"Formativa", emoji:"📋",
-            obj:"Avaliação formativa consistência 24m",
-            a1:"Circuito formativo FDQ 24m · Revisão",
-            a2:"Torneio games 24m · Formativo" }
+    label: "Verde-Amarelo", ball: "💚", quadra: "24m · Rede regulamentar",
+    ciclos: [
+      { id:"vdam_c1", nome:"Ciclo 1", nivel:"Consistência FDQ",
+        meta:"Jogar com consistência na situação neutra de FDQ — quadra 24m",
+        semanas: [
+          { id:"vdam_c1s1", nome:"Semana 1", tipo:"Introdução", desc:"Exercício fechado. Apresentação do tema.",
+            aulas: [
+              { id:"vdam_c1.1", num:"C1.1", cat:"FDQ",   foco:"Pé",   tema:"FDQ: situação neutra", obj:'"HOP" a cada preparação do adversário + recepção dinâmica' },
+              { id:"vdam_c1.2", num:"C1.2", cat:"FDQ",   foco:"Pé",   tema:"FDQ: situação neutra", obj:"HOP + recepção dinâmica + padrões de jogo neutro" },
+              { id:"vdam_c1.3", num:"C1.3", cat:"Tático", foco:"Olho", tema:"FDQ: situação neutra", obj:"Padrões de jogo neutro: jogar ponto fraco · S1: potência/colocado" }
+            ]},
+          { id:"vdam_c1s2", nome:"Semana 2", tipo:"Construção", desc:"Consolidar o gesto técnico. Correção precisa.",
+            aulas: [
+              { id:"vdam_c1.4", num:"C1.4", cat:"Tático", foco:"Olho", tema:"FDQ: situação neutra", obj:"Padrões neutro + ação mão-antebraço no spin FH/BH" },
+              { id:"vdam_c1.5", num:"C1.5", cat:"FDQ",   foco:"Mão",  tema:"FDQ: situação neutra", obj:"Ação mão-antebraço no spin (FH/BH) · lento→rápido" },
+              { id:"vdam_c1.6", num:"C1.6", cat:"FDQ",   foco:"Mão",  tema:"FDQ: situação neutra", obj:"Spin + soltar após preparação + terminação amplitude" }
+            ]},
+          { id:"vdam_c1s3", nome:"Semana 3", tipo:"Aplicação", desc:"Aluno aplica o tema com autonomia crescente.",
+            aulas: [
+              { id:"vdam_c1.7", num:"C1.7", cat:"FDQ", foco:"Pé",  tema:"FDQ: situação neutra",       obj:"Ritmo de movimentação na fase do deslocamento FH/BH" },
+              { id:"vdam_c1.8", num:"C1.8", cat:"FDQ", foco:"Pé",  tema:"FDQ: situação neutra",       obj:"Ritmo deslocamento + ancorar e empurrar no golpe" },
+              { id:"vdam_c1.9", num:"C1.9", cat:"FDQ", foco:"Mão", tema:"FDQ: construir e neutralizar", obj:"Soltar após preparação + terminação oposta c/ amplitude" }
+            ]},
+          { id:"vdam_c1s4", nome:"Semana 4", tipo:"Avaliação", desc:"Revisão dos objetivos. Torneio interno ou simulação.",
+            aulas: [
+              { id:"vdam_c1.10", num:"C1.10", cat:"Tático", foco:"Olho", tema:"Pré-evento",  obj:"3 situações TA de FdQ + 3 situações TA do saque" },
+              { id:"vdam_c1.11", num:"C1.11", cat:"Jogo",   foco:"Olho", tema:"Pré-evento",  obj:"Set curto 4 games · neutro · ponto fraco · S1 com intenção" },
+              { id:"vdam_c1.12", num:"C1.12", cat:"Jogo",   foco:"Olho", tema:"Avaliação C1", obj:"Avaliação: HOP · spin · padrões neutro · set 4 games" }
+            ]}
         ]
       },
-      { id:"vdam_c2", nome:"Caracol 2", nivel:"Ponto Forte+InsideOut",
-        meta:"Jogar ponto + utilizar ponto forte + inside out + devolução 2º saque",
-        temas:[
-          { id:"vdam_c2_s1", nome:"Introdução", foco:"Ponto Forte", emoji:"💪",
-            obj:"Identificar e usar ponto forte · padrão de jogo",
-            a1:"Análise ponto forte + padrão de jogo · FH/BH",
-            a2:"Jogo usando ponto forte 24m · Games" },
-          { id:"vdam_c2_s2", nome:"Construção", foco:"Inside Out", emoji:"↗️",
-            obj:"Inside out FH + devolução 2º saque",
-            a1:"Inside out FH + 2º saque devolução · Posição",
-            a2:"Games inside out + devolução 2º saque 24m" },
-          { id:"vdam_c2_s3", nome:"Aplicação", foco:"Padrão Ponto", emoji:"🧱",
-            obj:"Construir ponto com padrão servir + 1ª bola",
-            a1:"Padrão servir + 1ª bola · Construção ponto",
-            a2:"Games construção padrão 24m · Situacional" },
-          { id:"vdam_c2_s4", nome:"Avaliação", foco:"Formativa", emoji:"📋",
-            obj:"Avaliação formativa padrão ponto",
-            a1:"Avaliação formativa padrão jogo + saque · Revisão",
-            a2:"Torneio games 24m · Formativo" }
+      { id:"vdam_c2", nome:"Ciclo 2", nivel:"Ponto Forte e Inside Out",
+        meta:"Jogar o ponto ao utilizar ponto forte · inside out · devolução 2º saque",
+        semanas: [
+          { id:"vdam_c2s1", nome:"Semana 1", tipo:"Introdução", desc:"Exercício fechado. Apresentação do tema.",
+            aulas: [
+              { id:"vdam_c2.1", num:"C2.1", cat:"FDQ",   foco:"Pé",   tema:"FDQ: situação neutra",    obj:"Perna na batida: ancorar-transferir BH/FH + SAQ: p/ cima" },
+              { id:"vdam_c2.2", num:"C2.2", cat:"FDQ",   foco:"Pé",   tema:"FDQ: situação neutra",    obj:"Ancorar-transferir + split avançado na devolução 2º saque" },
+              { id:"vdam_c2.3", num:"C2.3", cat:"Tático", foco:"Olho", tema:"FDQ: situação favorável", obj:"Conhecer partes da ½ quadra do BH + inside out (zonas)" }
+            ]},
+          { id:"vdam_c2s2", nome:"Semana 2", tipo:"Construção", desc:"Consolidar o gesto técnico. Correção precisa.",
+            aulas: [
+              { id:"vdam_c2.4", num:"C2.4", cat:"Tático", foco:"Olho", tema:"FDQ: situação favorável", obj:"Inside out: deslocamento e recuperação + D2 split avançado" },
+              { id:"vdam_c2.5", num:"C2.5", cat:"FDQ",   foco:"Pé",   tema:"FDQ: situação favorável", obj:"Passos cruzados para inside out + D2 c/ split avançado" },
+              { id:"vdam_c2.6", num:"C2.6", cat:"FDQ",   foco:"Pé",   tema:"FDQ: situação favorável", obj:'Inside out + ponto de contato na frente (giro tronco "janela")' }
+            ]},
+          { id:"vdam_c2s3", nome:"Semana 3", tipo:"Aplicação", desc:"Aluno aplica o tema com autonomia crescente.",
+            aulas: [
+              { id:"vdam_c2.7", num:"C2.7", cat:"FDQ",       foco:"Olho", tema:"FDQ: situação favorável", obj:"Ponto de contato na frente + aceleração da mão (FH agressivo)" },
+              { id:"vdam_c2.8", num:"C2.8", cat:"Devolução",  foco:"Olho", tema:"Devolução 2º saque",      obj:"D2: split avançado + usar golpe forte · noAD: escolha lateral" },
+              { id:"vdam_c2.9", num:"C2.9", cat:"Jogo",       foco:"Olho", tema:"Pré-evento",              obj:"Ponto forte · inside out · D2 avançada · set 4 games noAD" }
+            ]},
+          { id:"vdam_c2s4", nome:"Semana 4", tipo:"Avaliação", desc:"Revisão dos objetivos. Torneio interno ou simulação.",
+            aulas: [
+              { id:"vdam_c2.10", num:"C2.10", cat:"Jogo", foco:"Olho", tema:"Avaliação C2", obj:"Avaliação: inside out · D2 · ponto de contato · noAD" }
+            ]}
         ]
       },
-      { id:"vdam_c3", nome:"Caracol 3", nivel:"Rede+Set Curto",
-        meta:"Vencer pontos na rede + set curto com autonomia quadra oficial 24m",
-        temas:[
-          { id:"vdam_c3_s1", nome:"Introdução", foco:"Rede 24m", emoji:"🥅",
-            obj:"Approach + voleio + smash 24m",
-            a1:"Approach situacional + finalização rede 24m",
-            a2:"Jogo rede 24m · Smash situacional" },
-          { id:"vdam_c3_s2", nome:"Construção", foco:"Set Curto", emoji:"🏁",
-            obj:"Set curto autonomia 24m · Gestão",
-            a1:"Gestão set curto + autonomia · Contagem",
-            a2:"Set curto autônomo 24m · Games" },
-          { id:"vdam_c3_s3", nome:"Aplicação", foco:"Estratégia", emoji:"🧠",
-            obj:"Estratégia ponto completo serve + volley + rally",
-            a1:"Estratégia serve + volley + rally · Padrão",
-            a2:"Set curto games 24m · Situacional" },
-          { id:"vdam_c3_s4", nome:"Avaliação", foco:"Somativa", emoji:"🏅",
-            obj:"Torneio set curto autônomo 24m",
-            a1:"Avaliação somativa jogo completo 24m · Revisão",
-            a2:"Torneio set curto autônomo 24m · Somativo" }
+      { id:"vdam_c3", nome:"Ciclo 3", nivel:"Rede e Set Autônomo",
+        meta:"Vencer pontos na rede · set curto com autonomia na quadra oficial 24m",
+        semanas: [
+          { id:"vdam_c3s1", nome:"Semana 1", tipo:"Introdução", desc:"Exercício fechado. Apresentação do tema.",
+            aulas: [
+              { id:"vdam_c3.1", num:"C3.1", cat:"Rede", foco:"Olho", tema:"Jogo de rede 1º/2º voleio", obj:"Identificar 1º voleio (construção) e 2º voleio (finalização)" },
+              { id:"vdam_c3.2", num:"C3.2", cat:"Rede", foco:"Olho", tema:"Jogo de rede 1º/2º voleio", obj:"1º/2º voleio + split step na rede + posições de recuperação" },
+              { id:"vdam_c3.3", num:"C3.3", cat:"Rede", foco:"Pé",   tema:"Jogo de rede 1º/2º voleio", obj:"Voleios c/ split step + giro do tronco + pé exterior" }
+            ]},
+          { id:"vdam_c3s2", nome:"Semana 2", tipo:"Construção", desc:"Consolidar o gesto técnico. Correção precisa.",
+            aulas: [
+              { id:"vdam_c3.4", num:"C3.4", cat:"Rede", foco:"Pé",  tema:"Jogo de rede 1º/2º voleio", obj:"Split rede + giro tronco + saque com equilíbrio dos pés" },
+              { id:"vdam_c3.5", num:"C3.5", cat:"Rede", foco:"Mão", tema:"Jogo de rede 1º/2º voleio", obj:"Giro tronco no voleio + voleio construção baixo" },
+              { id:"vdam_c3.6", num:"C3.6", cat:"Rede", foco:"Mão", tema:"Jogo na rede",              obj:"Voleio baixo + DEV: transferir → recuperação rápida" }
+            ]},
+          { id:"vdam_c3s3", nome:"Semana 3", tipo:"Aplicação", desc:"Aluno aplica o tema com autonomia crescente.",
+            aulas: [
+              { id:"vdam_c3.7", num:"C3.7", cat:"Tático", foco:"Olho", tema:"Pré-evento", obj:"Quando e como subir para a rede? · ponto fraco · abrir/paralela" },
+              { id:"vdam_c3.8", num:"C3.8", cat:"Jogo",   foco:"Olho", tema:"Pré-evento", obj:"Set 6 games · autonomia · árbitro rotativo · ética no jogo" },
+              { id:"vdam_c3.9", num:"C3.9", cat:"Jogo",   foco:"Olho", tema:"Pré-evento", obj:"Set 6 games · noAD · gestão trocas de lado · foco" }
+            ]},
+          { id:"vdam_c3s4", nome:"Semana 4", tipo:"Avaliação", desc:"Revisão dos objetivos. Torneio interno ou simulação.",
+            aulas: [
+              { id:"vdam_c3.10", num:"C3.10", cat:"Jogo", foco:"Olho", tema:"Avaliação de Fim de Semestre", obj:"Torneio set 6 games · rede · inside out · avaliação somativa" }
+            ]}
         ]
       }
     ]
   },
   verde_verde: {
-    label: "Verde-Verde", ball: "🟢", quadra: "24m",
-    caracois: [
-      { id:"vdvd_c1", nome:"Caracol 1", nivel:"Construção+Movimentação",
-        meta:"Construir ponto quadra 24m + movimentar adversário + 2º saque com efeito",
-        temas:[
-          { id:"vdvd_c1_s1", nome:"Introdução", foco:"Movimentar", emoji:"↔️",
-            obj:"Movimentar adversário + profundidade 24m",
-            a1:"Cross-court + profundidade movimentar adversário",
-            a2:"Jogo movimentar adversário 24m · Games" },
-          { id:"vdvd_c1_s2", nome:"Construção", foco:"2º Saque Efeito", emoji:"🌀",
-            obj:"2º saque com efeito kick/slice + posição",
-            a1:"2º saque kick/slice + posição pós-saque",
-            a2:"Jogo com 2º saque efeito 24m · Rally" },
-          { id:"vdvd_c1_s3", nome:"Aplicação", foco:"Construir+Atacar", emoji:"🚀",
-            obj:"Construir + movimentar + atacar sequência",
-            a1:"Sequência construção + movimentação adversário",
-            a2:"Games construção movimentação 24m" },
-          { id:"vdvd_c1_s4", nome:"Avaliação", foco:"Formativa", emoji:"📋",
-            obj:"Avaliação formativa construção 24m",
-            a1:"Avaliação formativa construção ponto · Revisão",
-            a2:"Torneio games 24m · Formativo" }
+    label: "Verde-Verde", ball: "🟢", quadra: "24m · Rede regulamentar",
+    ciclos: [
+      { id:"vdvd_c1", nome:"Ciclo 1", nivel:"Construção e 2º Saque",
+        meta:"Construir ponto na quadra 24m ao movimentar o adversário · 2º saque com efeito",
+        semanas: [
+          { id:"vdvd_c1s1", nome:"Semana 1", tipo:"Introdução", desc:"Exercício fechado. Apresentação do tema.",
+            aulas: [
+              { id:"vdvd_c1.1", num:"C1.1", cat:"FDQ",   foco:"Pé",   tema:"FDQ: situação neutra", obj:'"HOP" a cada preparação + recepção dinâmica e equilibrada' },
+              { id:"vdvd_c1.2", num:"C1.2", cat:"FDQ",   foco:"Pé",   tema:"FDQ: situação neutra", obj:"HOP + identificar 3 situações TA FdQ e SAQ" },
+              { id:"vdvd_c1.3", num:"C1.3", cat:"Tático", foco:"Olho", tema:"FDQ: situação neutra", obj:"3 situações TA FdQ + SAQ · troféu alto FH/BH" }
+            ]},
+          { id:"vdvd_c1s2", nome:"Semana 2", tipo:"Construção", desc:"Consolidar o gesto técnico. Correção precisa.",
+            aulas: [
+              { id:"vdvd_c1.4", num:"C1.4", cat:"Tático", foco:"Olho", tema:"FDQ: situação neutra", obj:"3 situações TA + continental + pronação saque" },
+              { id:"vdvd_c1.5", num:"C1.5", cat:"FDQ",   foco:"Mão",  tema:"FDQ: situação neutra", obj:"Troféu alto FH/BH + continental + pronação no 2º saque" },
+              { id:"vdvd_c1.6", num:"C1.6", cat:"FDQ",   foco:"Mão",  tema:"FDQ: situação neutra", obj:"Troféu + amplitude + soltar + 2º saque c/ spin" }
+            ]},
+          { id:"vdvd_c1s3", nome:"Semana 3", tipo:"Aplicação", desc:"Aluno aplica o tema com autonomia crescente.",
+            aulas: [
+              { id:"vdvd_c1.7", num:"C1.7", cat:"FDQ", foco:"Pé",  tema:"FDQ: situação neutra",       obj:"Base ½ aberta joelhos flexionados + diferencia 1º/2º saque" },
+              { id:"vdvd_c1.8", num:"C1.8", cat:"FDQ", foco:"Pé",  tema:"FDQ: situação neutra",       obj:"Base ½ aberta + pé esquerdo dinâmico + ancorar-empurrar" },
+              { id:"vdvd_c1.9", num:"C1.9", cat:"FDQ", foco:"Mão", tema:"FDQ: construir e neutralizar", obj:"Soltar após preparação + terminação amplitude + spin 2º saque" }
+            ]},
+          { id:"vdvd_c1s4", nome:"Semana 4", tipo:"Avaliação", desc:"Revisão dos objetivos. Torneio interno ou simulação.",
+            aulas: [
+              { id:"vdvd_c1.10", num:"C1.10", cat:"Tático", foco:"Olho", tema:"Pré-evento",  obj:"3 situações TA + ponto forte + padrões de jogo neutro" },
+              { id:"vdvd_c1.11", num:"C1.11", cat:"Jogo",   foco:"Olho", tema:"Pré-evento",  obj:"Set 6 games · neutro · 2º saque spin · padrão de jogo" },
+              { id:"vdvd_c1.12", num:"C1.12", cat:"Jogo",   foco:"Olho", tema:"Avaliação C1", obj:"Avaliação: construir neutro · 2º saque spin · padrões" }
+            ]}
         ]
       },
-      { id:"vdvd_c2", nome:"Caracol 2", nivel:"Defesa+Neutralização",
-        meta:"Defender FDQ + neutralizar 1º saque adversário + slice FH/BH",
-        temas:[
-          { id:"vdvd_c2_s1", nome:"Introdução", foco:"Slice", emoji:"🍕",
-            obj:"Slice FH/BH defensivo · técnica e uso situacional",
-            a1:"Slice FH e BH técnica + uso situacional",
-            a2:"Jogo trocas com slice 24m · Defensivo" },
-          { id:"vdvd_c2_s2", nome:"Construção", foco:"Dev 1º Saque", emoji:"↩️",
-            obj:"Neutralizar 1º saque + devolução agressiva",
-            a1:"Leitura + devolução 1º saque · Posição pós-dev",
-            a2:"Games devolução 1º saque 24m · Autônomo" },
-          { id:"vdvd_c2_s3", nome:"Aplicação", foco:"Defender+Neutralizar", emoji:"🛡️",
-            obj:"Defender + neutralizar + contra-atacar",
-            a1:"Posição defensiva + neutralização + contra-ataque",
-            a2:"Games defesa → neutralização 24m" },
-          { id:"vdvd_c2_s4", nome:"Avaliação", foco:"Formativa", emoji:"📋",
-            obj:"Avaliação formativa defesa slice 24m",
-            a1:"Avaliação formativa defesa + slice · Revisão",
-            a2:"Torneio games 24m · Formativo" }
+      { id:"vdvd_c2", nome:"Ciclo 2", nivel:"Defesa e Devolução",
+        meta:"Defender em FDQ · neutralizar 1º saque do adversário · slice FH/BH",
+        semanas: [
+          { id:"vdvd_c2s1", nome:"Semana 1", tipo:"Introdução", desc:"Exercício fechado. Apresentação do tema.",
+            aulas: [
+              { id:"vdvd_c2.1", num:"C2.1", cat:"FDQ", foco:"Mão", tema:"FDQ: construir e neutralizar",  obj:"Soltar após preparação + terminação amplitude + saque spin" },
+              { id:"vdvd_c2.2", num:"C2.2", cat:"FDQ", foco:"Mão", tema:"FDQ: situação desfavorável",    obj:"Empunhadura + ação punho/mão no slice FH e BH" },
+              { id:"vdvd_c2.3", num:"C2.3", cat:"FDQ", foco:"Mão", tema:"FDQ: situação desfavorável",    obj:"Slice FH/BH + posição na quadra para defender" }
+            ]},
+          { id:"vdvd_c2s2", nome:"Semana 2", tipo:"Construção", desc:"Consolidar o gesto técnico. Correção precisa.",
+            aulas: [
+              { id:"vdvd_c2.4", num:"C2.4", cat:"Tático", foco:"Olho", tema:"FDQ: situação desfavorável", obj:"Posição de defesa + zona de recuperação + ler bolas aéreas" },
+              { id:"vdvd_c2.5", num:"C2.5", cat:"FDQ",   foco:"Olho", tema:"FDQ: situação desfavorável", obj:"Posição + zona de recuperação + D1: bloqueio/slice" },
+              { id:"vdvd_c2.6", num:"C2.6", cat:"FDQ",   foco:"Pé",   tema:"FDQ: situação desfavorável", obj:"Passo cruzado de deslocamento + base aberta bolas distantes" }
+            ]},
+          { id:"vdvd_c2s3", nome:"Semana 3", tipo:"Aplicação", desc:"Aluno aplica o tema com autonomia crescente.",
+            aulas: [
+              { id:"vdvd_c2.7", num:"C2.7", cat:"FDQ",       foco:"Pé",   tema:"FDQ: situação desfavorável", obj:"Base aberta na defesa + D1: bloqueio com split avançado" },
+              { id:"vdvd_c2.8", num:"C2.8", cat:"Devolução",  foco:"Olho", tema:"Devolução 1º e 2º saque",   obj:"D1: bloqueio/slice · D2: ponto forte + noAD: escolha lateral" },
+              { id:"vdvd_c2.9", num:"C2.9", cat:"Jogo",       foco:"Olho", tema:"Pré-evento",                obj:"Ponto forte · defesa · D1/D2 · set 6 games noAD" }
+            ]},
+          { id:"vdvd_c2s4", nome:"Semana 4", tipo:"Avaliação", desc:"Revisão dos objetivos. Torneio interno ou simulação.",
+            aulas: [
+              { id:"vdvd_c2.10", num:"C2.10", cat:"Jogo", foco:"Olho", tema:"Avaliação C2", obj:"Avaliação: defesa · slice · D1/D2 · set games autônomo" }
+            ]}
         ]
       },
-      { id:"vdvd_c3", nome:"Caracol 3", nivel:"Saque Agressivo+Set",
-        meta:"Vencer pontos na rede + 1º saque agressivo + set curto autônomo",
-        temas:[
-          { id:"vdvd_c3_s1", nome:"Introdução", foco:"1º Saque Flat", emoji:"⚡",
-            obj:"1º saque agressivo flat/kick + posição após saque",
-            a1:"1º saque flat + posição após saque · Padrão",
-            a2:"Jogo com 1º saque agressivo 24m · Rally" },
-          { id:"vdvd_c3_s2", nome:"Construção", foco:"Serve&Volley", emoji:"🥅",
-            obj:"Rede + smash + 1º saque + sequência",
-            a1:"Approach + smash + sequência 24m",
-            a2:"Games serve & volley 24m" },
-          { id:"vdvd_c3_s3", nome:"Aplicação", foco:"Set Curto", emoji:"🏁",
-            obj:"Set curto autônomo 24m · Gestão autonomia",
-            a1:"Gestão set + autonomia decisão · Contagem",
-            a2:"Set curto autônomo 24m · Games" },
-          { id:"vdvd_c3_s4", nome:"Avaliação", foco:"Somativa", emoji:"🏅",
-            obj:"Torneio set curto autônomo 24m",
-            a1:"Avaliação somativa jogo completo · Revisão geral",
-            a2:"Torneio set curto autônomo 24m · Somativo" }
+      { id:"vdvd_c3", nome:"Ciclo 3", nivel:"Rede e 1º Saque Agressivo",
+        meta:"Vencer pontos na rede · 1º saque agressivo · set curto autônomo",
+        semanas: [
+          { id:"vdvd_c3s1", nome:"Semana 1", tipo:"Introdução", desc:"Exercício fechado. Apresentação do tema.",
+            aulas: [
+              { id:"vdvd_c3.1", num:"C3.1", cat:"Rede", foco:"Olho", tema:"Jogo na rede", obj:"Tática: quando subir para a rede · bola favorável para approach" },
+              { id:"vdvd_c3.2", num:"C3.2", cat:"Rede", foco:"Olho", tema:"Jogo na rede", obj:"Quando subir + escolha D2 + 2 posições para voleio V1/V2" },
+              { id:"vdvd_c3.3", num:"C3.3", cat:"Rede", foco:"Olho", tema:"Jogo na rede", obj:"Recuperar em função de V1 (construção) ou V2 (finalização)" }
+            ]},
+          { id:"vdvd_c3s2", nome:"Semana 2", tipo:"Construção", desc:"Consolidar o gesto técnico. Correção precisa.",
+            aulas: [
+              { id:"vdvd_c3.4", num:"C3.4", cat:"Rede", foco:"Olho", tema:"Jogo na rede",             obj:"V1/V2 + apoio aberto na devolução + efeito slice no voleio" },
+              { id:"vdvd_c3.5", num:"C3.5", cat:"Rede", foco:"Mão",  tema:"Jogo na rede",             obj:"Slice no voleio + giro tronco + approach com spin" },
+              { id:"vdvd_c3.6", num:"C3.6", cat:"Rede", foco:"Mão",  tema:"Jogo de rede 1º/2º voleio", obj:"Approach: acelerar cabeça raquete + continuar para rede + cotovelo" }
+            ]},
+          { id:"vdvd_c3s3", nome:"Semana 3", tipo:"Aplicação", desc:"Aluno aplica o tema com autonomia crescente.",
+            aulas: [
+              { id:"vdvd_c3.7", num:"C3.7", cat:"Saque", foco:"Mão",  tema:"Saque agressivo", obj:"S1 agressivo: pernas pulando + posição girada + projeção cotovelo" },
+              { id:"vdvd_c3.8", num:"C3.8", cat:"Jogo",  foco:"Olho", tema:"Pré-evento",       obj:"Trocas de lado · noAD · gestão emocional · foco · arbitragem" },
+              { id:"vdvd_c3.9", num:"C3.9", cat:"Jogo",  foco:"Olho", tema:"Pré-evento",       obj:"Set completo 6 games · saque agressivo · rede · defense" }
+            ]},
+          { id:"vdvd_c3s4", nome:"Semana 4", tipo:"Avaliação", desc:"Revisão dos objetivos. Torneio interno ou simulação.",
+            aulas: [
+              { id:"vdvd_c3.10", num:"C3.10", cat:"Jogo", foco:"Olho", tema:"Avaliação de Fim de Semestre", obj:"Torneio set 6 games · S1 agressivo · rede · avaliação somativa" }
+            ]}
         ]
       }
-    ]
-  },
-};
-
-// Mapa de bola para chave do CAL_PED (mantido para compatibilidade)
-// LEGADO: o campo 'ciclos' não existe mais — substituído por 'caracois'
-const CAL_PED_LEGACY = {
-  roxa: {
-    label: "Roxa", ball: "🟣", quadra: "10×6m · Sem rede",
-    ciclos: [
-      { id: "c1", nome: "C1 — Fundo de Quadra", obj: "Trocar bolas gol a gol, 3 devoluções",
-        aulas: [
-          { id:"c1a1", nums:"C1.1–2", tema:"Tática", sub:"Reconhecer Fora/Dentro + anunciar", foco:"Olho" },
-          { id:"c1a2", nums:"C1.3–4", tema:"FdQ", sub:"Posição início do jogo + agilidade (estrela)", foco:"Pé" },
-          { id:"c1a3", nums:"C1.5",   tema:"FdQ", sub:"Base neutra arremesso FH + Posição 0 joelhos flex.", foco:"Pé" },
-          { id:"c1a4", nums:"C1.6",   tema:"FdQ", sub:"Arranque (estrela) + SAQ: base semi-aberta FH", foco:"Pé" },
-          { id:"c1a5", nums:"C1.7–8", tema:"FdQ", sub:"Pegada raquete + mão livre no coração", foco:"Mão" },
-          { id:"c1a6", nums:"C1.9–10",tema:"FdQ", sub:"Percepção de alvos e zonas + Posição 0", foco:"Olho" },
-          { id:"c1a7", nums:"C1.11–12",tema:"Pré-evento", sub:"Recuperação C1.9–10", foco:"Olho" },
-        ]
-      },
-      { id: "c2", nome: "C2 — FdQ com Adversidade", obj: "Trocar bola com adversidade, gol a gol",
-        aulas: [
-          { id:"c2a1", nums:"C2.1–2", tema:"FdQ", sub:"Apoio neutro (arr.) / Pés dinâmicos (dev.)", foco:"Pé" },
-          { id:"c2a2", nums:"C2.3–4", tema:"FdQ", sub:"Giro dos ombros para arremessar FH e BH", foco:"Mão" },
-          { id:"c2a3", nums:"C2.5–6", tema:"FdQ", sub:"Ponto de contato na frente do corpo", foco:"Olho" },
-          { id:"c2a4", nums:"C2.7–8", tema:"FdQ", sub:"Equilíbrio da base + precisão dos golpes", foco:"Pé" },
-          { id:"c2a5", nums:"C2.9–10",tema:"Pré-evento", sub:"Anunciar 'fora'/'dentro' para o colega", foco:"Olho" },
-        ]
-      },
-      { id: "c3", nome: "C3 — Saque", obj: "Partida adaptada: 1º a 3 gols ou 5 min",
-        aulas: [
-          { id:"c3a1", nums:"C3.1–2", tema:"Saque", sub:"Dominar espaço acima da cabeça", foco:"Olho" },
-          { id:"c3a2", nums:"C3.3–4", tema:"Saque", sub:"Base semi-aberta no saque", foco:"Pé" },
-          { id:"c3a3", nums:"C3.5–6", tema:"Saque", sub:"Segurar raquete no fim do cabo", foco:"Mão" },
-          { id:"c3a4", nums:"C3.7–8", tema:"Saque", sub:"Toss + ponto de contato acima da cabeça", foco:"Mão" },
-          { id:"c3a5", nums:"C3.9–10",tema:"Pré-evento", sub:"Recuperar conteúdos", foco:"—" },
-        ]
-      },
-    ]
-  },
-  verm_branca: {
-    label: "Vermelha-Branca", ball: "🔴", quadra: "11×6m · Rede 0,50m",
-    ciclos: [
-      { id:"c1", nome:"C1 — OBS + FdQ", obj:"1 arremesso + 1 troca, rede 0,50m",
-        aulas: [
-          { id:"c1a1", nums:"C1.1–2",  tema:"Tática",    sub:"Anunciar quique Fora/Dentro + posicionamento", foco:"Olho" },
-          { id:"c1a2", nums:"C1.3–4",  tema:"OBS+FdQ",   sub:"Posição '0' mão livre no coração + prep. linear", foco:"Mão" },
-          { id:"c1a3", nums:"C1.5–6",  tema:"OBS+FdQ",   sub:"Pés 'pregados' + frear/parar + SAQ equilibrado", foco:"Pé" },
-          { id:"c1a4", nums:"C1.7–8",  tema:"FdQ",       sub:"Percepção: anúncio 'TAC' e recepção de bola", foco:"Olho" },
-          { id:"c1a5", nums:"C1.9–10", tema:"OBS+FdQ",   sub:"Pegada (almofadinha) e ponto de contato", foco:"Mão" },
-          { id:"c1a6", nums:"C1.11–12",tema:"Pré-evento", sub:"Contar e anunciar para o adversário", foco:"Olho" },
-        ]
-      },
-      { id:"c2", nome:"C2 — Voleio e Rede", obj:"Interceptar com voleio + conhecer jogo de rede",
-        aulas: [
-          { id:"c2a1", nums:"C2.1–2",  tema:"FdQ",       sub:"Pegada (almofadinha) e ponto de contato", foco:"Mão" },
-          { id:"c2a2", nums:"C2.3–4",  tema:"Voleio",    sub:"Posição 0 inferior + arrancar", foco:"Pé" },
-          { id:"c2a3", nums:"C2.5–6",  tema:"Voleio",    sub:"Posição 0 superior (mão coração) + prep. aberta", foco:"Mão" },
-          { id:"c2a4", nums:"C2.7–8",  tema:"Rede",      sub:"Percepção dos momentos TIC e TOC", foco:"Olho" },
-          { id:"c2a5", nums:"C2.9–10", tema:"Pré-evento", sub:"Contar + regra das 2 bolas no saque", foco:"Olho" },
-        ]
-      },
-      { id:"c3", nome:"C3 — Saque", obj:"Partida de 7 pontos, 11×6m × 0,50m",
-        aulas: [
-          { id:"c3a1", nums:"C3.1–2",  tema:"Saque", sub:"Base ½ aberta e equilíbrio no saque", foco:"Pé" },
-          { id:"c3a2", nums:"C3.3–4",  tema:"Saque", sub:"Empunhadura eastern a continental", foco:"Mão" },
-          { id:"c3a3", nums:"C3.5–6",  tema:"Saque", sub:"Toss controlado de direcionamento", foco:"Mão" },
-          { id:"c3a4", nums:"C3.7–8",  tema:"Saque", sub:"Ponto de contato elevado + mão livre posição 0", foco:"Mão" },
-          { id:"c3a5", nums:"C3.9–10", tema:"Pré-evento", sub:"Recuperação quadra + regra 2 bolas + sorteio", foco:"Pé" },
-        ]
-      },
-    ]
-  },
-  verm_verm: {
-    label: "Vermelha-Vermelha", ball: "🔴🔴", quadra: "12×8m · Rede 0,80m",
-    ciclos: [
-      { id:"c1", nome:"C1 — FdQ (1+2 FH)", obj:"1 arremesso + 2 trocas (FH)",
-        aulas: [
-          { id:"c1a1", nums:"C1.1–2",  tema:"Tática",    sub:"Anunciar Fora/Dentro + tie-break + 2 saques", foco:"Olho" },
-          { id:"c1a2", nums:"C1.3–4",  tema:"OBS+FdQ",   sub:"Posição '0' mão livre no coração + prep. linear", foco:"Mão" },
-          { id:"c1a3", nums:"C1.5–6",  tema:"OBS+FdQ",   sub:"Pés 'pregados' (arr.) + frear/parar (dev.)", foco:"Pé" },
-          { id:"c1a4", nums:"C1.7–8",  tema:"FdQ",       sub:"Percepção: anúncio 'TAC' e recepção de bola", foco:"Olho" },
-          { id:"c1a5", nums:"C1.9–10", tema:"OBS+FdQ",   sub:"Pegada (almofadinha) e ponto de contato", foco:"Mão" },
-          { id:"c1a6", nums:"C1.11–12",tema:"Pré-evento", sub:"Contar e anunciar para o parceiro", foco:"Olho" },
-        ]
-      },
-      { id:"c2", nome:"C2 — Voleio e Rede", obj:"1 arremesso + approach + interceptar com voleio",
-        aulas: [
-          { id:"c2a1", nums:"C2.1–2",  tema:"Voleio",    sub:"Joelhos flex. Posição '0' + SAQ base ½ aberta", foco:"Pé" },
-          { id:"c2a2", nums:"C2.3–4",  tema:"Rede 1+1",  sub:"Mão livre coração + empunhadura FH-BH voleio", foco:"Mão" },
-          { id:"c2a3", nums:"C2.5–6",  tema:"Rede 1+1",  sub:"Percepção lateral FH/BH + apontar no smash", foco:"Olho" },
-          { id:"c2a4", nums:"C2.7–8",  tema:"Voleio",    sub:"Preparação curta voleio + troféu smash", foco:"Mão" },
-          { id:"c2a5", nums:"C2.9–10", tema:"Pré-evento", sub:"Contagem, pontuação, atacar ou defender", foco:"Olho" },
-        ]
-      },
-      { id:"c3", nome:"C3 — Construção FH e BH", obj:"1 arremesso + 2 trocas FH/BH + SAQ 2 cruzadas",
-        aulas: [
-          { id:"c3a1", nums:"C3.1–2",  tema:"Construção", sub:"Percepção e decisão para usar 'vazios'", foco:"Olho" },
-          { id:"c3a2", nums:"C3.3–4",  tema:"Construção", sub:"Empunhadura Eastern FH + 'escovar' a bola", foco:"Mão" },
-          { id:"c3a3", nums:"C3.5–6",  tema:"Construção", sub:"Empunhadura Eastern BH + 'escovar' a bola", foco:"Mão" },
-          { id:"c3a4", nums:"C3.7–9",  tema:"FdQ/SAQ",   sub:"Ponto contato na frente + toss equilibrado", foco:"Olho" },
-          { id:"c3a5", nums:"C3.10",   tema:"Pré-evento", sub:"Trajetórias diferentes / rodízio tie-break", foco:"Olho" },
-        ]
-      },
-    ]
-  },
-  verm_laranja: {
-    label: "Vermelha-Laranja", ball: "🔴🟠", quadra: "12,80×5,50m",
-    ciclos: [
-      { id:"c1", nome:"C1 — Fundo de Quadra", obj:"Deslocar o adversário",
-        aulas: [
-          { id:"c1a1", nums:"C1.1–2",  tema:"FdQ",      sub:"Posição '0' dinâmica / Arr ½ aberto / SAQ ½ aberto", foco:"Pé" },
-          { id:"c1a2", nums:"C1.3–4",  tema:"FdQ",      sub:"Percepção profundidade cruzadas + contato s/cabeça", foco:"Olho" },
-          { id:"c1a3", nums:"C1.5–6",  tema:"FdQ",      sub:"Mão livre coração antes do TAC e 1º giro", foco:"Mão" },
-          { id:"c1a4", nums:"C1.7–8",  tema:"TEC-TAT",  sub:"Tac-Tac-Hop (TTH) movimentação + equilíbrio SAQ", foco:"Pé" },
-          { id:"c1a5", nums:"C1.9–10", tema:"TEC-TAT",  sub:"Golpes FdQ com preparação 'troféu'", foco:"Mão" },
-          { id:"c1a6", nums:"C1.11–12",tema:"Pré-evento",sub:"Reconhecer situação favorável/desfavorável", foco:"Olho" },
-        ]
-      },
-      { id:"c2", nome:"C2 — Jogo de Rede", obj:"Subir para rede em situação tática",
-        aulas: [
-          { id:"c2a1", nums:"C2.1–2",  tema:"TEC-TAT",  sub:"Troféu na preparação dos golpes (verticalidade)", foco:"Mão" },
-          { id:"c2a2", nums:"C2.3–4",  tema:"Rede",     sub:"Identificar posição na rede + subir e posicionar", foco:"Olho" },
-          { id:"c2a3", nums:"C2.5–6",  tema:"Rede",     sub:"Expectativa mão livre + empunhadura continental", foco:"Mão" },
-          { id:"c2a4", nums:"C2.7–8",  tema:"Rede",     sub:"Smash: movimentação, posicionamento, equilíbrio", foco:"Pé" },
-          { id:"c2a5", nums:"C2.9–10", tema:"Pré-evento",sub:"Decisão atacar ou defender + ordem pontuação", foco:"Olho" },
-        ]
-      },
-      { id:"c3", nome:"C3 — FH e BH + Tie-Break", obj:"Construir o ponto nos 'vazios'",
-        aulas: [
-          { id:"c3a1", nums:"C3.1–2",  tema:"FdQ 1+2",   sub:"Técnica de movimentação para frear/alinhar-se", foco:"Pé" },
-          { id:"c3a2", nums:"C3.3–4",  tema:"FdQ 1+2",   sub:"Diferenciar empunhaduras FH e BH", foco:"Mão" },
-          { id:"c3a3", nums:"C3.5–6",  tema:"FdQ 1+2",   sub:"Percepção lateral FH e BH + tempo de percepção", foco:"Olho" },
-          { id:"c3a4", nums:"C3.7–8",  tema:"TEC-TAT",   sub:"Base ½ aberta e neutra + DEV: tac-tac/hop-no-toss", foco:"Pé" },
-          { id:"c3a5", nums:"C3.9–10", tema:"Pré-evento", sub:"Posições na quadra + tie-break / sacador", foco:"Olho" },
-        ]
-      },
-    ]
-  },
-  laranja: {
-    label: "Laranja-Laranja", ball: "🟠", quadra: "18×8m · Rede 0,80m",
-    ciclos: [
-      { id:"c1", nome:"C1 — FdQ 18m + Saque", obj:"Trocar FdQ em quadra 18m",
-        aulas: [
-          { id:"c1a1", nums:"C1.1–2",  tema:"OBS+FdQ",  sub:"Percepção lateral rápida + posição sacador", foco:"Olho" },
-          { id:"c1a2", nums:"C1.3–4",  tema:"FdQ",      sub:"Empunhadura FH/BH + mão livre / continental", foco:"Mão" },
-          { id:"c1a3", nums:"C1.5–6",  tema:"FdQ 18m",  sub:"Passos laterais + equilíbrio pé esq. no saque", foco:"Pé" },
-          { id:"c1a4", nums:"C1.7–8",  tema:"FdQ 18m",  sub:"Giro + troféu FH/BH + subida junta dos braços SAQ", foco:"Mão" },
-          { id:"c1a5", nums:"C1.9–10", tema:"FdQ 18m",  sub:"3 Tempos após quique + SAQ e os 2 toss", foco:"Olho" },
-          { id:"c1a6", nums:"C1.11–12",tema:"Pré-evento",sub:"Reconhecer situação favorável/desfavorável", foco:"Olho" },
-        ]
-      },
-      { id:"c2", nome:"C2 — FdQ Direcionamento", obj:"Utilizar espaços da quadra",
-        aulas: [
-          { id:"c2a1", nums:"C2.1–2",  tema:"FdQ",      sub:"Perceber profundidade (1 e 2) + diferenciar S1 e S2", foco:"Olho" },
-          { id:"c2a2", nums:"C2.3–4",  tema:"FdQ",      sub:"Preparação elevada (troféu) + soltar", foco:"Mão" },
-          { id:"c2a3", nums:"C2.5–6",  tema:"FdQ",      sub:"Base ½ aberta cruzar + dinâmica pé esq. SAQ", foco:"Pé" },
-          { id:"c2a4", nums:"C2.7–8",  tema:"FdQ",      sub:"Ação mão spin + ponto contato + pronação SAQ", foco:"Mão" },
-          { id:"c2a5", nums:"C2.9–10", tema:"Tática dev.",sub:"D2: ponto fraco / acelerar paralela + noAD", foco:"Olho" },
-        ]
-      },
-      { id:"c3", nome:"C3 — Defesa, Rede e Dev.", obj:"Jogar 2 games em contagem tradicional",
-        aulas: [
-          { id:"c3a1", nums:"C3.1–2",  tema:"FdQ/Rede", sub:"Defesa extrema / Distinguir smash e voleio", foco:"Olho" },
-          { id:"c3a2", nums:"C3.3–4",  tema:"FdQ/Rede", sub:"Split step + passos cruzados / avançar rede", foco:"Pé" },
-          { id:"c3a3", nums:"C3.5–6",  tema:"FdQ/Rede", sub:"Slice continental / prep. curta voleio", foco:"Mão" },
-          { id:"c3a4", nums:"C3.7–10", tema:"FdQ+Pré",  sub:"3 Tempos quique + posição sacador +1", foco:"Olho" },
-        ]
-      },
-    ]
-  },
-  laranja_verde: {
-    label: "Laranja-Verde", ball: "🟠🟢", quadra: "18m · Quadra oficial",
-    ciclos: [
-      { id:"c1", nome:"C1 — OBS + FdQ", obj:"Construir com efeitos, profundidade e direcionamento",
-        aulas: [
-          { id:"c1a1", nums:"C1.1–2",  tema:"OBS+FdQ",  sub:"tac,tac,HOP – joelhos flex. + SAQ base neutra", foco:"Pé" },
-          { id:"c1a2", nums:"C1.3–4",  tema:"OBS+FdQ",  sub:"Posição expectativa 'jedi solto' + SAQ continental", foco:"Mão" },
-          { id:"c1a3", nums:"C1.5–6",  tema:"FdQ",      sub:"Percepção lateral e empunhadura + SAQ torre alta", foco:"Olho" },
-          { id:"c1a4", nums:"C1.7–8",  tema:"OBS+FdQ",  sub:"Empunhadura FH/BH e giro no 1º voo", foco:"Mão" },
-          { id:"c1a5", nums:"C1.9–10", tema:"FdQ",      sub:"Base flexionada e avança + SAQ: perna esq. p/ cima", foco:"Pé" },
-          { id:"c1a6", nums:"C1.11–12",tema:"Pré-evento",sub:"Identificar situação tática FdQ e SAQ", foco:"Olho" },
-        ]
-      },
-      { id:"c2", nome:"C2 — Atacar e Acelerar", obj:"Construir ao acelerar em situação favorável",
-        aulas: [
-          { id:"c2a1", nums:"C2.1–2",  tema:"FdQ 18m",  sub:"Passos laterais p/ entrar + SAQ: empurrar solo", foco:"Pé" },
-          { id:"c2a2", nums:"C2.3–4",  tema:"Atacar FdQ",sub:"TEC-TAC: troféu na prep. + S1 no saque", foco:"Mão" },
-          { id:"c2a3", nums:"C2.5–6",  tema:"Atacar FdQ",sub:"TEC-TAC: ação mão-antebraço no chicote", foco:"Mão" },
-          { id:"c2a4", nums:"C2.7–8",  tema:"Atacar FdQ",sub:"Base ½ aberta para cruzar e transferir", foco:"Pé" },
-          { id:"c2a5", nums:"C2.9–10", tema:"Pré-evento",sub:"D2: ponto fraco/paralela + regra noAD", foco:"Olho" },
-        ]
-      },
-      { id:"c3", nome:"C3 — Rede + Defesa + Dev.", obj:"Autônomo 2 games",
-        aulas: [
-          { id:"c3a1", nums:"C3.1–2",  tema:"Rede",     sub:"Identificar e utilizar ponto forte", foco:"Olho" },
-          { id:"c3a2", nums:"C3.3–4",  tema:"Rede",     sub:"Golpear e correr p/ frente até split step", foco:"Pé" },
-          { id:"c3a3", nums:"C3.5–6",  tema:"Rede",     sub:"Jogo de rede: empunhaduras voleio e contato", foco:"Mão" },
-          { id:"c3a4", nums:"C3.7–8",  tema:"FdQ: Def.",sub:"Movimentação de defesa c/ apoios abertos", foco:"Pé" },
-          { id:"c3a5", nums:"C3.9–10", tema:"Pré-evento",sub:"Posição sacador +1 (simples e dupla)", foco:"Olho" },
-        ]
-      },
-    ]
-  },
-  verde_verde: {
-    label: "Verde-Verde", ball: "🟢", quadra: "Quadra 24m · Set curto autônomo",
-    ciclos: [
-      { id:"c1", nome:"C1 — FdQ: Construção e Neutralização", obj:"Construir o ponto movimentando o adversário",
-        aulas: [
-          { id:"c1a1", nums:"C1.1–2",  tema:"FdQ",      sub:"HOP com recepção dinâmica e equilibrada", foco:"Pé" },
-          { id:"c1a2", nums:"C1.3–4",  tema:"FdQ",      sub:"Identificar 3 situações TA de FdQ/saque", foco:"Olho" },
-          { id:"c1a3", nums:"C1.5–6",  tema:"FdQ",      sub:"Troféu alto FH e BH + continental + pronação SAQ", foco:"Mão" },
-          { id:"c1a4", nums:"C1.7–8",  tema:"FdQ",      sub:"Base ½ aberta + joelhos flex. + diferenciar 1º/2º SAQ", foco:"Pé" },
-          { id:"c1a5", nums:"C1.9–10", tema:"FdQ",      sub:"Soltar após prep. + terminação c/ amplitude + SAQ spin", foco:"Mão" },
-          { id:"c1a6", nums:"C1.11–12",tema:"Pré-evento",sub:"Identificar 3 situações TA de FdQ/saque", foco:"Olho" },
-        ]
-      },
-      { id:"c2", nome:"C2 — FdQ Desfavorável (Defesa)", obj:"Defender em Fundo de Quadra",
-        aulas: [
-          { id:"c2a1", nums:"C2.1–2",  tema:"FdQ",      sub:"Soltar após prep. + terminação c/ amplitude", foco:"Mão" },
-          { id:"c2a2", nums:"C2.3–4",  tema:"FdQ",      sub:"Empunhadura e ação punho/mão no slice FH e BH", foco:"Mão" },
-          { id:"c2a3", nums:"C2.5–6",  tema:"FdQ",      sub:"Posição quadra para defender + zona de recuperação", foco:"Olho" },
-          { id:"c2a4", nums:"C2.7–8",  tema:"FdQ",      sub:"Passo cruzado + base aberta (apoios abertos)", foco:"Pé" },
-          { id:"c2a5", nums:"C2.9–10", tema:"Pré-evento",sub:"Ponto forte + regras gerais (autonomia)", foco:"Olho" },
-        ]
-      },
-      { id:"c3", nome:"C3 — Jogo de Rede + SAQ Agressivo", obj:"Set curto autônomo quadra 24m",
-        aulas: [
-          { id:"c3a1", nums:"C3.1–2",  tema:"Rede",     sub:"Identificar quando subir + escolha D2", foco:"Olho" },
-          { id:"c3a2", nums:"C3.3–4",  tema:"Rede",     sub:"Recuperar em função dos voleios V1 ou V2", foco:"Pé" },
-          { id:"c3a3", nums:"C3.5–6",  tema:"Rede",     sub:"Slice no voleio + giro do tronco", foco:"Mão" },
-          { id:"c3a4", nums:"C3.7–8",  tema:"Rede 1º/2º",sub:"Approach c/ aceleração + projeção cotovelo SAQ", foco:"Mão" },
-          { id:"c3a5", nums:"C3.9–10", tema:"Pré-evento",sub:"Quando/como subir rede? + pegar rede + ponto fraco", foco:"Olho" },
-        ]
-      },
-    ]
-  },
-  verde_amarela: {
-    label: "Verde-Amarelo", ball: "🟢🟡", quadra: "Quadra 24m · Oficial",
-    ciclos: [
-      { id:"c1", nome:"C1 — FdQ: Situação Neutra", obj:"Jogar com consistência em situação neutra",
-        aulas: [
-          { id:"c1a1", nums:"C1.1–2",  tema:"FdQ",      sub:"HOP com recepção dinâmica e equilibrada", foco:"Pé" },
-          { id:"c1a2", nums:"C1.3–4",  tema:"FdQ",      sub:"Padrões de jogo: ponto fraco / SAQ potência ou colocado", foco:"Olho" },
-          { id:"c1a3", nums:"C1.5–6",  tema:"FdQ",      sub:"Ação mão-antebraço no spin (FH/BH)", foco:"Mão" },
-          { id:"c1a4", nums:"C1.7–8",  tema:"FdQ",      sub:"Ritmo de movimentação na fase do deslocamento", foco:"Pé" },
-          { id:"c1a5", nums:"C1.9–10", tema:"FdQ",      sub:"Soltar após prep. + terminação c/ amplitude + SAQ spin", foco:"Mão" },
-          { id:"c1a6", nums:"C1.11–12",tema:"Pré-evento",sub:"Identificar 3 situações TA de FdQ e do saque", foco:"Olho" },
-        ]
-      },
-      { id:"c2", nome:"C2 — FdQ Favorável + Inside Out", obj:"Jogar utilizando o ponto forte",
-        aulas: [
-          { id:"c2a1", nums:"C2.1–2",  tema:"FdQ",      sub:"Técnica de perna: ancorar–transferir + SAQ p/ cima", foco:"Pé" },
-          { id:"c2a2", nums:"C2.3–4",  tema:"FdQ",      sub:"½ quadra do BH + D2: posicionamento p/ sair", foco:"Olho" },
-          { id:"c2a3", nums:"C2.5–6",  tema:"FdQ",      sub:"Passos cruzados inside out + D2 c/ split avançado", foco:"Pé" },
-          { id:"c2a4", nums:"C2.7–8",  tema:"FdQ",      sub:"Ponto contato na frente (giro tronco + braço janela)", foco:"Olho" },
-          { id:"c2a5", nums:"C2.9–10", tema:"Pré-evento",sub:"Ponto forte + regras gerais (autonomia)", foco:"Olho" },
-        ]
-      },
-      { id:"c3", nome:"C3 — Jogo de Rede + Dev.", obj:"Vencer pontos na rede + set curto",
-        aulas: [
-          { id:"c3a1", nums:"C3.1–2",  tema:"Rede 1º/2º",sub:"Identificar e conhecer 1º e 2º voleio", foco:"Olho" },
-          { id:"c3a2", nums:"C3.3–4",  tema:"Rede",     sub:"Voleios + split step + SAQ equilíbrio dos pés", foco:"Pé" },
-          { id:"c3a3", nums:"C3.5–6",  tema:"Rede",     sub:"Giro do tronco no voleio", foco:"Mão" },
-          { id:"c3a4", nums:"C3.7–8",  tema:"Rede",     sub:"Voleio construção baixo + DEV: transferir + recuperação", foco:"Pé" },
-          { id:"c3a5", nums:"C3.9–10", tema:"Pré-evento",sub:"Quando/como subir p/ rede? + identificar ponto fraco", foco:"Olho" },
-        ]
-      },
     ]
   },
 };
@@ -1327,14 +1199,12 @@ const BOLA_CAL_MAP = {
   verde_amarela: 'verde_amarela', verde: 'verde_amarela',
 };
 
-// Pega o progresso do caracol (novo formato: { caracol, sessoes })
+// Pega o progresso local ({ caracol:1, ciclo:0, aulas:{} })
 function getCalProgLocal(turmaId) {
   const raw = localStorage.getItem('calped_prog_' + turmaId);
-  if (!raw) return { caracol: 0, sessoes: {} };
+  if (!raw) return { caracol: 1, ciclo: 0, aulas: {} };
   const p = JSON.parse(raw);
-  // migração do formato antigo { ciclo, aulas }
-  if (p.ciclo !== undefined && p.sessoes === undefined) return { caracol: 0, sessoes: {} };
-  return { caracol: p.caracol || 0, sessoes: p.sessoes || {} };
+  return { caracol: p.caracol || 1, ciclo: p.ciclo || 0, aulas: p.aulas || {} };
 }
 function saveCalProgLocal(turmaId, prog) {
   localStorage.setItem('calped_prog_' + turmaId, JSON.stringify(prog));
@@ -1366,7 +1236,7 @@ function openCalPed() {
         const calKey = BOLA_CAL_MAP[t.bola] || t.bola;
         const cal = CAL_PED[calKey];
         const prog = getCalProgLocal(t.id);
-        return sum + Object.values(prog.sessoes||{}).filter(Boolean).length;
+        return sum + Object.values(prog.aulas||{}).filter(Boolean).length;
       }, 0);
       const totalDone = totalAulas;
 
@@ -1394,12 +1264,12 @@ const _notesCache = {};
 
 async function getCalProg(turmaId) {
   const cached = _calCache[turmaId];
-  if (cached && cached.sessoes !== undefined) return cached;
+  if (cached && cached.aulas !== undefined) return cached;
   try {
     const { data, error } = await getDb().from('cal_progress').select('ciclo_index, aulas_json').eq('turma_id', turmaId).single();
     if (!error && data) {
       const aj = data.aulas_json || {};
-      const prog = { caracol: data.ciclo_index || 0, sessoes: aj.sessoes || {} };
+      const prog = { caracol: aj.caracol || 1, ciclo: data.ciclo_index || 0, aulas: aj.aulas || {} };
       _calCache[turmaId] = prog; return prog;
     }
   } catch(e) {}
@@ -1414,8 +1284,8 @@ async function saveCalProg(turmaId, prog) {
   try {
     const { error } = await getDb().from('cal_progress').upsert({
       turma_id: turmaId, academia_id: currentAcademia.id, coach_id: currentUser.id,
-      ciclo_index: prog.caracol || 0,
-      aulas_json: { sessoes: prog.sessoes || {} },
+      ciclo_index: prog.ciclo || 0,
+      aulas_json: { caracol: prog.caracol || 1, aulas: prog.aulas || {} },
       updated_at: new Date().toISOString()
     }, { onConflict: 'turma_id' });
     if (!error) localStorage.removeItem('calped_prog_' + turmaId);
@@ -1447,7 +1317,7 @@ async function preloadCalProgress() {
     const { data } = await getDb().from('cal_progress').select('turma_id,ciclo_index,aulas_json').in('turma_id', tms.map(t => t.id));
     if (data) data.forEach(r => {
       const aj = r.aulas_json || {};
-      _calCache[r.turma_id] = { caracol: r.ciclo_index || 0, sessoes: aj.sessoes || {} };
+      _calCache[r.turma_id] = { caracol: aj.caracol || 1, ciclo: r.ciclo_index || 0, aulas: aj.aulas || {} };
     });
   } catch(e) {}
 }
@@ -1492,10 +1362,10 @@ async function openCalPedCoach(coachName) {
       const calKey = BOLA_CAL_MAP[t.bola] || t.bola;
       const cal = CAL_PED[calKey];
       const prog = await getCalProg(t.id);
-      const caracolAtual = cal ? cal.caracois[prog.caracol || 0] : null;
-      const totalSessoes = caracolAtual ? caracolAtual.temas.length * 2 : 0;
-      const concluidas = caracolAtual ? caracolAtual.temas.reduce((n,tema) => n + (prog.sessoes[tema.id+'_a1']?1:0) + (prog.sessoes[tema.id+'_a2']?1:0), 0) : 0;
-      const pct = totalSessoes > 0 ? Math.round((concluidas/totalSessoes)*100) : 0;
+      const cicloAtual = cal ? cal.ciclos[prog.ciclo || 0] : null;
+      const totalAulas = cicloAtual ? cicloAtual.semanas.reduce((n,s) => n + s.aulas.length, 0) : 0;
+      const concluidas = cicloAtual ? cicloAtual.semanas.reduce((n,s) => n + s.aulas.filter(a => prog.aulas[a.id]).length, 0) : 0;
+      const pct = totalAulas > 0 ? Math.round((concluidas/totalAulas)*100) : 0;
       return `<div onclick="openCalPedTurma('${t.id}')" style="background:var(--card);border:1px solid var(--bo);border-radius:16px;padding:16px;margin-bottom:12px;cursor:pointer" ontouchstart="this.style.opacity='.7'" ontouchend="this.style.opacity='1'">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
           <div style="width:42px;height:42px;border-radius:12px;background:${t.cor};display:flex;align-items:center;justify-content:center;font-size:20px">${cal ? cal.ball : '🎾'}</div>
@@ -1506,12 +1376,11 @@ async function openCalPedCoach(coachName) {
           </div>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3)"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
-        ${caracolAtual ? `<div style="font-size:12px;font-weight:600;color:var(--t2);margin-bottom:6px">🐌 ${caracolAtual.nome} · ${caracolAtual.nivel}</div><div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${t.cor};border-radius:3px;transition:width .4s"></div></div><div style="font-size:11px;color:var(--t2);margin-top:4px">${concluidas} de ${totalSessoes} sessões · ${pct}%</div>` : '<div style="font-size:12px;color:var(--t3)">Nível sem conteúdo cadastrado</div>'}
+        ${cicloAtual ? `<div style="font-size:12px;font-weight:600;color:var(--t2);margin-bottom:6px">🐌 Caracol ${prog.caracol||1} · ${cicloAtual.nome} · ${cicloAtual.nivel}</div><div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${t.cor};border-radius:3px;transition:width .4s"></div></div><div style="font-size:11px;color:var(--t2);margin-top:4px">${concluidas} de ${totalAulas} aulas · ${pct}%</div>` : '<div style="font-size:12px;color:var(--t3)">Nível sem conteúdo cadastrado</div>'}
       </div>`;
     }))).join('')}
   `;
 }
-
 // ── ABRIR TURMA — PERIODIZAÇÃO CARACOL (async) ──
 async function openCalPedTurma(turmaId) {
   calPedTurmaId = turmaId;
@@ -1523,15 +1392,18 @@ async function openCalPedTurma(turmaId) {
   const el = document.getElementById('calped-body');
   el.innerHTML = `<div style="text-align:center;padding:40px"><div class="spin"></div></div>`;
   const prog = await getCalProg(turmaId);
-  const caracolIdx = prog.caracol || 0;
-  const caracol = cal.caracois[caracolIdx];
-  if (!caracol) { el.innerHTML = `<div style="text-align:center;padding:40px;color:var(--t2)">Nenhum caracol disponível</div>`; return; }
-  const totalSessoes = caracol.temas.length * 2;
-  const concluidas = caracol.temas.reduce((n,tema) => n + (prog.sessoes[tema.id+'_a1']?1:0) + (prog.sessoes[tema.id+'_a2']?1:0), 0);
-  const pct = Math.round((concluidas/totalSessoes)*100);
-  const tudo_feito = concluidas === totalSessoes;
+  const caracolNum = prog.caracol || 1;
+  const cicloIdx   = prog.ciclo  || 0;
+  const ciclo = cal.ciclos[cicloIdx];
+  if (!ciclo) { el.innerHTML = `<div style="text-align:center;padding:40px;color:var(--t2)">Nenhum ciclo disponível</div>`; return; }
+  const totalAulas  = ciclo.semanas.reduce((n,s) => n + s.aulas.length, 0);
+  const concluidas  = ciclo.semanas.reduce((n,s) => n + s.aulas.filter(a => prog.aulas[a.id]).length, 0);
+  const pct = Math.round((concluidas/totalAulas)*100);
+  const tudo_feito  = concluidas === totalAulas;
+  const focoColor   = { Olho:'#2563eb', Mão:'#d97706', Pé:'#059669' };
+  const catColor    = { FDQ:'#6366f1', Tático:'#0891b2', Jogo:'#16a34a', Rede:'#dc2626', Saque:'#9333ea', Devolução:'#ea580c', FDQ:'#6366f1' };
   el.innerHTML = `
-    <button onclick="openCalPedCoach('${(t.coach||'Sem coach').replace(/'/g,"\\'")}') " style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--g);font-size:13px;font-weight:700;cursor:pointer;margin-bottom:16px;padding:0">
+    <button onclick="openCalPedCoach('${(t.coach||'Sem coach').replace(/'/g,"\'")}') " style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--g);font-size:13px;font-weight:700;cursor:pointer;margin-bottom:16px;padding:0">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
       ${t.coach || 'Treinadores'}
     </button>
@@ -1542,118 +1414,106 @@ async function openCalPedTurma(turmaId) {
     <div style="background:var(--card);border:2px solid ${t.cor};border-radius:16px;padding:16px;margin-bottom:16px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
         <div>
-          <div style="font-size:11px;font-weight:700;color:${t.cor};text-transform:uppercase;letter-spacing:.06em">🐌 ${caracol.nome}</div>
-          <div style="font-size:13px;font-weight:600;color:var(--t);margin-top:2px">${caracol.nivel}</div>
+          <div style="font-size:11px;font-weight:700;color:${t.cor};text-transform:uppercase;letter-spacing:.06em">🐌 Caracol ${caracolNum} · ${ciclo.nome}</div>
+          <div style="font-size:13px;font-weight:600;color:var(--t);margin-top:2px">${ciclo.nivel}</div>
+          <div style="font-size:11px;color:var(--t2);margin-top:2px;font-style:italic">${ciclo.meta}</div>
         </div>
         <div style="text-align:right">
           <div style="font-size:20px;font-weight:800;color:${t.cor}">${pct}%</div>
-          <div style="font-size:11px;color:var(--t2)">${concluidas}/${totalSessoes} sessões</div>
+          <div style="font-size:11px;color:var(--t2)">${concluidas}/${totalAulas} aulas</div>
         </div>
       </div>
       <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${t.cor};border-radius:3px;transition:width .4s"></div></div>
     </div>
-    ${caracol.temas.map(tema => {
-      const a1Done = !!prog.sessoes[tema.id+'_a1'];
-      const a2Done = !!prog.sessoes[tema.id+'_a2'];
-      const icon = (a1Done && a2Done) ? '✅' : (a1Done || a2Done) ? '▶' : '⬜';
-      return `<div onclick="openTemaDetalhe('${turmaId}','${tema.id}')" style="background:var(--card);border:1px solid var(--bo);border-radius:16px;padding:14px;margin-bottom:10px;cursor:pointer" ontouchstart="this.style.opacity='.7'" ontouchend="this.style.opacity='1'">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-          <span style="font-size:22px">${tema.emoji}</span>
-          <div style="flex:1">
-            <div style="font-size:13px;font-weight:700;color:var(--t)">${tema.nome}</div>
-            <div style="font-size:12px;color:var(--t2);margin-top:1px">Foco: ${tema.foco} · ${tema.obj}</div>
+    ${ciclo.semanas.map(semana => {
+      const semConcluidas = semana.aulas.filter(a => prog.aulas[a.id]).length;
+      const semTotal = semana.aulas.length;
+      const semDone = semConcluidas === semTotal;
+      const tipoColor = { Introdução:'#2563eb', Construção:'#d97706', Aplicação:'#059669', Avaliação:'#9333ea' };
+      const tc = tipoColor[semana.tipo] || 'var(--t3)';
+      return `<div style="background:var(--card);border:1px solid var(--bo);border-radius:16px;padding:14px;margin-bottom:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:${tc};text-transform:uppercase;letter-spacing:.06em">${semana.nome} — ${semana.tipo}</div>
+            <div style="font-size:11px;color:var(--t3);margin-top:2px">${semana.desc}</div>
           </div>
-          <span style="font-size:18px">${icon}</span>
+          <div style="font-size:11px;color:${semDone?'var(--g)':'var(--t2)'};font-weight:700">${semDone?'✅':''}${semConcluidas}/${semTotal}</div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" onclick="event.stopPropagation()">
-          <button onclick="marcarSessao('${turmaId}','${tema.id}','a1')" style="padding:10px 8px;border-radius:12px;background:${a1Done?'var(--gl)':'var(--bg3)'};border:${a1Done?'2px solid var(--g)':'1px solid var(--bo)'};color:${a1Done?'var(--g)':'var(--t2)'};font-size:12px;font-weight:700;cursor:pointer;text-align:center">${a1Done?'✅':'⬜'} Aula 1</button>
-          <button onclick="marcarSessao('${turmaId}','${tema.id}','a2')" style="padding:10px 8px;border-radius:12px;background:${a2Done?'var(--gl)':'var(--bg3)'};border:${a2Done?'2px solid var(--g)':'1px solid var(--bo)'};color:${a2Done?'var(--g)':'var(--t2)'};font-size:12px;font-weight:700;cursor:pointer;text-align:center">${a2Done?'✅':'⬜'} Aula 2</button>
-        </div>
+        ${semana.aulas.map(aula => {
+          const done = !!prog.aulas[aula.id];
+          const fc = focoColor[aula.foco] || 'var(--t3)';
+          const cc = catColor[aula.cat] || 'var(--t3)';
+          return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--bo)">
+            <button onclick="marcarAula('${turmaId}','${aula.id}')" style="flex-shrink:0;width:28px;height:28px;border-radius:8px;background:${done?'var(--gl)':'var(--bg3)'};border:${done?'2px solid var(--g)':'1.5px solid var(--bo)'};cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">${done?'✅':'⬜'}</button>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">
+                <span style="font-size:10px;font-weight:700;color:#fff;background:${cc};border-radius:5px;padding:2px 6px">${aula.cat}</span>
+                <span style="font-size:10px;font-weight:700;color:${fc};background:${fc}18;border-radius:5px;padding:2px 6px">👁 ${aula.foco}</span>
+                <span style="font-size:10px;color:var(--t3);font-weight:600">${aula.num}</span>
+              </div>
+              <div style="font-size:12px;font-weight:600;color:var(--t)">${aula.tema}</div>
+              <div style="font-size:11px;color:var(--t2);margin-top:2px">${aula.obj}</div>
+            </div>
+          </div>`;
+        }).join('')}
       </div>`;
     }).join('')}
     ${tudo_feito ? `<div style="background:var(--gl);border:2px solid var(--g);border-radius:16px;padding:16px;margin-bottom:12px;text-align:center">
       <div style="font-size:22px;margin-bottom:6px">🎉</div>
-      <div style="font-size:14px;font-weight:800;color:var(--g);margin-bottom:4px">Caracol Concluído!</div>
-      <div style="font-size:12px;color:var(--t2);margin-bottom:12px">Todos os temas foram trabalhados.</div>
-      ${cal.caracois[caracolIdx+1] ? `<button onclick="avancarCaracol('${turmaId}',${caracolIdx+1})" style="width:100%;padding:12px;border-radius:12px;background:var(--g);border:none;color:#fff;font-size:14px;font-weight:700;cursor:pointer">Iniciar Caracol ${caracolIdx+2} — ${cal.caracois[caracolIdx+1].nivel} →</button>` : `<div style="font-size:12px;font-weight:700;color:var(--g)">🏆 Nível máximo alcançado!</div>`}
-      <button onclick="avancarCaracol('${turmaId}',${caracolIdx})" style="width:100%;margin-top:8px;padding:10px;border-radius:12px;background:var(--bg3);border:1px solid var(--bo);color:var(--t2);font-size:13px;font-weight:600;cursor:pointer">🔄 Repetir este caracol</button>
+      <div style="font-size:14px;font-weight:800;color:var(--g);margin-bottom:4px">Ciclo Concluído!</div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:12px">Todas as aulas foram trabalhadas.</div>
+      ${cal.ciclos[cicloIdx+1] ? `<button onclick="avancarCiclo('${turmaId}','next')" style="width:100%;padding:12px;border-radius:12px;background:var(--g);border:none;color:#fff;font-size:14px;font-weight:700;cursor:pointer">Iniciar ${cal.ciclos[cicloIdx+1].nome} →</button>` : `<button onclick="avancarCaracol('${turmaId}')" style="width:100%;padding:12px;border-radius:12px;background:var(--g);border:none;color:#fff;font-size:14px;font-weight:700;cursor:pointer">🐌 Iniciar Caracol ${caracolNum+1} →</button>`}
+      <button onclick="avancarCiclo('${turmaId}','reset')" style="width:100%;margin-top:8px;padding:10px;border-radius:12px;background:var(--bg3);border:1px solid var(--bo);color:var(--t2);font-size:13px;font-weight:600;cursor:pointer">🔄 Repetir este ciclo</button>
     </div>` : ''}
-    ${caracolIdx > 0 ? `<button onclick="avancarCaracol('${turmaId}',${caracolIdx-1})" style="width:100%;padding:10px;border-radius:12px;background:var(--bg3);border:1px solid var(--bo);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer;margin-top:4px">← Voltar para Caracol ${caracolIdx}</button>` : ''}
+    ${cicloIdx > 0 || caracolNum > 1 ? `<button onclick="avancarCiclo('${turmaId}','prev')" style="width:100%;padding:10px;border-radius:12px;background:var(--bg3);border:1px solid var(--bo);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer;margin-top:4px">← Ciclo anterior</button>` : ''}
   `;
 }
 
-// ── AVANÇAR CARACOL (async) ──
-async function avancarCaracol(turmaId, novoCaracol) {
+// ── AVANÇAR CICLO (dentro de um caracol) ou REINICIAR (async) ──
+async function avancarCiclo(turmaId, modo) {
   const prog = await getCalProg(turmaId);
-  const atual = prog.caracol || 0;
-  const voltando = novoCaracol < atual;
-  const repetindo = novoCaracol === atual;
-  const msg = voltando ? 'Voltar para o caracol anterior?' : repetindo ? 'Reiniciar este caracol? O progresso será zerado.' : 'Avançar para o próximo caracol?';
-  if (!confirm(msg)) return;
-  prog.caracol = novoCaracol;
-  if (repetindo || voltando) prog.sessoes = {};
-  await saveCalProg(turmaId, prog);
-  toast(voltando ? 'Voltou ao caracol anterior ✓' : repetindo ? 'Caracol reiniciado ✓' : 'Avançou para o próximo caracol ✓');
-  openCalPedTurma(turmaId);
-}
-
-// ── MARCAR / DESMARCAR SESSÃO (async) ──
-async function marcarSessao(turmaId, temaId, sessao) {
-  const prog = await getCalProg(turmaId);
-  const key = temaId + '_' + sessao;
-  prog.sessoes[key] = !prog.sessoes[key];
-  await saveCalProg(turmaId, prog);
-  toast(prog.sessoes[key] ? 'Sessão marcada ✅' : 'Sessão desmarcada');
-  openCalPedTurma(turmaId);
-}
-
-// ── DETALHE DO TEMA (async) ──
-async function openTemaDetalhe(turmaId, temaId) {
-  const t = tms.find(x => String(x.id) === String(turmaId));
-  if (!t) return;
-  const calKey = BOLA_CAL_MAP[t.bola] || t.bola;
+  const calKey = BOLA_CAL_MAP[tms.find(x=>String(x.id)===String(turmaId))?.bola] || '';
   const cal = CAL_PED[calKey];
-  if (!cal) return;
-  const prog = await getCalProg(turmaId);
-  const caracol = cal.caracois[prog.caracol || 0];
-  if (!caracol) return;
-  const tema = caracol.temas.find(x => x.id === temaId);
-  if (!tema) return;
-  const a1Done = !!prog.sessoes[temaId+'_a1'];
-  const a2Done = !!prog.sessoes[temaId+'_a2'];
-  const focoColor = { Olho:'#2563eb', Mão:'#d97706', Pé:'#059669' };
-  const fc = focoColor[tema.foco] || 'var(--t3)';
-  document.getElementById('plano-title').textContent = tema.emoji + ' ' + tema.nome;
-  document.getElementById('plano-body').innerHTML = `
-    <div style="background:linear-gradient(135deg,${t.cor}18,${t.cor}08);border:1px solid ${t.cor}30;border-radius:16px;padding:16px;margin-bottom:16px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-        <div style="font-size:28px">${tema.emoji}</div>
-        <div style="flex:1"><div style="font-size:14px;font-weight:800;color:var(--t)">${tema.nome}</div><div style="font-size:12px;color:var(--t2)">${cal.quadra}</div></div>
-        <div style="background:${fc}15;border:1px solid ${fc}30;border-radius:10px;padding:4px 10px;font-size:11px;font-weight:700;color:${fc}">Foco: ${tema.foco}</div>
-      </div>
-      <div style="font-size:13px;font-weight:600;color:var(--t2)">🎯 ${tema.obj}</div>
-    </div>
-    <div style="background:var(--card);border:${a1Done?'2px solid var(--g)':'1px solid var(--bo)'};border-radius:14px;padding:16px;margin-bottom:12px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div style="font-size:12px;font-weight:700;color:#2563eb;text-transform:uppercase;letter-spacing:.06em">🎾 Aula 1 — Técnica</div>
-        <span style="font-size:16px">${a1Done?'✅':'⬜'}</span>
-      </div>
-      ${tema.a1.split('·').map(s=>s.trim()).filter(Boolean).map(s=>`<div style="padding:7px 0;border-bottom:1px solid var(--bo);font-size:13px;color:var(--t)">${s}</div>`).join('')}
-      <button onclick="marcarSessao('${turmaId}','${temaId}','a1');clsM('m-plano');setTimeout(()=>openCalPedTurma('${turmaId}'),150)" style="width:100%;margin-top:12px;padding:12px;border-radius:12px;background:${a1Done?'var(--gl)':'var(--bg3)'};border:${a1Done?'2px solid var(--g)':'1px solid var(--bo)'};color:${a1Done?'var(--g)':'var(--t)'};font-size:13px;font-weight:700;cursor:pointer">${a1Done?'✅ Concluída — Desmarcar':'⬜ Marcar como concluída'}</button>
-    </div>
-    <div style="background:var(--card);border:${a2Done?'2px solid var(--g)':'1px solid var(--bo)'};border-radius:14px;padding:16px;margin-bottom:16px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div style="font-size:12px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:.06em">🧠 Aula 2 — Volume + Jogos</div>
-        <span style="font-size:16px">${a2Done?'✅':'⬜'}</span>
-      </div>
-      ${tema.a2.split('·').map(s=>s.trim()).filter(Boolean).map(s=>`<div style="padding:7px 0;border-bottom:1px solid var(--bo);font-size:13px;color:var(--t)">${s}</div>`).join('')}
-      <div style="font-size:11px;color:var(--t3);margin-top:8px;font-style:italic">Técnica fica a critério do treinador, se necessário.</div>
-      <button onclick="marcarSessao('${turmaId}','${temaId}','a2');clsM('m-plano');setTimeout(()=>openCalPedTurma('${turmaId}'),150)" style="width:100%;margin-top:12px;padding:12px;border-radius:12px;background:${a2Done?'var(--gl)':'var(--bg3)'};border:${a2Done?'2px solid var(--g)':'1px solid var(--bo)'};color:${a2Done?'var(--g)':'var(--t)'};font-size:13px;font-weight:700;cursor:pointer">${a2Done?'✅ Concluída — Desmarcar':'⬜ Marcar como concluída'}</button>
-    </div>
-  `;
-  opnM('m-plano');
+  const maxCiclo = cal ? cal.ciclos.length - 1 : 2;
+  if (modo === 'next') {
+    if (!confirm('Avançar para o próximo ciclo?')) return;
+    prog.ciclo = Math.min((prog.ciclo||0) + 1, maxCiclo);
+    prog.aulas = {};
+  } else if (modo === 'prev') {
+    if (!confirm('Voltar para o ciclo anterior?')) return;
+    if ((prog.ciclo||0) > 0) { prog.ciclo = (prog.ciclo||0) - 1; prog.aulas = {}; }
+    else if ((prog.caracol||1) > 1) { prog.caracol = (prog.caracol||1) - 1; prog.ciclo = maxCiclo; prog.aulas = {}; }
+  } else if (modo === 'reset') {
+    if (!confirm('Reiniciar este ciclo? O progresso será zerado.')) return;
+    prog.aulas = {};
+  }
+  await saveCalProg(turmaId, prog);
+  const labels = { next:'Avançou para o próximo ciclo ✓', prev:'Voltou ao ciclo anterior ✓', reset:'Ciclo reiniciado ✓' };
+  toast(labels[modo]);
+  openCalPedTurma(turmaId);
 }
 
+// ── AVANÇAR CARACOL (novo caracol = repetição em nível superior) (async) ──
+async function avancarCaracol(turmaId) {
+  const prog = await getCalProg(turmaId);
+  if (!confirm(`Iniciar Caracol ${(prog.caracol||1)+1}? O progresso do ciclo atual será zerado.`)) return;
+  prog.caracol = (prog.caracol||1) + 1;
+  prog.ciclo = 0;
+  prog.aulas = {};
+  await saveCalProg(turmaId, prog);
+  toast(`Caracol ${prog.caracol} iniciado ✓`);
+  openCalPedTurma(turmaId);
+}
+
+// ── MARCAR / DESMARCAR AULA (async) ──
+async function marcarAula(turmaId, aulaId) {
+  const prog = await getCalProg(turmaId);
+  prog.aulas[aulaId] = !prog.aulas[aulaId];
+  if (!prog.aulas[aulaId]) delete prog.aulas[aulaId];
+  await saveCalProg(turmaId, prog);
+  toast(prog.aulas[aulaId] ? 'Aula marcada ✅' : 'Aula desmarcada');
+  openCalPedTurma(turmaId);
+}
 // ── TOGGLE EDIÇÃO (async) ──
 async function toggleEdit(divId, txtId, storageKey) {
   const div = document.getElementById(divId);
@@ -2473,11 +2333,13 @@ async function gerarPassportPDF(alunoId) {
   _pdfSectionTitle(doc,'PRÓXIMOS OBJETIVOS',ML,y,CW); y+=10;
   const calKey=BOLA_CAL_MAP[s.bola]||s.bola;
   const cal=CAL_PED[calKey];
-  if (cal && cal.caracois && cal.caracois[0]) {
-    cal.caracois[0].temas.slice(0,3).forEach((tema,i) => {
+  if (cal && cal.ciclos && cal.ciclos[0]) {
+    cal.ciclos[0].semanas.slice(0,3).forEach((sem,i) => {
+      const primeiraAula = sem.aulas[0];
+      if (!primeiraAula) return;
       doc.setFillColor(220,252,231); doc.roundedRect(ML,y,CW,10,2,2,'F');
-      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(0,135,90); doc.text(`T${i+1}`,ML+3,y+6.5);
-      doc.setFont('helvetica','normal'); doc.setTextColor(15,31,23); doc.text(tema.obj,ML+14,y+6.5);
+      doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(0,135,90); doc.text(`S${i+1}`,ML+3,y+6.5);
+      doc.setFont('helvetica','normal'); doc.setTextColor(15,31,23); doc.text(primeiraAula.obj,ML+14,y+6.5);
       y+=13;
     });
   }
@@ -3411,21 +3273,21 @@ async function loadPlanoHoje(turmaId) {
     if (!t) { el.innerHTML = ''; return; }
     const calKey = BOLA_CAL_MAP[t.bola] || t.bola;
     const cal = CAL_PED[calKey];
-    if (!cal || !cal.caracois) { el.innerHTML = ''; return; }
+    if (!cal || !cal.ciclos) { el.innerHTML = ''; return; }
     const prog = await getCalProg(turmaId);
-    const caracol = cal.caracois[prog.caracol || 0];
-    if (!caracol) { el.innerHTML = ''; return; }
-    const totalSessoes = caracol.temas.length * 2;
-    const concluidas = caracol.temas.reduce((n,tema) => n + (prog.sessoes[tema.id+'_a1']?1:0) + (prog.sessoes[tema.id+'_a2']?1:0), 0);
-    const pct = Math.round((concluidas/totalSessoes)*100);
-    const temaAtual = caracol.temas.find(tema => !prog.sessoes[tema.id+'_a1'] || !prog.sessoes[tema.id+'_a2']);
+    const ciclo = cal.ciclos[prog.ciclo || 0];
+    if (!ciclo) { el.innerHTML = ''; return; }
+    const totalAulas  = ciclo.semanas.reduce((n,s) => n + s.aulas.length, 0);
+    const concluidas  = ciclo.semanas.reduce((n,s) => n + s.aulas.filter(a => prog.aulas[a.id]).length, 0);
+    const pct = Math.round((concluidas/totalAulas)*100);
+    const proxAula = ciclo.semanas.flatMap(s=>s.aulas).find(a => !prog.aulas[a.id]);
     el.innerHTML = `<div style="background:var(--card);border:1.5px solid ${t.cor}40;border-radius:16px;padding:14px;cursor:pointer;margin-bottom:16px" onclick="openCalPedTurma('${turmaId}')">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--t3)">🐌 Calendário Pedagógico</div>
         <div style="font-size:12px;font-weight:700;color:${t.cor}">${pct}%</div>
       </div>
-      <div style="font-size:13px;font-weight:700;color:var(--t);margin-bottom:4px">${caracol.nome} · ${caracol.nivel}</div>
-      ${temaAtual ? `<div style="font-size:12px;color:var(--t2)">Próximo: ${temaAtual.emoji} ${temaAtual.nome}</div>` : `<div style="font-size:12px;color:var(--g);font-weight:700">🎉 Caracol concluído!</div>`}
+      <div style="font-size:13px;font-weight:700;color:var(--t);margin-bottom:4px">Caracol ${prog.caracol||1} · ${ciclo.nome} · ${ciclo.nivel}</div>
+      ${proxAula ? `<div style="font-size:12px;color:var(--t2)">Próxima: ${proxAula.num} ${proxAula.tema}</div>` : `<div style="font-size:12px;color:var(--g);font-weight:700">🎉 Ciclo concluído!</div>`}
       <div style="height:4px;background:var(--bg3);border-radius:2px;margin-top:8px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${t.cor};border-radius:2px"></div></div>
     </div>`;
   } catch(e) {
