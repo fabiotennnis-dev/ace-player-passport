@@ -1497,109 +1497,6 @@ async function voltarCaracol(turmaId) {
   openCalPedTurma(turmaId);
 }
 
-// ── BIBLIOTECA DE DINÂMICAS ──
-const DINAMICAS = [
-  // AQUECIMENTOS LÚDICOS
-  { id:'d_bola_dorm', nome:'Bola Dorminhoca', tipo:'aq', cats:['FDQ','Tático','Devolução'], focos:['Olho','Mão'],
-    dur:'8 min', mat:'1 bola/criança · cones',
-    exec:'A criança caminha pelo percurso segurando a bola "dormindo" — sem apertar e sem deixar cair. Ao sinal do professor, para, agacha e continua.',
-    var:'Iniciante: devagar em linha · Intermediário: zigue-zague · Avançado: equilibrar na raquete', dica:'Reforce: "segure como se fosse um ovo — não deixa cair!"' },
-  { id:'d_semaforo', nome:'Semáforo da Mini Quadra', tipo:'aq', cats:['Tático','Jogo','FDQ'], focos:['Olho','Pé'],
-    dur:'8 min', mat:'Cones coloridos · bolas · raquetes',
-    exec:'Verde → se deslocar com bola/raquete em movimento. Amarelo → diminuir velocidade, manter controle. Vermelho → congelar em posição de expectativa (Posição 0).',
-    var:'Adicionar quique da bola ou condução na raquete durante o verde', dica:'Comece devagar e aumente os comandos progressivamente' },
-  { id:'d_foguete', nome:'Foguete do Saque', tipo:'aq', cats:['Saque'], focos:['Mão','Olho'],
-    dur:'8 min', mat:'Bolas · cones · alvos visuais no alto',
-    exec:'Cada criança faz lançamento da bola para cima como foguete, estende o braço acompanhando a trajetória. Quem lançar controlado e recuperar com equilíbrio marca ponto.',
-    var:'Trocar altura · usar alvo visual · fazer em duplas', dica:'Estimule lançamento à frente do corpo e braço bem estendido, sem pressa' },
-  { id:'d_bola_amiga', nome:'Bola Amiga', tipo:'aq', cats:['Tático','Jogo','Devolução'], focos:['Mão','Pé'],
-    dur:'8 min', mat:'2 raquetes/dupla · 1 bola · cones',
-    exec:'A dupla transporta a bola equilibrada sobre as duas raquetes juntas, caminhando até o final do percurso e voltando sem deixar cair.',
-    var:'4-6a: percurso curto · 7-9a: incluir cones · 10-14a: revezamento com tempo', dica:'Estimule comunicação: "devagar", "agora", "vamos juntos"' },
-  { id:'d_raquete_volante', nome:'Raquete Volante', tipo:'aq', cats:['FDQ','Rede','Devolução'], focos:['Mão','Olho'],
-    dur:'8 min', mat:'1 raquete/criança',
-    exec:'Cada aluno faz keepups (bouncing) da bola na raquete no lugar, depois em deslocamento. Tentar bater o próprio recorde. Pode ser sem quique (raquete horizontal) ou com quique no chão.',
-    var:'Alternando face da raquete · caminhar em linha reta · com obstáculos', dica:'Cue: "olho fixo na bola, raquete firme como uma bandeja"' },
-  // TÉCNICA
-  { id:'d_raquete_frente', nome:'Raquete na Frente', tipo:'tec', cats:['FDQ','Devolução'], focos:['Mão','Olho'],
-    dur:'20 min', mat:'Raquetes · bolas leves · cones-alvo',
-    exec:'1) Organize uma fila curta. 2) Demonstre o forehand com finalização à frente do corpo (Preparação → Contato → Finalização). 3) Lance bola leve para cada criança realizar o movimento. 4) Após a batida, retorna ao final da fila.',
-    var:'Começar sem bola · usar balão · aumentar distância · alvo marcado', dica:'Valorize empunhadura simples, giro lateral do corpo e finalização apontando ao alvo' },
-  { id:'d_quica_alvo', nome:'Quica e Bate no Alvo', tipo:'tec', cats:['FDQ','Devolução'], focos:['Olho','Mão'],
-    dur:'20 min', mat:'Raquetes · bolas · cones-alvo',
-    exec:'Professor quica a bola para o aluno que usa o forehand para acertar alvo marcado com cone. Foco: ponto de contato na frente do corpo, finalização apontando ao alvo. Contar pontos no alvo.',
-    var:'Alvo maior/menor · alvo em movimento · após batida correr para cone', dica:'"Bata quando a bola estiver na frente do seu bolso" — cue do ponto de contato' },
-  { id:'d_passos_fh', nome:'Passos e Forehand', tipo:'tec', cats:['FDQ'], focos:['Pé','Olho'],
-    dur:'20 min', mat:'Raquetes · cones marcando posições · bolas',
-    exec:'Aluno parte de cone central. Professor aponta direita ou esquerda. Aluno se desloca com passos laterais, ajusta os pés e bate na bola lançada. Foco: PARAR antes de bater.',
-    var:'Mais fácil: bola devagar · mais difícil: direção inesperada', dica:'"Passos pequenos para ajustar, então PARA e bate" — ritmo 1-2-bate' },
-  { id:'d_caminho_giro', nome:'Caminho do Giro', tipo:'tec', cats:['FDQ'], focos:['Mão','Pé'],
-    dur:'20 min', mat:'Raquetes · cones de posição · bolas',
-    exec:'Cones marcam onde os pés ficam. Aluno para em cada cone, gira o tronco (preparação) e bate na bola lançada. Repetir: preparação → giro → contato → terminação.',
-    var:'Sem bola para aprender o giro · com bola · com deslocamento antes', dica:'"Mostre os ombros para a rede antes de bater" — cue visual do giro' },
-  { id:'d_estatua_rede', nome:'Estátua da Rede', tipo:'tec', cats:['Rede'], focos:['Olho','Mão'],
-    dur:'20 min', mat:'Raquetes · bolas de espuma · cones · rede',
-    exec:'Professor diz "rede viva" → todos assumem posição de voleio (pés afastados, joelhos flexionados, raquete à frente). "Estátua" → congelam. Depois lança bola leve para toque de voleio.',
-    var:'Fácil: só congelar · Média: tocar bolas lançadas · Difícil: alternar DT e DE', dica:'"Raquete na frente", "joelho molinho", "olho na bola" — cues simples e ritmados' },
-  { id:'d_saque_alvo', nome:'Saque no Alvo', tipo:'tec', cats:['Saque'], focos:['Mão','Olho'],
-    dur:'20 min', mat:'Raquetes · bolas · alvos (cones, aros) na área de saque',
-    exec:'1) Posição troféu no lugar sem bola. 2) Com bola: lançamento + extensão + pronação. 3) Colocar alvos na caixa de serviço — quem acertar mais alvos ganha. 2 tentativas como no tênis real.',
-    var:'Saque mais próximo · alvo maior/menor · contar sequência de saques válidos', dica:'"Lance para o relógio das 13h" (à frente e ligeiramente para dentro) — toss consistente' },
-  { id:'d_toque_rebote', nome:'Toque de Rebote', tipo:'tec', cats:['Devolução','Rede'], focos:['Olho','Mão'],
-    dur:'20 min', mat:'Raquetes · bolas · parede ou trampolim',
-    exec:'Aluno em posição de expectativa. Bola lançada contra parede ou pelo professor com direções variadas. Aluno toca de voleio ou devolve bloqueando. Foco: raquete firme, sem swing.',
-    var:'Lento: só bloquear · médio: direcionar · difícil: alternar lados', dica:'"Raquete é um escudo — firme, sem balanço" — voleio de bloqueio primeiro' },
-  { id:'d_tatic_posicao', nome:'Caça ao Espaço', tipo:'tec', cats:['Tático'], focos:['Olho','Pé'],
-    dur:'20 min', mat:'Mini quadra · raquetes · bolas · cones',
-    exec:'Aluno ataca para o espaço aberto (onde o adversário não está). Parceiro ou professor ocupa uma posição fixa, aluno identifica e bate para o espaço livre. Contar quantas vezes acerta o espaço.',
-    var:'Adversário em posição estática · em movimento · adicionar 2 espaços-alvo', dica:'"Não bata para o adversário — bata para onde ele não está"' },
-  // JOGOS DIRIGIDOS
-  { id:'d_rally_troca', nome:'Recorde de Troca', tipo:'jogo', cats:['FDQ','Tático','Devolução'], focos:['Olho','Pé'],
-    dur:'15 min', mat:'Raquetes · bolas adaptadas · rede/corda',
-    exec:'Em duplas: contar trocas consecutivas. A cada rodada tentar bater o próprio recorde. O objetivo é cooperar — não competir contra o parceiro. Anunciar o número em voz alta.',
-    var:'Distância maior · bola mais rápida · jogar cruzado ou paralelo', dica:'"Anuncie o número para o parceiro" — trabalha comunicação + tática ao mesmo tempo' },
-  { id:'d_reinado', nome:'Reinado', tipo:'jogo', cats:['Tático','Jogo','FDQ','Saque','Rede'], focos:['Olho','Pé'],
-    dur:'15 min', mat:'Mini quadras com cones · bolas · raquetes',
-    exec:'Alunos em mini quadras. Quem faz 3 pontos sobe de quadra, quem perde fica/desce. Rodatividade constante. Todos jogando ao mesmo tempo. Ponto bônus para quem aplicar o tema da aula.',
-    var:'Pontuação dupla para o tema da semana · duplas · contar em voz alta', dica:'Reforce o tema como "ponto especial" — ex: forehand correto vale duplo' },
-  { id:'d_jogo_saque', nome:'Ponto começa com Saque', tipo:'jogo', cats:['Saque'], focos:['Mão','Olho','Pé'],
-    dur:'15 min', mat:'Raquetes · bolas · quadra com rede',
-    exec:'Todo ponto começa com saque obrigatório. Quem acerta 2 saques consecutivos na área ganha ponto bônus. 2 chances como no tênis real. Sets curtos de 4 pontos.',
-    var:'Saque mais próximo · saque em cima do cone-alvo · duplas', dica:'"Saque que fica dentro vale mais que saque forte fora" — consistência em primeiro' },
-  { id:'d_jogo_rede', nome:'Jogo de Subida para a Rede', tipo:'jogo', cats:['Rede','Devolução'], focos:['Olho','Mão','Pé'],
-    dur:'15 min', mat:'Raquetes · bolas · quadra com rede',
-    exec:'Após a 3ª troca, o aluno é obrigado a subir para a rede e finalizar de voleio. Quem finalizar de rede ganha ponto bônus. Sets de 5 pontos com revezamento.',
-    var:'Subir após 1ª troca · ambos sobem · quem passar mais rápido para rede sobe de quadra', dica:'Incentive ir buscar a bola com os pés, não só com o braço' },
-  { id:'d_jogo_tatic', nome:'Mini Rally Tático', tipo:'jogo', cats:['Tático','FDQ','Jogo'], focos:['Olho','Pé'],
-    dur:'15 min', mat:'Mini quadra · raquetes · bolas · cones de espaço',
-    exec:'Jogo na mini quadra com regras adaptadas: bola pode quicar 2×, quadra reduzida com cones. Jogar pontos com contagem. Ponto bônus para acertar cone-alvo no espaço aberto.',
-    var:'Recorde de troca cooperativa · Reinado · Partida por sets curtos', dica:'Intervenha só se o tema for completamente ignorado — o objetivo é aplicar em jogo real' },
-];
-
-function getDinamicasParaAula(aula) {
-  const byTipo = (tipo) => DINAMICAS.filter(d => d.tipo === tipo);
-  const score = (d) => (d.cats.includes(aula.cat)?2:0) + (d.focos.includes(aula.foco)?1:0);
-  const best = (tipo) => byTipo(tipo).sort((a,b)=>score(b)-score(a))[0];
-  return { aq: best('aq'), tec: best('tec'), jogo: best('jogo') };
-}
-
-function renderDinamica(d, icon, cor) {
-  if (!d) return '';
-  return `<div style="background:var(--card);border:1.5px solid ${cor}30;border-radius:14px;padding:14px;margin-bottom:10px">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-      <span style="font-size:18px">${icon}</span>
-      <div>
-        <div style="font-size:10px;font-weight:700;color:${cor};text-transform:uppercase;letter-spacing:.06em">${d.tipo==='aq'?'Aquecimento · '+d.dur:d.tipo==='tec'?'Exercício Técnico · '+d.dur:'Jogo Dirigido · '+d.dur}</div>
-        <div style="font-size:13px;font-weight:700;color:var(--t)">${d.nome}</div>
-      </div>
-    </div>
-    <div style="font-size:12px;color:var(--t2);line-height:1.55;margin-bottom:8px">${d.exec}</div>
-    <div style="font-size:11px;color:var(--t3);margin-bottom:6px">📦 ${d.mat}</div>
-    <div style="font-size:11px;color:#f59e0b;margin-bottom:6px">↕ ${d.var}</div>
-    <div style="font-size:11px;color:var(--g);background:var(--gl);border-radius:8px;padding:6px 10px">💡 ${d.dica}</div>
-  </div>`;
-}
-
 // ── DETALHE DE AULA (abre m-plano) ──
 async function openAulaDetalhe(turmaId, aulaId) {
   const t = tms.find(x => String(x.id) === String(turmaId));
@@ -1615,23 +1512,19 @@ async function openAulaDetalhe(turmaId, aulaId) {
   const catColor  = { FDQ:'#6366f1', Tático:'#0891b2', Jogo:'#16a34a', Rede:'#dc2626', Saque:'#9333ea', Devolução:'#ea580c' };
   const fc = focoColor[aula.foco]||'var(--t3)';
   const cc = catColor[aula.cat]||'#666';
-  const din = getDinamicasParaAula(aula);
   document.getElementById('plano-title').textContent = aula.num + ' · ' + aula.tema;
   document.getElementById('plano-body').innerHTML = `
     <div style="padding:16px">
-      <div style="background:var(--card);border:1px solid var(--bo);border-radius:12px;padding:12px;margin-bottom:14px">
-        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:6px">
-          <span style="font-size:10px;font-weight:700;color:#fff;background:${cc};border-radius:5px;padding:2px 7px">${aula.cat}</span>
-          <span style="font-size:10px;font-weight:700;color:${fc};background:${fc}18;border-radius:5px;padding:2px 7px">Foco: ${aula.foco}</span>
-          <span style="font-size:10px;color:var(--t3);font-weight:600">${aula.num}</span>
+      <div style="background:var(--card);border:1px solid var(--bo);border-radius:12px;padding:16px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:8px">
+          <span style="font-size:11px;font-weight:700;color:#fff;background:${cc};border-radius:5px;padding:2px 8px">${aula.cat}</span>
+          <span style="font-size:11px;font-weight:700;color:${fc};background:${fc}18;border-radius:5px;padding:2px 8px">Foco: ${aula.foco}</span>
+          <span style="font-size:11px;color:var(--t3);font-weight:600">${aula.num}</span>
         </div>
-        <div style="font-size:13px;font-weight:700;color:var(--t);margin-bottom:4px">${aula.tema}</div>
-        <div style="font-size:12px;color:var(--t2);line-height:1.5">🎯 ${aula.obj}</div>
+        <div style="font-size:15px;font-weight:700;color:var(--t);margin-bottom:6px">${aula.tema}</div>
+        <div style="font-size:13px;color:var(--t2);line-height:1.6">🎯 ${aula.obj}</div>
       </div>
-      ${renderDinamica(din.aq, '🏃', '#f59e0b')}
-      ${renderDinamica(din.tec, '🎾', cc)}
-      ${renderDinamica(din.jogo, '🏆', '#16a34a')}
-      <button onclick="marcarAula('${turmaId}','${aulaId}');clsM('m-plano');setTimeout(()=>openCalPedTurma('${turmaId}'),100)" style="width:100%;padding:14px;border-radius:12px;background:${done?'var(--gl)':'var(--g)'};border:${done?'2px solid var(--g)':'none'};color:${done?'var(--g)':'#fff'};font-size:14px;font-weight:700;cursor:pointer;margin-top:4px">${done?'✅ Concluída — Desmarcar':'⬜ Marcar como concluída'}</button>
+      <button onclick="marcarAula('${turmaId}','${aulaId}');clsM('m-plano');setTimeout(()=>openCalPedTurma('${turmaId}'),100)" style="width:100%;padding:14px;border-radius:12px;background:${done?'var(--gl)':'var(--g)'};border:${done?'2px solid var(--g)':'none'};color:${done?'var(--g)':'#fff'};font-size:14px;font-weight:700;cursor:pointer">${done?'✅ Concluída — Desmarcar':'⬜ Marcar como concluída'}</button>
     </div>
   `;
   opnM('m-plano');
