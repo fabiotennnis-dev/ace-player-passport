@@ -1539,6 +1539,220 @@ async function marcarAula(turmaId, aulaId) {
   toast(prog.aulas[aulaId] ? 'Aula marcada ✅' : 'Aula desmarcada');
   openCalPedTurma(turmaId);
 }
+// ── GRADE DE TURMAS 2025 ──
+const GRADE_2025 = {
+  '16h': {
+    SEG:[
+      {q:'Q5',nome:'Baby',bola:'vermelha',coach:'Michelle',alunos:['Lis Parreia','Celine Danigno','Julia Nunes Borges']},
+      {q:'Q5',nome:'Mini Tennis',bola:'vermelha',coach:'Vitor',alunos:['Vitor Leão','Rafaella Parreia','Alice Fernandes']},
+      {q:'Q5',nome:'Vermelha',bola:'vermelha',coach:'Ingrid',alunos:['Julia Moreira','Maria Antônia Guerra','Augusto Fernandes','Tomas Cedraz Gomide']},
+      {q:'Q6',nome:'Bola Laranja',bola:'laranja',coach:'',alunos:['João Estevão de Oliveira','Maria Antônia Guerra','Daniel Pimenta','Tomas Cedraz Gomide','Gabriel Almeida Martins','Fernanda Stecker']},
+      {q:'Q7',nome:'Laranja',bola:'laranja',coach:'Dimas',alunos:['Pedro Amorim','Luca Leão','Daniel Pimenta','Luísa Akemi','Gabriel Martins','Luiz Guilherme Mourão','Sara Akemi']},
+      {q:'Q8',nome:'Verde',bola:'verde',coach:'Antônio',alunos:['Catarina Pedrosa','Thomas Danigno','Maité Brandão','Vitório Avelar','Sara Yamamoto','Joaquim Gondim','Valentina Rocha']},
+      {q:'Q9',nome:'Vd. Amarela',bola:'verde_amarela',coach:'Glaubert',alunos:['Guilherme Adorno','Sofia Uchoa','Pedro Raw','Maria Uchoa']},
+      {q:'Q10',nome:'Amarela',bola:'amarela',coach:'Glaubert',alunos:['Bento Uchoa','Luiza Ibarra','Mateo Vaz','Enrico da Costa']},
+      {q:'Q11',nome:'Amarela',bola:'amarela',coach:'Robson',alunos:['Gabriel Allan','Caio Valdetaro','Murilo Pedrosa','Nicholas Danigno']},
+      {q:'Q12',nome:'Verde · Amarela',bola:'amarela',coach:'Douglas',alunos:['João Gabriel Adrino','Arthur Gois','David Avelar','Rafael Flento','Pedro Chehab','Enrico Vaz','Daniel Fayez da Silva Bahmad']},
+    ],
+    TER:[
+      {q:'Q5',nome:'Baby',bola:'vermelha',coach:'Michelle',alunos:['Gabriel Braga','Giovana Junqueira','Maria Fernanda Vieira','Frederico Gadelka']},
+      {q:'Q5',nome:'Mini Tennis',bola:'vermelha',coach:'Vitor',alunos:['Giovana Junqueira','Maria Fernanda Vieira','Rebeca Viana','Frederico Gadelka']},
+      {q:'Q5',nome:'Vermelha',bola:'vermelha',coach:'Ingrid',alunos:['Alice Gumz','Eduardo Baracat','Laura Melo','Cecília Glaubert']},
+      {q:'Q6',nome:'Laranja',bola:'laranja',coach:'',alunos:['Benjamin Farah','Gianluca Martini','Maria Glaubert','Lorenzo Lott','Ester Andrade']},
+      {q:'Q7',nome:'Laranja',bola:'laranja',coach:'',alunos:['Paulo El Hajj','Marcela Baracat','Valentina Raw','Benjamin Gumz','Maria Eduarda Ferraz e Espinheira']},
+      {q:'Q8',nome:'Verde',bola:'verde',coach:'Antônio',alunos:['Ester Andrade','Davi Raw','Fernando Berlin','Benjamim Nava','Rogério Pecci','Lorenzo Nava']},
+      {q:'Q9',nome:'Vd. Amarela',bola:'verde_amarela',coach:'Glaubert',alunos:['David Piva','Davi Ferola','Mateo Vaz','Cauã']},
+      {q:'Q10',nome:'Amarela',bola:'amarela',coach:'Glaubert',alunos:['Bento Uchoa','Giovanna Dal Bello','Bento Girardelli','Theo Brandão','Vinicius Dal Bello']},
+      {q:'Q11',nome:'Amarela',bola:'amarela',coach:'Douglas',alunos:['Rafael Lacerda','Domênico Martini','Heitor Carolino e Oliveira','Davi Pimentel']},
+      {q:'Q12',nome:'Verde · Amarela',bola:'amarela',coach:'Douglas',alunos:['Miguel Nunes da Silva Plattner','Lucas Gois','Guilherme Lyra','João Marcelo Roriz','Willian Gumz']},
+    ],
+    QUA:[
+      {q:'Q5',nome:'Baby',bola:'vermelha',coach:'Michelle',alunos:['Liua Nogueira','Lis Parreia','Giulia Muller','Luisa Poyes']},
+      {q:'Q5',nome:'Mini Tennis',bola:'vermelha',coach:'Ingrid',alunos:['Gustavo Abres','Celine Danigno']},
+      {q:'Q5',nome:'Vermelha',bola:'vermelha',coach:'Victor',alunos:['Alice Fernandes','Rafaella Parreia','Julia Scattoum Moreira','Valentina Chanu Madeira']},
+      {q:'Q6',nome:'Bola Laranja',bola:'laranja',coach:'',alunos:['Helena Guimarães','Sofia Guimarães','João Estevão','Tomas Cedraz Gomide','Maria Antônia Guerra']},
+      {q:'Q7',nome:'Bola Laranja',bola:'laranja',coach:'',alunos:['Daniel Pimenta','Pedro Amorim','Gabriel Martins','Luísa Akemi']},
+      {q:'Q8',nome:'Verde',bola:'verde',coach:'Antônio',alunos:['Maité Brandão','Valentina Rocha','Catarina Pedrosa','Vitório Avelar','Thomas Danigno','Luiz Guilherme Mourão','Sara Akemi']},
+      {q:'Q9',nome:'Vd. Amarela',bola:'verde_amarela',coach:'Robson',alunos:['Guilherme Adorno','Sofia Uchoa','Pedro Raw','Maria Uchoa']},
+      {q:'Q10',nome:'Amarela',bola:'amarela',coach:'Glaubert',alunos:['Bento Uchoa','Luiza Ibarra','Mateo Vaz','Enrico da Costa']},
+      {q:'Q11',nome:'Amarela',bola:'amarela',coach:'Robson',alunos:['Gabriel Allan','Caio Valdetaro','Nicholas Danigno','Eduardo Tajara','Pedro Tjara']},
+      {q:'Q12',nome:'Verde · Amarela',bola:'amarela',coach:'Douglas',alunos:['João Gabriel Adrino','Arthur Gois','David Avelar','Rafael Flento','Pedro Chehab','Enrico Vaz','Daniel Fayez da Silva Bahmad']},
+    ],
+    QUI:[
+      {q:'Q5',nome:'Baby',bola:'vermelha',coach:'Michelle',alunos:['Gabriel Braga','Giovana Junqueira','Maria Fernanda Vieira','Frederico Gadelka','Lucas Neves Guimarães Sarada','Gabriel Moreira Ribeiro']},
+      {q:'Q5',nome:'Mini Tennis',bola:'vermelha',coach:'Vitor',alunos:['Rebeca Viana','Giovana Junqueira','Maria Fernanda Vieira','Cecília Glaubert']},
+      {q:'Q5',nome:'Vermelha',bola:'vermelha',coach:'Ingrid',alunos:['Laura Melo','Eduardo Baracat','Alice Gumz']},
+      {q:'Q6',nome:'Laranja',bola:'laranja',coach:'',alunos:['Benjamin Farah','Gianluca Martini','Maria Glaubert','Lorenzo Lott']},
+      {q:'Q7',nome:'Bola Laranja',bola:'laranja',coach:'',alunos:['Isabelle Calixto','Valentina Raw','Benjamin Gumz','Marcela Baracat','Maria Eduarda Ferraz e Espinheira']},
+      {q:'Q8',nome:'Verde',bola:'verde',coach:'Antônio',alunos:['Rogério Pecci','Fernando Berlin','Benjamim Nava','Camille Chies','Joaquim Gondim','Sofia Gastal','Lorenzo Nava']},
+      {q:'Q9',nome:'Vd. Amarela',bola:'verde_amarela',coach:'Glaubert',alunos:['Cauã Lucas Barreto','Caio Nicolas Barreto','Bernardo','David Piva','Davi Ferola','Henrique Motta','Mateo Vaz']},
+      {q:'Q10',nome:'Amarela',bola:'amarela',coach:'Glaubert',alunos:['Maria Meireles','Giovanna Dal Bello','Bento Girardelli','Theo Brandão','Vinicius Dal Bello']},
+      {q:'Q11',nome:'Amarela',bola:'amarela',coach:'Douglas',alunos:['Rafael Lacerda','Domênico Martini','Heitor Carolino e Oliveira','Davi Pimentel']},
+      {q:'Q12',nome:'Verde · Amarela',bola:'amarela',coach:'Douglas',alunos:['Miguel Nunes da Silva Plattner','Samuel Gaya','João Marcelo Roriz','Willian Gumz']},
+    ],
+    SEX:[
+      {q:'Q5',nome:'Baby',bola:'vermelha',coach:'Michelle',alunos:['Laura Nobreza']},
+      {q:'Q5',nome:'Mini Tennis',bola:'vermelha',coach:'Vitor',alunos:['Eduardo Nobreza','Julia Nunes Borges']},
+      {q:'Q5',nome:'Vermelha',bola:'vermelha',coach:'Ingrid',alunos:['Lucas Leão','Gabriel Martins','Helena Guimarães','Sofia Guimarães','Maria Luisa Estevão','Arthur Gois']},
+      {q:'Q6',nome:'Laranja',bola:'laranja',coach:'Dimas',alunos:['Domênico','Enrico Vaz','David Avelar','Pedro Farah','Rafael Lacerda','Arthur Gois']},
+      {q:'Q7',nome:'Verde',bola:'verde',coach:'Douglas',alunos:['Luísa Sena','Sofia Gastal','Gabriel Cardoso','Alycia Athayde','Davi Fittipaldi']},
+      {q:'Q8',nome:'Verde',bola:'verde',coach:'Antônio',alunos:['Luísa Sena','Sofia Gastal','Gabriel Cardoso','Rafael Flento','Davi Fittipaldi','Maria Eduarda Ferraz e Espinheira']},
+      {q:'Q10',nome:'Amarela',bola:'amarela',coach:'',alunos:['Mateus Ferraz','Mateus Cunha','Enrico Vaz','Sofia Uchôa','Giovanna Dal Bello']},
+    ],
+  },
+  '17h': {
+    SEG:[
+      {q:'Q5',nome:'Baby',bola:'vermelha',coach:'Michele · Ingrid',alunos:['Hugo Guedes','Sofia Diaz','Antonio Peixoto','Gaia Garbellini']},
+      {q:'Q5',nome:'Mini Tennis',bola:'vermelha',coach:'Ingrid',alunos:['Pedro Diaz','Maria Peixoto','Alice Fernandes','Barbara Moretti']},
+      {q:'Q5',nome:'Vermelha',bola:'vermelha',coach:'',alunos:['Matheus Padua','Chiara Cedraz','Rafaela de Castro','Olivia Freitas','Filipe de Castro']},
+      {q:'Q6',nome:'Laranja',bola:'laranja',coach:'Rafael · Glau',alunos:['Gustavo Menegatti','Guilherme Gomes','Fernanda Stecker','Bianca Brandão','Alma Garbellini']},
+      {q:'Q7',nome:'Verde',bola:'verde',coach:'Antônio',alunos:['Luísa Sena','Alice Athayde','Sofia Gastal','Maité el Haje','Ana Paula Torres','Manuela Girão']},
+      {q:'Q8',nome:'Verde',bola:'verde',coach:'Antônio',alunos:['Isabela Adjuto','Ana Júlia Torres','Ana Carolina Torres','Maria Gabriela Trad','Maria Eduarda Girão']},
+      {q:'Q10',nome:'Amarela',bola:'amarela',coach:'Douglas',alunos:['Enrico Vaz','João Guilherme Guerra','Arthur Gois','David Avelar','Rafael Flento','Daniel Fayez da Silva Bahmad','Pedro Chehab']},
+      {q:'Q11',nome:'Amarela',bola:'amarela',coach:'Fábio',alunos:['Catarina Pedrosa','Valentina Rocha','Maitê Brandão','Luis Gustavo Mourão','Vitório Avelar','Thomas Danigno']},
+      {q:'Q12',nome:'Amarela',bola:'amarela',coach:'Robson',alunos:['Murilo Pedrosa','Caio Valdetaro','Nicholas Danigno','Gabriel Alam','Matheus Cunha']},
+    ],
+    TER:[
+      {q:'Q5',nome:'Baby',bola:'vermelha',coach:'',alunos:['Gabriel Queiroz Ferreira Bueno']},
+      {q:'Q5',nome:'Mini Tennis',bola:'vermelha',coach:'Ingrid',alunos:['Antonella Ferraz','Leonardo Vaz','Laura Gonzaga Garcia Boavista','Amanda Carvalho Scatolino']},
+      {q:'Q5',nome:'Vermelha',bola:'vermelha',coach:'',alunos:['Isabela Teles','Francisco Lira','Maria Yasmim','Mauricio Trevenzole','Helena Cunha']},
+      {q:'Q6',nome:'Laranja',bola:'laranja',coach:'',alunos:['Maria Luisa Cunha','Alice Pinheiro','Paulo El Hajj','Nina El Haje','Henrique Sandi','Isabelle Calixto','Isadora Calixto','Maria Carolina']},
+      {q:'Q7',nome:'Verde',bola:'verde',coach:'',alunos:['André Maia','Lívia Hungria','Beatriz Felix','Ester Faria','Maria Rita G.','Vinicius Pinheiro','Ester Andrade']},
+      {q:'Q8',nome:'Verde',bola:'verde',coach:'Antônio',alunos:['Fernando Berlin','Gabriel Reis','Gabriel Teles','Guilherme Lyra','Vinicius Pinheiro']},
+      {q:'Q9',nome:'Vd. Amarela',bola:'verde_amarela',coach:'Robson',alunos:['Vinicius Dal Bello','Bento Girardelli','Murilo Pedroso','Theo Brandão']},
+      {q:'Q10',nome:'Amarela',bola:'amarela',coach:'Glaubert',alunos:['Maria Meireles','Isadora Hungria','Giovanna Dal Bello','Vinicius Pinheiro']},
+      {q:'Q11',nome:'Amarela',bola:'amarela',coach:'Douglas',alunos:['Gabriel Farjado','Davi Pimentel','Heitor Miguel Lima','Rafael Lacerda','Miguel Nunes da Silva Plattner']},
+      {q:'Q12',nome:'Amarela',bola:'amarela',coach:'Douglas',alunos:['Pedro Farah','Matheus Regô','Benjamim Mohammad','Andre Fleury']},
+    ],
+    QUA:[
+      {q:'Q5',nome:'Baby Tennis',bola:'vermelha',coach:'Victor',alunos:['Hugo Guedes','Pedro Brow','Davi Brow','Antonio Peixoto']},
+      {q:'Q5',nome:'Mini Tennis',bola:'vermelha',coach:'Victor',alunos:['Isabela Guedes','Maria Peixoto','Gaia Garbellini','Sofia Diaz']},
+      {q:'Q5',nome:'Vermelha',bola:'vermelha',coach:'Ingrid',alunos:['Matheus Padua','Chiara Cedraz','Rafaela de Melo','Olivia Freitas','Alice Fernandes','Lucas Brow']},
+      {q:'Q6',nome:'Laranja',bola:'laranja',coach:'',alunos:['Bianca Brandão','Maria Antônia Guerra','Nicolas Freire']},
+      {q:'Q7',nome:'Laranja',bola:'laranja',coach:'',alunos:['João Paulo Tomazet','Gustavo Menegatti','Fernanda Stecker','Alma Garbellini']},
+      {q:'Q8',nome:'Verde',bola:'verde',coach:'Antônio',alunos:['Maria Gabriela Trad','Isabela Adjuto','Alice Athayde','Ana Paula Torres','Maité el Haje','Luisa Sena']},
+      {q:'Q9',nome:'Vd. Amarela',bola:'verde_amarela',coach:'Robson',alunos:['Murilo Pedrosa','Nicholas Danigno','Catarina Rocha','Ana Paula Torres','Pedro Tajara','Caio Danigno']},
+      {q:'Q10',nome:'Vd. Amarela',bola:'verde_amarela',coach:'Fábio',alunos:['Maité Brandão','Valentina Rocha','Catarina Pedrosa','Vitório Avelar','Thomas Danigno','João Guilherme Mourão']},
+      {q:'Q11',nome:'Amarela',bola:'amarela',coach:'Douglas',alunos:['Rafael Flento','João Adrino','David Avelar','Arthur Gois','Pedro Chehab']},
+      {q:'Q12',nome:'Amarela',bola:'amarela',coach:'Douglas',alunos:['Mateus Cunha','João Guilherme Guerra','Lucas Gois','Pedro Farh','Daniel Fayez da Silva Bahmad']},
+    ],
+    QUI:[
+      {q:'Q5',nome:'Baby',bola:'vermelha',coach:'',alunos:['Gabriel Queiroz Ferreira Bueno']},
+      {q:'Q5',nome:'Mini Tennis',bola:'vermelha',coach:'Ingrid',alunos:['Antonella Ferraz','Leonardo Vaz','Laura Gonzaga Garcia Boavista']},
+      {q:'Q5',nome:'Vermelha',bola:'vermelha',coach:'',alunos:['Francisco Lira','Maria Yasmim','Helena Cunha']},
+      {q:'Q6',nome:'Laranja',bola:'laranja',coach:'',alunos:['Maria Luisa Cunha','Isabelle Calixto','Isadora Calixto','Henrique Sandi','Maria Carolina','Alice Pinheiro']},
+      {q:'Q7',nome:'Verde',bola:'verde',coach:'Fábio',alunos:['Benjamin Nava','Lorenzo Nava','Andre Maia']},
+      {q:'Q8',nome:'Verde',bola:'verde',coach:'Antônio',alunos:['Fernando Berlin','Beatriz Felix','Guilherme Lyra','Vinicius Pinheiro','Ester Andrade']},
+      {q:'Q9',nome:'Vd. Amarela',bola:'verde_amarela',coach:'Glaubert',alunos:['Maria Meireles','Isadora Hungria','Mateus Cunha','Giovanna Dal Bello']},
+      {q:'Q10',nome:'Amarela',bola:'amarela',coach:'Robson',alunos:['Vinicius Dal Bello','Vinicius Pinheiro','Theo Brandão','Murilo Medeiros']},
+      {q:'Q11',nome:'Amarela',bola:'amarela',coach:'Douglas',alunos:['Heitor Miguel','Pedro Farah','Rafael Lacerda','Miguel Nunes da Silva Plattner']},
+      {q:'Q12',nome:'Amarela',bola:'amarela',coach:'Douglas',alunos:['Davi Pimentel','Gabriel Reis','Rafael Lacerda','Joaquim Gondim']},
+    ],
+    SEX:[
+      {q:'Q5',nome:'Baby',bola:'vermelha',coach:'',alunos:['Laura Amorim']},
+      {q:'Q5',nome:'Mini Tennis',bola:'vermelha',coach:'',alunos:['Helena Cunha','Julia Nunes Borges']},
+      {q:'Q5',nome:'Vermelha',bola:'vermelha',coach:'',alunos:['Matheus Padua','Mauricio Trevenzole','Samuel Carneiro','Carlos Eduardo Franco Machado']},
+      {q:'Q6',nome:'Laranja',bola:'laranja',coach:'',alunos:['João Paulo Tomazet','Arthur Padua','Eduardo Amorim','Nina El Haje','David Peppi','Lucas Fittipaldi']},
+      {q:'Q7',nome:'Verde',bola:'verde',coach:'',alunos:['Gabriel Cardoso','Maria Gabriela','Alycia Athayde','Rafael Lacerda','Luísa Sena','Isabela Adjuto','Davi Fittipaldi']},
+      {q:'Q8',nome:'Verde',bola:'verde',coach:'',alunos:['Eduardo Gomes','Maria Luisa Cunha','Maria Carolina Ramos','Domênico','Paulo El Haje']},
+      {q:'Q9',nome:'Vd. Amarela',bola:'verde_amarela',coach:'',alunos:['Giovana Dal Bello']},
+      {q:'Q10',nome:'Amarela',bola:'amarela',coach:'',alunos:['Mateus Ferraz','Mateus Cunha','Enrico Vaz','Sofia Uchôa','Lorenzo Verdini','Tomas Veridini']},
+    ],
+  },
+};
+
+let _gradeTempo = '16h', _gradeDia = 'SEG';
+
+function normNomeGrade(n) {
+  return n.toLowerCase()
+    .replace(/\s*\(.*?\)/g,'').replace(/[àáâãä]/g,'a').replace(/[èéêë]/g,'e')
+    .replace(/[ìíîï]/g,'i').replace(/[òóôõö]/g,'o').replace(/[ùúûü]/g,'u')
+    .replace(/[ç]/g,'c').replace(/[ñ]/g,'n').trim();
+}
+function matchAlunoGrade(nomeGrade) {
+  const norm = normNomeGrade(nomeGrade);
+  let found = sts.find(s => normNomeGrade(s.nome) === norm);
+  if (found) return found;
+  const parts = norm.split(/\s+/);
+  if (parts.length >= 2) {
+    found = sts.find(s => {
+      const sp = normNomeGrade(s.nome).split(/\s+/);
+      return sp[0] === parts[0] && sp.some(p => parts.slice(1).includes(p));
+    });
+  }
+  return found || null;
+}
+
+const _bolaCor = {vermelha:'#dc2626',laranja:'#ea580c',verde:'#16a34a',verde_amarela:'#65a30d',amarela:'#b45309'};
+const _bolaEmoji = {vermelha:'🔴',laranja:'🟠',verde:'🟢',verde_amarela:'🟡',amarela:'🟡'};
+
+function openGrade() {
+  renderGradeView();
+  opnM('m-grade');
+}
+
+function renderGradeView() {
+  const dias = ['SEG','TER','QUA','QUI','SEX'];
+  const tempos = ['16h','17h'];
+  const el = document.getElementById('grade-body');
+  if (!el) return;
+
+  // contar totais
+  const turmas = (GRADE_2025[_gradeTempo]||{})[_gradeDia]||[];
+  const totalAlunos = [...new Set(turmas.flatMap(t=>t.alunos.map(a=>normNomeGrade(a))))].length;
+  const totalCadastrados = [...new Set(turmas.flatMap(t=>t.alunos).filter(a=>matchAlunoGrade(a)).map(a=>normNomeGrade(a)))].length;
+
+  // tabs tempo
+  const tabsTempo = tempos.map(t=>`<button onclick="_gradeTempo='${t}';renderGradeView()" style="flex:1;padding:9px 0;border-radius:10px;border:none;font-size:13px;font-weight:700;cursor:pointer;background:${_gradeTempo===t?'var(--g)':'var(--bg3)'};color:${_gradeTempo===t?'#fff':'var(--t2)'}">${t==='16h'?'16h00':'17h00'}</button>`).join('');
+
+  // tabs dia
+  const tabsDia = dias.map(d=>`<button onclick="_gradeDia='${d}';renderGradeView()" style="flex:1;padding:8px 2px;border-radius:0;border:none;border-bottom:3px solid ${_gradeDia===d?'var(--g)':'transparent'};font-size:12px;font-weight:700;cursor:pointer;background:transparent;color:${_gradeDia===d?'var(--g)':'var(--t3)'}">${d}</button>`).join('');
+
+  // resumo
+  const pct = totalAlunos ? Math.round(totalCadastrados/totalAlunos*100) : 0;
+  const resumo = `<div style="background:var(--bg3);border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">
+    <div><div style="font-size:12px;color:var(--t3);font-weight:600">Alunos no ACE</div><div style="font-size:22px;font-weight:800;color:var(--g)">${totalCadastrados}<span style="font-size:14px;color:var(--t3)"> / ${totalAlunos}</span></div></div>
+    <div style="text-align:right"><div style="font-size:12px;color:var(--t3);font-weight:600">Cadastrados</div><div style="font-size:22px;font-weight:800;color:${pct>=80?'var(--g)':pct>=50?'#d97706':'var(--r)'}">${pct}%</div></div>
+  </div>`;
+
+  // cards
+  const cards = turmas.map(t => {
+    const cor = _bolaCor[t.bola]||'#16a34a';
+    const cads = t.alunos.filter(a=>matchAlunoGrade(a));
+    const nao = t.alunos.filter(a=>!matchAlunoGrade(a));
+    const alunosHtml = t.alunos.map(a => {
+      const found = matchAlunoGrade(a);
+      return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bo)">
+        <span style="font-size:15px">${found?'✅':'➕'}</span>
+        <span style="font-size:12px;color:${found?'var(--t)':'var(--r)'};flex:1">${a}</span>
+        ${found?`<span style="font-size:10px;color:var(--t3)">${found.bola||''}</span>`:`<span style="font-size:10px;color:var(--r);font-weight:700">não cadastrado</span>`}
+      </div>`;
+    }).join('');
+    return `<div style="background:var(--card);border-radius:14px;border:1px solid var(--bo);overflow:hidden;margin-bottom:10px">
+      <div style="height:4px;background:${cor}"></div>
+      <div style="padding:12px 14px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div style="width:38px;height:38px;border-radius:10px;background:${cor};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;line-height:1.1;text-align:center;flex-shrink:0">${t.q}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:700;color:var(--t)">${t.nome}</div>
+            <div style="font-size:11px;color:var(--t3)">${t.coach?'👤 '+t.coach:'—'}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:18px;font-weight:800;color:${cads.length===t.alunos.length?'var(--g)':nao.length>0?'var(--r)':'var(--t)'}">${cads.length}<span style="font-size:12px;color:var(--t3)">/${t.alunos.length}</span></div>
+            <div style="font-size:10px;color:var(--t3)">no ACE</div>
+          </div>
+        </div>
+        ${alunosHtml}
+      </div>
+    </div>`;
+  }).join('') || '<div style="text-align:center;padding:32px;color:var(--t3)">Sem turmas neste dia.</div>';
+
+  el.innerHTML = `
+    <div style="display:flex;gap:6px;margin-bottom:12px">${tabsTempo}</div>
+    <div style="display:flex;border-bottom:1px solid var(--bo);margin-bottom:14px">${tabsDia}</div>
+    ${resumo}${cards}`;
+}
+
 // ── TOGGLE EDIÇÃO (async) ──
 async function toggleEdit(divId, txtId, storageKey) {
   const div = document.getElementById(divId);
@@ -2573,6 +2787,7 @@ async function gerarPassportPDF(alunoId) {
 <button onclick="openCad()" class="shb" style="border-radius:var(--rr);background:var(--card);box-shadow:var(--shadow)"><span class="shi">👤</span><span style="flex:1"><span class="sht">Cadastrar aluno</span><span class="shs">Novo aluno em 3 etapas — gera link automático</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3)"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
 <button onclick="openTurmas()" class="shb" style="border-radius:var(--rr);background:var(--card);box-shadow:var(--shadow)"><span class="shi">📅</span><span style="flex:1"><span class="sht">Turmas &amp; Calendário</span><span class="shs">Gerenciar dias, horários e coaches</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3)"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
 <button onclick="openReq()" class="shb" style="border-radius:var(--rr);background:var(--card);box-shadow:var(--shadow)"><span class="shi">📊</span><span style="flex:1"><span class="sht">Requisitos por nível</span><span class="shs">98 critérios — técnico, tático, físico, mental</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3)"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+<button onclick="openGrade()" class="shb" style="border-radius:var(--rr);background:var(--card);box-shadow:var(--shadow)"><span class="shi">🗓️</span><span style="flex:1"><span class="sht">Grade de Turmas 2025</span><span class="shs">Kids 16h/17h — comparar alunos cadastrados</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3)"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
 </div>
 <div class="lbl">Meu Plano</div>
 <div id="plano-card" onclick="openMeuPlano()" style="background:var(--card);border-radius:var(--rr);box-shadow:var(--shadow);padding:16px 18px;margin-bottom:20px;cursor:pointer;border:1px solid var(--bo)"></div>
@@ -4308,6 +4523,15 @@ async function loadPresencaHoje() {
   <div class="mb2" id="plano-body" style="padding:0;overflow-y:auto"></div>
 </div>
 
+
+<div class="ms" id="m-grade" style="display:flex;flex-direction:column">
+  <div class="mh">
+    <button class="mb" onclick="clsM('m-grade')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+    <span style="font-size:16px;font-weight:700;color:var(--t);flex:1;text-align:center">Grade de Turmas 2025</span>
+    <div style="width:34px"></div>
+  </div>
+  <div class="mb2" id="grade-body" style="flex:1;overflow-y:auto;padding:14px 16px;padding-bottom:32px"></div>
+</div>
 
 <div class="ms" id="m-convidar">
   <div class="mh">
