@@ -1753,6 +1753,112 @@ function renderGradeView() {
     ${resumo}${cards}`;
 }
 
+// ── DIAGNÓSTICO E IMPORTAÇÃO DA GRADE ──
+function getAlunosDaGrade() {
+  // retorna array de {nome, bola} únicos da grade (por nome normalizado)
+  const vistos = new Set();
+  const lista = [];
+  const tempos = ['16h','17h'];
+  const dias = ['SEG','TER','QUA','QUI','SEX'];
+  for (const t of tempos) {
+    for (const d of dias) {
+      const turmas = (GRADE_2025[t]||{})[d]||[];
+      for (const turma of turmas) {
+        for (const nome of turma.alunos) {
+          const key = normNomeGrade(nome);
+          if (!vistos.has(key)) {
+            vistos.add(key);
+            lista.push({ nome, bola: turma.bola });
+          }
+        }
+      }
+    }
+  }
+  return lista;
+}
+
+function getAlunosFaltandoGrade() {
+  return getAlunosDaGrade().filter(a => !matchAlunoGrade(a.nome));
+}
+
+function openDiagnosticoGrade() {
+  renderDiagnosticoGrade();
+  opnM('m-diag-grade');
+}
+
+function renderDiagnosticoGrade() {
+  const el = document.getElementById('diag-grade-body');
+  if (!el) return;
+  const todos = getAlunosDaGrade();
+  const faltando = todos.filter(a => !matchAlunoGrade(a.nome));
+  const cadastrados = todos.filter(a => matchAlunoGrade(a.nome));
+  const pct = todos.length ? Math.round(cadastrados.length/todos.length*100) : 0;
+
+  const resumo = `<div style="background:var(--bg3);border-radius:14px;padding:16px;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="text-align:center;flex:1">
+        <div style="font-size:28px;font-weight:800;color:var(--g)">${cadastrados.length}</div>
+        <div style="font-size:11px;color:var(--t3);font-weight:600">Já no ACE ✅</div>
+      </div>
+      <div style="text-align:center;flex:1">
+        <div style="font-size:28px;font-weight:800;color:var(--r)">${faltando.length}</div>
+        <div style="font-size:11px;color:var(--t3);font-weight:600">Faltando ➕</div>
+      </div>
+      <div style="text-align:center;flex:1">
+        <div style="font-size:28px;font-weight:800;color:var(--t)">${todos.length}</div>
+        <div style="font-size:11px;color:var(--t3);font-weight:600">Total grade</div>
+      </div>
+    </div>
+    <div style="height:8px;background:var(--bo);border-radius:4px;overflow:hidden">
+      <div style="width:${pct}%;height:100%;background:var(--g);border-radius:4px;transition:width 0.4s"></div>
+    </div>
+    <div style="font-size:11px;color:var(--t3);margin-top:6px;text-align:center">${pct}% cadastrados</div>
+  </div>`;
+
+  const btnImportar = faltando.length > 0
+    ? `<button id="btn-importar-grade" onclick="importarAlunosDaGrade()" style="width:100%;padding:14px;border-radius:12px;background:var(--g);border:none;color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:16px">
+        ➕ Importar ${faltando.length} aluno${faltando.length>1?'s':''} faltante${faltando.length>1?'s':''}
+      </button>`
+    : `<div style="text-align:center;padding:12px;background:var(--bg3);border-radius:12px;margin-bottom:16px;font-size:14px;font-weight:700;color:var(--g)">✅ Todos os alunos da grade já estão no ACE!</div>`;
+
+  const listaFaltando = faltando.length > 0 ? `
+    <div style="font-size:13px;font-weight:700;color:var(--t);margin-bottom:8px">Faltando (${faltando.length})</div>
+    ${faltando.map(a=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bo)">
+      <span style="font-size:14px">➕</span>
+      <span style="flex:1;font-size:13px;color:var(--r)">${a.nome}</span>
+      <span style="font-size:11px;padding:2px 8px;border-radius:20px;background:${_bolaCor[a.bola]||'#16a34a'}22;color:${_bolaCor[a.bola]||'#16a34a'};font-weight:700">${(a.bola||'').replace('_',' ')}</span>
+    </div>`).join('')}` : '';
+
+  const listaCadastrados = cadastrados.length > 0 ? `
+    <div style="font-size:13px;font-weight:700;color:var(--t);margin-top:16px;margin-bottom:8px">Já cadastrados (${cadastrados.length})</div>
+    ${cadastrados.map(a=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bo)">
+      <span style="font-size:14px">✅</span>
+      <span style="flex:1;font-size:13px;color:var(--t2)">${a.nome}</span>
+      <span style="font-size:11px;padding:2px 8px;border-radius:20px;background:${_bolaCor[a.bola]||'#16a34a'}22;color:${_bolaCor[a.bola]||'#16a34a'};font-weight:700">${(a.bola||'').replace('_',' ')}</span>
+    </div>`).join('')}` : '';
+
+  el.innerHTML = resumo + btnImportar + listaFaltando + listaCadastrados;
+}
+
+async function importarAlunosDaGrade() {
+  const btn = document.getElementById('btn-importar-grade');
+  if (btn) { btn.disabled = true; btn.textContent = 'Importando...'; }
+  const faltando = getAlunosFaltandoGrade();
+  let ok = 0, erros = 0;
+  for (const a of faltando) {
+    const result = await saveAlunoSupabase({ nome: a.nome, bola: a.bola });
+    if (result) {
+      ok++;
+      sts.push({ id: 'tmp_'+Date.now()+'_'+ok, nome: a.nome, bola: a.bola, ativo: true });
+    } else {
+      erros++;
+    }
+  }
+  await loadAlunos();
+  toast(erros ? `${ok} importados, ${erros} com erro` : `${ok} aluno${ok>1?'s':''} importado${ok>1?'s':''} ✅`);
+  renderDiagnosticoGrade();
+}
+
 // ── TOGGLE EDIÇÃO (async) ──
 async function toggleEdit(divId, txtId, storageKey) {
   const div = document.getElementById(divId);
@@ -2787,7 +2893,8 @@ async function gerarPassportPDF(alunoId) {
 <button onclick="openCad()" class="shb" style="border-radius:var(--rr);background:var(--card);box-shadow:var(--shadow)"><span class="shi">👤</span><span style="flex:1"><span class="sht">Cadastrar aluno</span><span class="shs">Novo aluno em 3 etapas — gera link automático</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3)"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
 <button onclick="openTurmas()" class="shb" style="border-radius:var(--rr);background:var(--card);box-shadow:var(--shadow)"><span class="shi">📅</span><span style="flex:1"><span class="sht">Turmas &amp; Calendário</span><span class="shs">Gerenciar dias, horários e coaches</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3)"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
 <button onclick="openReq()" class="shb" style="border-radius:var(--rr);background:var(--card);box-shadow:var(--shadow)"><span class="shi">📊</span><span style="flex:1"><span class="sht">Requisitos por nível</span><span class="shs">98 critérios — técnico, tático, físico, mental</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3)"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
-<button onclick="openGrade()" class="shb" style="border-radius:var(--rr);background:var(--card);box-shadow:var(--shadow)"><span class="shi">🗓️</span><span style="flex:1"><span class="sht">Grade de Turmas 2025</span><span class="shs">Kids 16h/17h — comparar alunos cadastrados</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3)"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+<button onclick="openGrade()" class="shb" style="border-radius:var(--rr);background:var(--card);box-shadow:var(--shadow)"><span class="shi">🗓️</span><span style="flex:1"><span class="sht">Grade de Turmas 2025</span><span class="shs">Kids 16h/17h — visualizar por dia e horário</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3)"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+<button onclick="openDiagnosticoGrade()" class="shb" style="border-radius:var(--rr);background:var(--card);box-shadow:var(--shadow)"><span class="shi">🔍</span><span style="flex:1"><span class="sht">Diagnóstico Grade</span><span class="shs">Comparar grade com ACE e importar faltantes</span></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--t3)"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
 </div>
 <div class="lbl">Meu Plano</div>
 <div id="plano-card" onclick="openMeuPlano()" style="background:var(--card);border-radius:var(--rr);box-shadow:var(--shadow);padding:16px 18px;margin-bottom:20px;cursor:pointer;border:1px solid var(--bo)"></div>
@@ -4531,6 +4638,15 @@ async function loadPresencaHoje() {
     <div style="width:34px"></div>
   </div>
   <div class="mb2" id="grade-body" style="flex:1;overflow-y:auto;padding:14px 16px;padding-bottom:32px"></div>
+</div>
+
+<div class="ms" id="m-diag-grade" style="display:flex;flex-direction:column">
+  <div class="mh">
+    <button class="mb" onclick="clsM('m-diag-grade')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+    <span style="font-size:16px;font-weight:700;color:var(--t);flex:1;text-align:center">Diagnóstico Grade</span>
+    <div style="width:34px"></div>
+  </div>
+  <div class="mb2" id="diag-grade-body" style="flex:1;overflow-y:auto;padding:14px 16px;padding-bottom:32px"></div>
 </div>
 
 <div class="ms" id="m-convidar">
