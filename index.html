@@ -1794,69 +1794,69 @@ function renderDiagnosticoGrade() {
   const cadastrados = todos.filter(a => matchAlunoGrade(a.nome));
   const pct = todos.length ? Math.round(cadastrados.length/todos.length*100) : 0;
 
-  const resumo = `<div style="background:var(--bg3);border-radius:14px;padding:16px;margin-bottom:16px">
+  // resumo geral
+  const resumo = `<div style="background:var(--bg3);border-radius:14px;padding:16px;margin-bottom:14px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
       <div style="text-align:center;flex:1">
         <div style="font-size:28px;font-weight:800;color:var(--g)">${cadastrados.length}</div>
-        <div style="font-size:11px;color:var(--t3);font-weight:600">Já no ACE ✅</div>
+        <div style="font-size:11px;color:var(--t3);font-weight:600">Já no ACE</div>
       </div>
       <div style="text-align:center;flex:1">
         <div style="font-size:28px;font-weight:800;color:var(--r)">${faltando.length}</div>
-        <div style="font-size:11px;color:var(--t3);font-weight:600">Faltando ➕</div>
+        <div style="font-size:11px;color:var(--t3);font-weight:600">Faltando</div>
       </div>
       <div style="text-align:center;flex:1">
         <div style="font-size:28px;font-weight:800;color:var(--t)">${todos.length}</div>
         <div style="font-size:11px;color:var(--t3);font-weight:600">Total grade</div>
       </div>
     </div>
-    <div style="height:8px;background:var(--bo);border-radius:4px;overflow:hidden">
-      <div style="width:${pct}%;height:100%;background:var(--g);border-radius:4px;transition:width 0.4s"></div>
+    <div style="height:8px;background:var(--bo);border-radius:4px;overflow:hidden;margin-bottom:4px">
+      <div style="width:${pct}%;height:100%;background:var(--g);border-radius:4px"></div>
     </div>
-    <div style="font-size:11px;color:var(--t3);margin-top:6px;text-align:center">${pct}% cadastrados</div>
+    <div style="font-size:11px;color:var(--t3);text-align:center">${pct}% cadastrados no ACE</div>
   </div>`;
 
-  const btnImportar = faltando.length > 0
-    ? `<button id="btn-importar-grade" onclick="importarAlunosDaGrade()" style="width:100%;padding:14px;border-radius:12px;background:var(--g);border:none;color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:16px">
-        ➕ Importar ${faltando.length} aluno${faltando.length>1?'s':''} faltante${faltando.length>1?'s':''}
-      </button>`
-    : `<div style="text-align:center;padding:12px;background:var(--bg3);border-radius:12px;margin-bottom:16px;font-size:14px;font-weight:700;color:var(--g)">✅ Todos os alunos da grade já estão no ACE!</div>`;
+  // breakdown por bola
+  const bolas = ['vermelha','laranja','verde','verde_amarela','amarela'];
+  const bolaLabel = {vermelha:'Vermelha',laranja:'Laranja',verde:'Verde',verde_amarela:'Verde-Amarela',amarela:'Amarela'};
+  const bolaEmoji = {vermelha:'🔴',laranja:'🟠',verde:'🟢',verde_amarela:'🟡',amarela:'🟡'};
+  const bolasHtml = bolas.map(b => {
+    const total = todos.filter(a=>a.bola===b).length;
+    if (!total) return '';
+    const cad = cadastrados.filter(a=>a.bola===b).length;
+    const falt = total - cad;
+    const p = Math.round(cad/total*100);
+    const cor = _bolaCor[b]||'#16a34a';
+    return `<div style="background:var(--card);border-radius:12px;border:1px solid var(--bo);padding:12px 14px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:16px">${bolaEmoji[b]}</span>
+        <span style="font-size:13px;font-weight:700;color:var(--t);flex:1">${bolaLabel[b]}</span>
+        <span style="font-size:12px;color:var(--t3)">${cad}/${total}</span>
+        <span style="font-size:12px;font-weight:700;color:${cor}">${p}%</span>
+      </div>
+      <div style="height:5px;background:var(--bo);border-radius:3px;overflow:hidden;margin-bottom:6px">
+        <div style="width:${p}%;height:100%;background:${cor};border-radius:3px"></div>
+      </div>
+      <div style="display:flex;gap:12px">
+        <span style="font-size:11px;color:var(--g)">✅ ${cad} cadastrados</span>
+        <span style="font-size:11px;color:var(--r)">➕ ${falt} faltando</span>
+      </div>
+    </div>`;
+  }).join('');
 
-  const listaFaltando = faltando.length > 0 ? `
-    <div style="font-size:13px;font-weight:700;color:var(--t);margin-bottom:8px">Faltando (${faltando.length})</div>
-    ${faltando.map(a=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bo)">
-      <span style="font-size:14px">➕</span>
-      <span style="flex:1;font-size:13px;color:var(--r)">${a.nome}</span>
-      <span style="font-size:11px;padding:2px 8px;border-radius:20px;background:${_bolaCor[a.bola]||'#16a34a'}22;color:${_bolaCor[a.bola]||'#16a34a'};font-weight:700">${(a.bola||'').replace('_',' ')}</span>
-    </div>`).join('')}` : '';
+  // top faltando (primeiros 20)
+  const topFaltando = faltando.slice(0, 20).map(a => {
+    const cor = _bolaCor[a.bola]||'#16a34a';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bo)">
+      <span style="font-size:13px;flex:1;color:var(--r)">${a.nome}</span>
+      <span style="font-size:10px;padding:2px 7px;border-radius:20px;background:${cor}22;color:${cor};font-weight:700">${(a.bola||'').replace('_','-')}</span>
+    </div>`;
+  }).join('');
 
-  const listaCadastrados = cadastrados.length > 0 ? `
-    <div style="font-size:13px;font-weight:700;color:var(--t);margin-top:16px;margin-bottom:8px">Já cadastrados (${cadastrados.length})</div>
-    ${cadastrados.map(a=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bo)">
-      <span style="font-size:14px">✅</span>
-      <span style="flex:1;font-size:13px;color:var(--t2)">${a.nome}</span>
-      <span style="font-size:11px;padding:2px 8px;border-radius:20px;background:${_bolaCor[a.bola]||'#16a34a'}22;color:${_bolaCor[a.bola]||'#16a34a'};font-weight:700">${(a.bola||'').replace('_',' ')}</span>
-    </div>`).join('')}` : '';
-
-  el.innerHTML = resumo + btnImportar + listaFaltando + listaCadastrados;
-}
-
-async function importarAlunosDaGrade() {
-  const btn = document.getElementById('btn-importar-grade');
-  if (btn) { btn.disabled = true; btn.textContent = 'Importando...'; }
-  const faltando = getAlunosFaltandoGrade();
-  let ok = 0, erros = 0;
-  for (const a of faltando) {
-    const result = await saveAlunoSupabase({ nome: a.nome, bola: a.bola });
-    if (result) {
-      ok++;
-      sts.push({ id: 'tmp_'+Date.now()+'_'+ok, nome: a.nome, bola: a.bola, ativo: true });
-    } else {
-      erros++;
-    }
-  }
-  await loadAlunos();
-  toast(erros ? `${ok} importados, ${erros} com erro` : `${ok} aluno${ok>1?'s':''} importado${ok>1?'s':''} ✅`);
-  renderDiagnosticoGrade();
+  el.innerHTML = resumo
+    + `<div style="font-size:13px;font-weight:700;color:var(--t);margin-bottom:10px">Por cor de bola</div>`
+    + bolasHtml
+    + (faltando.length > 0 ? `<div style="font-size:13px;font-weight:700;color:var(--t);margin-top:16px;margin-bottom:8px">Faltando (${faltando.length})</div>${topFaltando}${faltando.length>20?`<div style="font-size:12px;color:var(--t3);text-align:center;padding:8px">… e mais ${faltando.length-20}</div>`:''}` : `<div style="text-align:center;padding:16px;color:var(--g);font-weight:700">✅ Todos cadastrados!</div>`);
 }
 
 // ── TOGGLE EDIÇÃO (async) ──
