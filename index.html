@@ -382,7 +382,7 @@ async function saveAlunoSupabase(aluno) {
         nome:              aluno.nome,
         data_nascimento:   aluno.nasc || null,
         // genero omitido — constraint no banco
-        bola:          aluno.bola || 'laranja',
+        pulseira:      aluno.bola || 'laranja',
         turma_id:          aluno.turma || null,
         coach_nome:        aluno.coach || '',
         horario:           aluno.horario || '',
@@ -438,7 +438,7 @@ async function loadAlunos() {
         nome:        r.nome || '',
         nasc:        r.data_nascimento || '',
         gen:         r.gen || '',
-        bola:    r.bola || 'laranja',
+        bola:    r.pulseira || 'laranja',
         turma:       r.turma_id || '',
         horario:     r.horario  || '',
         dias:        r.dias     || '',
@@ -482,7 +482,7 @@ async function loadTurmas() {
     if (!data || !data.length) return;
 
     tms = data.map(r => {
-      const p = gP(r.bola || 'laranja');
+      const p = gP(r.pulseira || 'laranja');
       return {
         id:        r.id,
         label:     r.label || r.nome || '',
@@ -490,8 +490,8 @@ async function loadTurmas() {
         horario:   r.horario || '',
         coach:     r.coach_nome || '',
         cor:       r.cor || p.color || '#00a862',
-        bola:  r.bola || 'laranja',
-        bolas: r.bolas || [r.bola || 'laranja'],
+        bola:  r.pulseira || 'laranja',
+        bolas: r.pulseiras || [r.pulseira || 'laranja'],
         quadra:    r.quadra || ''
       };
     });
@@ -511,7 +511,7 @@ async function updateAlunoSupabase(aluno) {
         reveal_pct:   aluno.reveal || 0,
         xp_total:     aluno.xp || 0,
         apto:         aluno.apto || false,
-        bola:     aluno.bola,
+        pulseira: aluno.bola,
         fundamentos:  aluno.fundamentos || {tecnico:0,tatico:0,fisico:0,mental:0}
       })
       .eq('id', aluno.id);
@@ -537,7 +537,7 @@ async function saveTurmaSupabase(turma) {
         dias:        Array.isArray(turma.dias) ? turma.dias : [],
         horario:     turma.horario,
         coach_nome:  turma.coach,
-        bola:    turma.bola,
+        pulseira:    turma.bola,
         cor:         turma.cor || '#00a862',
         quadra:      turma.quadra || '',
         ativo:       true
@@ -2198,7 +2198,7 @@ async function saveEditTurma(turmaId) {
       const { error } = await getDb().from('turmas').update({
         label:      nome,
         coach_nome: coach,
-        bola:   bola,
+        pulseira:   bola,
         cor:        p.color || t.cor,
         quadra,
         horario,
