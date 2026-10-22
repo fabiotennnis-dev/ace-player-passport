@@ -1915,7 +1915,8 @@ async function loadCoaches() {
     console.log('Coaches carregados:', coaches.length);
     // Detecta funcao do usuário logado pelo email
     const me = coaches.find(c => c.email?.toLowerCase() === currentUser?.email?.toLowerCase());
-    myFuncao = me?.funcao || 'Coach';
+    // Se não encontrar por email, mantém acesso total (Head Coach) por segurança
+    myFuncao = me?.funcao || 'Head Coach';
     applyRoleUI();
   } catch(e) {
     console.error('loadCoaches exception:', e);
