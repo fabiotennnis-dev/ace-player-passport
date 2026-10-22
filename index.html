@@ -226,6 +226,7 @@ function getDb() {
 let currentUser = null;
 let currentAcademia = null;
 let currentPortalAccount = null; // set when logged in as parent/student
+let myFuncao = 'Coach'; // funcao do coach logado, detectado em loadCoaches
 
 // ── ACCESS CODE GENERATOR ──
 function genAccessCode() {
@@ -1912,9 +1913,107 @@ async function loadCoaches() {
     // Update D.coaches list
     D.coaches = coaches.map(c => c.nome);
     console.log('Coaches carregados:', coaches.length);
+    // Detecta funcao do usuário logado pelo email
+    const me = coaches.find(c => c.email?.toLowerCase() === currentUser?.email?.toLowerCase());
+    myFuncao = me?.funcao || 'Coach';
+    applyRoleUI();
   } catch(e) {
     console.error('loadCoaches exception:', e);
   }
+}
+
+// ── PERMISSÕES POR FUNÇÃO ──
+const ADMIN_FUNCOES = ['Head Coach','Coordenador','Gestor','Diretor'];
+function isAdmin() { return ADMIN_FUNCOES.includes(myFuncao); }
+
+function applyRoleUI() {
+  const navAcademy = document.getElementById('n-academy');
+  const scrAcademy = document.getElementById('s-academy');
+  if (!navAcademy) return;
+  if (isAdmin()) {
+    navAcademy.style.display = '';
+  } else {
+    navAcademy.style.display = 'none';
+    if (scrAcademy?.classList.contains('on')) goS('coach');
+  }
+}
+
+// ── GERENCIAR ALUNOS DA TURMA ──
+async function retirarDaTurma(alunoId, turmaId) {
+  const a = gSt(alunoId);
+  if (!a) return;
+  if (!confirm(`Retirar ${a.nome} desta turma?\nO aluno continuará na base de dados.`)) return;
+  try {
+    const { error } = await getDb().from('alunos').update({
+      turma_id: null, coach_id: null, coach_nome: null, horario: null, dias: null, quadra: null
+    }).eq('id', alunoId);
+    if (error) { toast('Erro ao retirar aluno: ' + error.message); return; }
+    const s = sts.find(x => x.id === alunoId);
+    if (s) { s.turma = null; s.coach = ''; s.horario = ''; s.dias = []; s.quadra = ''; }
+    toast(`${a.nome} retirado da turma ✅`);
+    opTD(turmaId);
+  } catch(e) { toast('Erro: ' + e.message); }
+}
+
+function openAddAlunoTurma(turmaId) {
+  const t = tms.find(x => String(x.id) === String(turmaId));
+  if (!t) return;
+  const semTurma = sts.filter(s => !s.turma || String(s.turma) === '');
+  const html = `
+    <div style="padding:16px">
+      <div style="font-size:15px;font-weight:700;color:var(--t);margin-bottom:4px">Adicionar aluno à turma</div>
+      <div style="font-size:13px;color:var(--t2);margin-bottom:12px">${t.label} · Alunos sem turma: ${semTurma.length}</div>
+      <input id="add-aluno-search" type="text" placeholder="Buscar aluno..." oninput="renderAddAlunoList('${turmaId}',this.value)"
+        style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--bo);background:var(--bg3);color:var(--t);font-size:14px;font-family:inherit;outline:none;margin-bottom:10px;box-sizing:border-box">
+      <div id="add-aluno-list"></div>
+    </div>`;
+  const modal = document.getElementById('m-add-aluno');
+  document.getElementById('m-add-aluno-body').innerHTML = html;
+  document.getElementById('m-add-aluno-turma-id').value = turmaId;
+  opnM('m-add-aluno');
+  renderAddAlunoList(turmaId, '');
+}
+
+function renderAddAlunoList(turmaId, q) {
+  const semTurma = sts.filter(s => !s.turma || String(s.turma) === '');
+  const filtro = q.trim().toLowerCase();
+  const lista = filtro ? semTurma.filter(s => s.nome.toLowerCase().includes(filtro)) : semTurma;
+  const el = document.getElementById('add-aluno-list');
+  if (!el) return;
+  if (!lista.length) {
+    el.innerHTML = `<div style="text-align:center;color:var(--t3);font-size:13px;padding:20px 0">${filtro ? 'Nenhum aluno encontrado' : 'Todos os alunos já estão em turmas'}</div>`;
+    return;
+  }
+  el.innerHTML = lista.slice(0,30).map(a => {
+    const p = gP(a.bola);
+    return `<div onclick="addAlunoTurma('${a.id}','${turmaId}')" style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--bo);cursor:pointer">
+      <div class="rav" style="background:${a.cor};width:36px;height:36px;font-size:11px">${ini(a.nome)}<div class="rb2">${p.ball}</div></div>
+      <div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--t)">${a.nome}</div><div style="font-size:12px;color:var(--t2)">${p.label}</div></div>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--g)" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </div>`;
+  }).join('');
+}
+
+async function addAlunoTurma(alunoId, turmaId) {
+  const a = gSt(alunoId);
+  const t = tms.find(x => String(x.id) === String(turmaId));
+  if (!a || !t) return;
+  try {
+    const { error } = await getDb().from('alunos').update({
+      turma_id:   turmaId,
+      coach_id:   currentUser.id,
+      coach_nome: t.coach || '',
+      horario:    t.horario || '',
+      dias:       Array.isArray(t.dias) ? t.dias.join('/') : t.dias || '',
+      quadra:     t.quadra || ''
+    }).eq('id', alunoId);
+    if (error) { toast('Erro ao adicionar aluno: ' + error.message); return; }
+    const s = sts.find(x => x.id === alunoId);
+    if (s) { s.turma = turmaId; s.coach = t.coach || ''; s.horario = t.horario || ''; s.quadra = t.quadra || ''; }
+    toast(`${a.nome} adicionado à turma ✅`);
+    clsM('m-add-aluno');
+    opTD(turmaId);
+  } catch(e) { toast('Erro: ' + e.message); }
 }
 
 // ── EDITAR DADOS DO ALUNO ──
@@ -3613,7 +3712,7 @@ function openTurmas(){
   try { rTL('list'); } catch(e) { console.error('rTL error:', e); }
   opnM('m-turmas');
 }
-async function opTD(id){const t=tms.find(x=>String(x.id)===String(id));if(!t)return;const als=sts.filter(s=>String(s.turma)===String(id));document.getElementById('tmt').textContent=t.label;document.getElementById('tmb').innerHTML=`<button class="bg" style="margin-bottom:16px;font-size:14px" onclick="rTL('list')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> Todas as turmas</button><div style="background:${t.cor}12;border:1.5px solid ${t.cor}30;border-radius:20px;padding:18px;margin-bottom:18px"><div style="font-size:20px;font-weight:800;color:var(--t);margin-bottom:14px">${t.label}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${[['Coach','👤 '+t.coach],['Horário','🕐 '+t.horario],['Dias','📅 '+t.dias.join(' · ')],['Bolas','🎾 '+t.bolas.join(', ')],['Quadra','🎾 '+(t.quadra||'—')]].map(([l,v])=>`<div style="background:rgba(255,255,255,.8);border-radius:10px;padding:11px;box-shadow:var(--shadow)"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);margin-bottom:4px">${l}</div><div style="font-size:13px;font-weight:700;color:var(--t)">${v}</div></div>`).join('')}</div></div><div id="td-plano" style="margin-bottom:16px"></div><div class="lbl">Alunos (${als.length})</div><div style="background:var(--card);border:1px solid var(--bo);border-radius:var(--rs);padding:0 16px;box-shadow:var(--shadow)">${als.length?als.map(a=>{const p=gP(a.bola);const cb2=a.comportamento??1;const st2=presMarkings[a.id];const pI=st2===true?'✅':st2===false?'❌':'📋';const pBg2=st2===true?'#dcfce7':st2===false?'#fee2e2':'var(--bg3)';const pBc2=st2===true?'#16a34a':st2===false?'#ef4444':'var(--b2)';const ah=(t.horario||'').replace(/'/g,"\\'");const ac=(t.coach||'').replace(/'/g,"\\'");return `<div onclick="sid='${a.id}';clsM('m-turmas');openAS('${a.id}')" style="display:flex;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid var(--bo);cursor:pointer"><div class="rav" style="background:${a.cor};width:38px;height:38px;font-size:12px">${ini(a.nome)}<div class="rb2">${p.ball}</div></div><div class="ri" style="flex:1"><div class="rn">${a.nome}</div><div class="rm">${p.label} · ${ageF(a.nasc)} anos</div></div><div style="display:flex;gap:5px;flex-shrink:0;align-items:center" onclick="event.stopPropagation()"><button data-pres="${a.id}" onclick="presToggleHoje('${a.id}','${t.id}','${ah}','${ac}',event)" style="width:32px;height:32px;border-radius:9px;border:1.5px solid ${pBc2};background:${pBg2};cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">${pI}</button>${CB.map((x,i)=>`<button data-cb-idx="${a.id}-${i}" onclick="setComportamento('${a.id}',${i})" style="width:32px;height:32px;border-radius:9px;border:2px solid ${cb2===i?x.border:'var(--bo)'};background:${cb2===i?x.bg:'var(--bg3)'};cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">${x.icon}</button>`).join('')}</div></div>`;}).join(''):'<div style="padding:22px 0;text-align:center;color:var(--t3);font-size:14px">Nenhum aluno nesta turma</div>'}</div><button onclick="rTL('new')" class="bp" style="margin-top:16px">+ Nova turma</button>
+async function opTD(id){const t=tms.find(x=>String(x.id)===String(id));if(!t)return;const als=sts.filter(s=>String(s.turma)===String(id));document.getElementById('tmt').textContent=t.label;document.getElementById('tmb').innerHTML=`<button class="bg" style="margin-bottom:16px;font-size:14px" onclick="rTL('list')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg> Todas as turmas</button><div style="background:${t.cor}12;border:1.5px solid ${t.cor}30;border-radius:20px;padding:18px;margin-bottom:18px"><div style="font-size:20px;font-weight:800;color:var(--t);margin-bottom:14px">${t.label}</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${[['Coach','👤 '+t.coach],['Horário','🕐 '+t.horario],['Dias','📅 '+t.dias.join(' · ')],['Bolas','🎾 '+t.bolas.join(', ')],['Quadra','🎾 '+(t.quadra||'—')]].map(([l,v])=>`<div style="background:rgba(255,255,255,.8);border-radius:10px;padding:11px;box-shadow:var(--shadow)"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--t3);margin-bottom:4px">${l}</div><div style="font-size:13px;font-weight:700;color:var(--t)">${v}</div></div>`).join('')}</div></div><div id="td-plano" style="margin-bottom:16px"></div><div class="lbl">Alunos (${als.length})</div><div style="background:var(--card);border:1px solid var(--bo);border-radius:var(--rs);padding:0 16px;box-shadow:var(--shadow)">${als.length?als.map(a=>{const p=gP(a.bola);const cb2=a.comportamento??1;const st2=presMarkings[a.id];const pI=st2===true?'✅':st2===false?'❌':'📋';const pBg2=st2===true?'#dcfce7':st2===false?'#fee2e2':'var(--bg3)';const pBc2=st2===true?'#16a34a':st2===false?'#ef4444':'var(--b2)';const ah=(t.horario||'').replace(/'/g,"\\'");const ac=(t.coach||'').replace(/'/g,"\\'");return `<div onclick="sid='${a.id}';clsM('m-turmas');openAS('${a.id}')" style="display:flex;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid var(--bo);cursor:pointer"><div class="rav" style="background:${a.cor};width:38px;height:38px;font-size:12px">${ini(a.nome)}<div class="rb2">${p.ball}</div></div><div class="ri" style="flex:1"><div class="rn">${a.nome}</div><div class="rm">${p.label} · ${ageF(a.nasc)} anos</div></div><div style="display:flex;gap:5px;flex-shrink:0;align-items:center" onclick="event.stopPropagation()"><button data-pres="${a.id}" onclick="presToggleHoje('${a.id}','${t.id}','${ah}','${ac}',event)" style="width:32px;height:32px;border-radius:9px;border:1.5px solid ${pBc2};background:${pBg2};cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">${pI}</button>${CB.map((x,i)=>`<button data-cb-idx="${a.id}-${i}" onclick="setComportamento('${a.id}',${i})" style="width:32px;height:32px;border-radius:9px;border:2px solid ${cb2===i?x.border:'var(--bo)'};background:${cb2===i?x.bg:'var(--bg3)'};cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">${x.icon}</button>`).join('')}<button onclick="retirarDaTurma('${a.id}','${t.id}')" style="width:32px;height:32px;border-radius:9px;border:1.5px solid #ef444440;background:#fee2e2;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center" title="Retirar da turma">↩</button></div></div>`;}).join(''):'<div style="padding:22px 0;text-align:center;color:var(--t3);font-size:14px">Nenhum aluno nesta turma</div>'}</div><button onclick="openAddAlunoTurma('${t.id}')" style="width:100%;padding:12px;border-radius:12px;background:var(--gl);border:1.5px solid var(--g);color:var(--g);font-size:14px;font-weight:700;cursor:pointer;margin-top:12px">+ Adicionar aluno à turma</button><button onclick="rTL('new')" class="bp" style="margin-top:8px">+ Nova turma</button>
 <button onclick="openEditTurma('${t.id}')" style="width:100%;padding:12px;border-radius:var(--rs);border:1px solid var(--bo);background:var(--bg3);color:var(--t);font-size:13px;font-weight:600;cursor:pointer;margin-top:8px">✏️ Editar turma</button>
 <button onclick="deleteTurma('${t.id}')" style="width:100%;padding:12px;border-radius:var(--rs);border:1px solid var(--r);background:var(--rl);color:var(--r);font-size:13px;font-weight:600;cursor:pointer;margin-top:8px">🗑️ Remover turma</button>`; loadPlanoHoje(id); };
 
@@ -4643,6 +4742,17 @@ async function loadPresencaHoje() {
     <div style="width:34px"></div>
   </div>
   <div class="mb2" id="grade-body" style="flex:1;overflow-y:auto;padding:14px 16px;padding-bottom:32px"></div>
+</div>
+
+<!-- MODAL: ADICIONAR ALUNO À TURMA -->
+<div class="ms" id="m-add-aluno" style="display:flex;flex-direction:column">
+  <div class="mh">
+    <button class="mb" onclick="clsM('m-add-aluno')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+    <span style="font-size:16px;font-weight:700;color:var(--t);flex:1;text-align:center">Adicionar Aluno</span>
+    <div style="width:34px"></div>
+  </div>
+  <input type="hidden" id="m-add-aluno-turma-id">
+  <div class="mb2" id="m-add-aluno-body" style="flex:1;overflow-y:auto;padding-bottom:32px"></div>
 </div>
 
 <div class="ms" id="m-diag-grade" style="display:flex;flex-direction:column">
